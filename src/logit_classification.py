@@ -20,10 +20,11 @@ from scipy.stats import spearmanr
 from sklearn.utils import shuffle
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation, Dropout
-from keras.layers import BatchNormalization
+from keras.layers import BatchNormalization,Conv1D
 from keras.optimizers import Adam, SGD
 from keras.models import model_from_json
 from keras.models import load_model
+from keras import regularizers as regs
 
 import itertools
 import pandas as pd
@@ -72,8 +73,11 @@ def train(feature_models, trainSet, devSet, extra_features, nclass ):
     index = [i for i, j in enumerate(trainF) if j ==  errorFlag]
     trainF = np.asarray([x for i, x in enumerate(trainF) if i not in index])
     trainY = np.asarray([x for i, x in enumerate(trainY) if i not in index])
+    print trainF.shape
+    print np.asarray(trainSet[2]).shape
     if (extra_features):
-        trainF = np.column_stack((trainF, np.asarray(trainSet[2])))
+        trainExF = np.asarray([x for i, x in enumerate(trainSet[2]) if i not in index])
+        trainF = np.column_stack((trainF, trainExF))
     print trainF.shape
 
     devF = np.asarray(get_features (feature_models, process(devSet[0])))
@@ -83,7 +87,8 @@ def train(feature_models, trainSet, devSet, extra_features, nclass ):
     devY = np.asarray([x for i, x in enumerate(devY) if i not in index])
     devS = np.asarray([x for i, x in enumerate(devSet[1]) if i not in index])
     if (extra_features):
-        devF = np.column_stack((devF, np.asarray(devSet[2])))
+        devExF = np.asarray([x for i, x in enumerate(devSet[2]) if i not in index])
+        devF = np.column_stack((devF, devExF))
     print devF.shape
 
     print 'Compiling model...'
@@ -109,16 +114,19 @@ def test(models, classifier, testSet, extra_features , nclass):
     #print (np.asarray(testSet[2]).shape)
     print testF
     if(extra_features):
-        testF = np.column_stack((testF, np.asarray(testSet[2])))
+        testExF = np.asarray([x for i, x in enumerate(testSet[2]) if i not in index])
+        testF = np.column_stack((testF, testExF))
     #print testF.shape
     print "After extra features:" + str(testF.shape)
     print testF
 
     p = classifier.predict_proba(testF, verbose=0)
     yhat = decode_labels(p, nclass)
-    f1 = f1_score(testS, yhat, average="micro")
-    pre = precision_score(testS, yhat, average="micro")
-    rec = recall_score(testS, yhat, average="micro")
+    print(pd.DataFrame({'Predicted': yhat, 'Expected': testS}))
+
+    f1 = f1_score(testS, yhat, average=None)
+    pre = precision_score(testS, yhat, average=None)
+    rec = recall_score(testS, yhat, average=None)
     accuracy = accuracy_score(testS, yhat)
     print("\n************ SUMMARY ***********")
     print 'Test data size: ' + str(len(testS))
@@ -168,9 +176,9 @@ def train_nn_model(lrmodel, X, Y, devX, devY, devscores, nclass):
         #score = pearsonr(yhat, devscores)[0]
         if score > best:
             print 'Dev score: = ' + str(score) # print 'Dev Pearson: = ' + str(score)
-            print 'Dev F1-score: = ' + str(f1_score(devscores, yhat, average="micro"))  # print 'Dev Pearson: = ' + str(score)
-            print 'Dev Precision score: = ' + str(precision_score(devscores, yhat, average="micro"))  # print 'Dev Pearson: = ' + str(score)
-            print 'Dev Recall score: = ' + str(recall_score(devscores, yhat, average="micro"))  # print 'Dev Pearson: = ' + str(score)
+            print 'Dev F1-score: = ' + str(f1_score(devscores, yhat, average=None))  # print 'Dev Pearson: = ' + str(score)
+            print 'Dev Precision score: = ' + str(precision_score(devscores, yhat, average=None))  # print 'Dev Pearson: = ' + str(score)
+            print 'Dev Recall score: = ' + str(recall_score(devscores, yhat, average=None))  # print 'Dev Pearson: = ' + str(score)
             best = score
             ## FA: commented out the following line because of the new keras version problem with deepcopy
             ## FA: not the model scored right after the best model will be returned (not too bad though, usually the difference is so small)
@@ -183,10 +191,14 @@ def train_nn_model(lrmodel, X, Y, devX, devY, devscores, nclass):
 
 def prepare_nn_model(dim, nclass):
     lrmodel = Sequential()
-    lrmodel.add(Dense(500, input_dim=dim)) #set this to twice the size of sentence vector or equal to the final feature vector size
+    lrmodel.add(Dense(300, input_dim=dim))#, activity_regularizer=regs.l1(0.01))) #set this to twice the size of sentence vector or equal to the final feature vector size
     #lrmodel.add(BatchNormalization())
+    #lrmodel.add(Dense(100))
     lrmodel.add(Activation('relu'))
-    lrmodel.add(Dropout(0.05))
+    lrmodel.add(Dropout(0.2))
+    #lrmodel.add(Conv1D(filter_length= 10, nb_filter= 10))
+    lrmodel.add(Dense(300))
+    lrmodel.add(Activation('relu'))
     lrmodel.add(Dense(nclass))
     lrmodel.add(Activation('softmax'))
     adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
@@ -317,7 +329,8 @@ def load_data_constructiveness(datafolder = "/Users/fa/workspace/temp/data/varad
     df = xl.parse("Sheet1")
     allA = df["Preprocessed"].tolist()
     allS = df["Constructive"].tolist()
-    allF = df[["Has_conjunction_or_connectives","Has_stance_adverbials","Has_reasoning_verbs","Has_modals","Has_shell_nouns"]].values.tolist()
+    allF = df[["Has_conjunction_or_connectives","Has_stance_adverbials","Has_reasoning_verbs","Has_modals","Has_shell_nouns",
+               "Len","Average_word_length", "Readability", "PersonalEXP", "Named_entity_count", "nSents", "Avg_words_per_sent"]].values.tolist()
     nclass = len(Counter(allS).keys())
     print(nclass)
     print len(allA)
@@ -330,12 +343,12 @@ def load_data_constructiveness(datafolder = "/Users/fa/workspace/temp/data/varad
     allS = [(x * (nclass -1) + 1) for x in allS]
 
     ## shuffle the data
-    allS, allA, allF = shuffle(allS, allA, allF, random_state=12345)
+    allS, allA, allF = shuffle(allS, allA, allF, random_state=54321)
 
     #print(pd.DataFrame({'Label': allA[:10], 'Score': allS[:10], 'Other_features': allF[:10]}))
 
     ## split into train and dev
-    split = 0.90
+    split = 0.80
     trainA, devA = allA[0: int(math.floor(split * len(allA)))], allA[int(math.floor(split * len(allA))) + 1:]
     trainS, devS = allS[0: int(math.floor(split * len(allS)))], allS[int(math.floor(split * len(allS))) + 1:]
     trainF, devF = allF[0: int(math.floor(split * len(allF)))], allF[int(math.floor(split * len(allF))) + 1:]
@@ -346,7 +359,8 @@ def load_data_constructiveness(datafolder = "/Users/fa/workspace/temp/data/varad
     df = xl.parse("Sheet1")
     testA = df["Preprocessed"].tolist()
     testS = df["Constructive"].tolist()
-    testF = df[["Has_conjunction_or_connectives", "Has_stance_adverbials", "Has_reasoning_verbs", "Has_modals", "Has_shell_nouns"]].values.tolist()
+    testF = df[["Has_conjunction_or_connectives","Has_stance_adverbials","Has_reasoning_verbs","Has_modals","Has_shell_nouns",
+               "Len","Average_word_length", "Readability", "PersonalEXP", "Named_entity_count", "nSents", "Avg_words_per_sent"]].values.tolist()
     print len(testA)
     print len(testS)
     print len(testF)
@@ -368,6 +382,8 @@ def load_data_constructiveness(datafolder = "/Users/fa/workspace/temp/data/varad
     #print(pd.DataFrame({'Label': trainA[0:10], 'Score': trainS[0:10], 'Other_features': trainF[0:10]}))
 
     return [trainA, trainS, trainF], [devA, devS, devF], [testA, testS,testF], nclass
+    #return [trainA[0:100], trainS[0:100], trainF[0:100]], [devA, devS, devF], [testA, testS, testF], nclass
+
 
 
 
@@ -378,14 +394,14 @@ if __name__ == '__main__':
 
 
 
-    #word2vec_model = w2vF.Word2vecFeatures("/Users/fa/workspace/shared/sfu/fake_news/pretrained/embeddings/vectorsW.bin")
-    lexicon_model = lexF.LexiconFeatures("/Users/fa/workspace/temp/NPOV/bias_related_lexicons")
+    word2vec_model = w2vF.Word2vecFeatures("/Users/fa/workspace/repos/_codes/MODELS/Rob/word2vec_100_6/vectorsW.bin")
+    #lexicon_model = lexF.LexiconFeatures("/Users/fa/workspace/temp/NPOV/bias_related_lexicons")
 
 
 
     ## Add specific models to ensemble
-    ensemble.append(lexicon_model)
-    #ensemble.append(word2vec_model)
+    #ensemble.append(lexicon_model)
+    ensemble.append(word2vec_model)
 
     ## Load some data for training (standard SICK dataset)
     #trainSet, devSet, testSet = load_data_SICK('../data/SICK/')
