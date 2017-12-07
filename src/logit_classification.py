@@ -160,9 +160,12 @@ def train_nn_model(lrmodel, X, Y, devX, devY, devscores, nclass):
     """
     done = False
     best = -1.0
+    maxepoch = 500
+    epoch = 0
     while not done:
         # Every 100 epochs, check Pearson on development set
         lrmodel.fit(X, Y, verbose=1, shuffle=False, validation_data=(devX, devY))
+        epoch = epoch + 100
         p = lrmodel.predict_proba(devX, verbose=0)
         yhat = decode_labels(p, nclass)
         print(pd.DataFrame({'Predicted': yhat, 'Expected': devscores}))
@@ -174,11 +177,14 @@ def train_nn_model(lrmodel, X, Y, devX, devY, devscores, nclass):
         #print(p)
         score = accuracy_score(devscores, yhat)
         #score = pearsonr(yhat, devscores)[0]
-        if score > best:
-            print 'Dev score: = ' + str(score) # print 'Dev Pearson: = ' + str(score)
-            print 'Dev F1-score: = ' + str(f1_score(devscores, yhat, average=None))  # print 'Dev Pearson: = ' + str(score)
-            print 'Dev Precision score: = ' + str(precision_score(devscores, yhat, average=None))  # print 'Dev Pearson: = ' + str(score)
-            print 'Dev Recall score: = ' + str(recall_score(devscores, yhat, average=None))  # print 'Dev Pearson: = ' + str(score)
+        print 'Dev score: = ' + str(score)  # print 'Dev Pearson: = ' + str(score)
+        print 'Dev F1-score: = ' + str(f1_score(devscores, yhat, average=None))  # print 'Dev Pearson: = ' + str(score)
+        print 'Dev Precision score: = ' + str(
+            precision_score(devscores, yhat, average=None))  # print 'Dev Pearson: = ' + str(score)
+        print 'Dev Recall score: = ' + str(
+            recall_score(devscores, yhat, average=None))  # print 'Dev Pearson: = ' + str(score)
+
+        if (score > best and epoch < maxepoch): ## with early stopping based on number of epochs
             best = score
             ## FA: commented out the following line because of the new keras version problem with deepcopy
             ## FA: not the model scored right after the best model will be returned (not too bad though, usually the difference is so small)
@@ -190,6 +196,25 @@ def train_nn_model(lrmodel, X, Y, devX, devY, devscores, nclass):
 
 
 def prepare_nn_model(dim, nclass):
+    lrmodel = Sequential()
+    lrmodel.add(Dense(200, input_dim=dim))#, activity_regularizer=regs.l1(0.01))) #set this to twice the size of sentence vector or equal to the final feature vector size
+    #lrmodel.add(BatchNormalization())
+    #lrmodel.add(Dense(100))
+    lrmodel.add(Activation('relu'))
+    lrmodel.add(Dropout(0.1))
+    #lrmodel.add(Conv1D(filter_length= 10, nb_filter= 10))
+    #lrmodel.add(Dense(100))
+    #lrmodel.add(Activation('relu'))
+    #lrmodel.add(Dropout(0.1))
+    lrmodel.add(Dense(nclass))
+    lrmodel.add(Activation('softmax'))
+    adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    lrmodel.compile(loss='categorical_crossentropy', optimizer= adam, metrics=['accuracy'])
+    #opt = SGD(lr=0.0001)
+    #lrmodel.compile(loss="categorical_crossentropy", optimizer=opt)
+    return lrmodel
+
+'''
     lrmodel = Sequential()
     lrmodel.add(Dense(300, input_dim=dim))#, activity_regularizer=regs.l1(0.01))) #set this to twice the size of sentence vector or equal to the final feature vector size
     #lrmodel.add(BatchNormalization())
@@ -205,34 +230,21 @@ def prepare_nn_model(dim, nclass):
     lrmodel.compile(loss='categorical_crossentropy', optimizer= adam, metrics=['accuracy'])
     #opt = SGD(lr=0.0001)
     #lrmodel.compile(loss="categorical_crossentropy", optimizer=opt)
-    return lrmodel
+    
+    
+    
+    Dev score: = 0.862677217277
+    Dev F1-score: = [ 0.86007055  0.86518854]
+    Dev Precision score: = [ 0.87491456  0.85127389]
+    Dev Recall score: = [ 0.84572184  0.87956565]
+    Train on 24249 samples, validate on 6066 samples
+            
+    Test data size: 1099
+    Test F1-Score: [ 0.80276134  0.83108108]
+    Test Precision: [ 0.78571429  0.84681583]
+    Test Recall: [ 0.82056452  0.8159204 ]
+    Test Accuracy: 0.818016378526
 
-'''
-    lrmodel = Sequential()
-    lrmodel.add(Dense(500, input_dim=dim)) #set this to twice the size of sentence vector or equal to the final feature vector size
-    #lrmodel.add(BatchNormalization())
-    lrmodel.add(Activation('relu'))
-    lrmodel.add(Dropout(0.005))
-    lrmodel.add(Dense(nclass))
-    lrmodel.add(Activation('softmax'))
-    adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-    lrmodel.compile(loss='categorical_crossentropy', optimizer= adam, metrics=['accuracy'])
-    #opt = SGD(lr=0.0001)
-    #lrmodel.compile(loss="categorical_crossentropy", optimizer=opt)
-    return lrmodel
-    
-    
-    Dev score: = 0.780141843972
-    Dev F1-score: = 0.791181873852
-    Dev Precision score: = 0.801986343886
-    Dev Recall score: = 0.780664652568
-    Train on 27926 samples, validate on 3102 samples
-        
-    Test data size: 1121
-    Test F1-Score: 0.761904761905
-    Test Precision: 0.68085106383
-    Test Recall: 0.864864864865
-    Test Accuracy: 0.750223015165
 '''
 
 '''
@@ -348,7 +360,7 @@ def load_data_constructiveness(datafolder = "/Users/fa/workspace/temp/data/varad
     #print(pd.DataFrame({'Label': allA[:10], 'Score': allS[:10], 'Other_features': allF[:10]}))
 
     ## split into train and dev
-    split = 0.80
+    split = 0.90
     trainA, devA = allA[0: int(math.floor(split * len(allA)))], allA[int(math.floor(split * len(allA))) + 1:]
     trainS, devS = allS[0: int(math.floor(split * len(allS)))], allS[int(math.floor(split * len(allS))) + 1:]
     trainF, devF = allF[0: int(math.floor(split * len(allF)))], allF[int(math.floor(split * len(allF))) + 1:]
@@ -382,11 +394,50 @@ def load_data_constructiveness(datafolder = "/Users/fa/workspace/temp/data/varad
     #print(pd.DataFrame({'Label': trainA[0:10], 'Score': trainS[0:10], 'Other_features': trainF[0:10]}))
 
     return [trainA, trainS, trainF], [devA, devS, devF], [testA, testS,testF], nclass
-    #return [trainA[0:100], trainS[0:100], trainF[0:100]], [devA, devS, devF], [testA, testS, testF], nclass
+    #return [trainA[0:10000], trainS[0:10000], trainF[0:10000]], [devA, devS, devF], [testA, testS, testF], nclass
+
+
+
+def load_data_liar():
+    data_train = pd.read_table("~/workspace/temp/liar_dataset/train.tsv", sep='\t', header=None, names=["id", "label","data"], usecols=[0,1,2])
+    #data_train = pd.read_csv("~/workspace/temp/data/varada_constructiveness/train.csv",  header=None, names=["data", "label"], usecols=[0,1])
+    data_train = data_train.sample(frac=1).reset_index(drop=True)
+    print('Train data loaded')
+    data_train.label = pd.Categorical(data_train.label)
+    data_train['target'] = data_train['label'].cat.codes
+    print( data_train.data[0:6] )
+    print( data_train.target[0:6] )
+    # order of labels in `target_names` can be different from `categories`
+    target_names = data_train['label'].values
+
+    allA = data_train.data.tolist()
+    allS = data_train.target.tolist()
+    allS = [(float(s) + 1) for s in allS]
+    ## shuffle the data
+    allS, allA = shuffle(allS, allA,  random_state=54321)
+    ## split into train and dev
+    split = 0.90
+    trainA, devA = allA[0: int(math.floor(split * len(allA)))], allA[int(math.floor(split * len(allA))) + 1:]
+    trainS, devS = allS[0: int(math.floor(split * len(allS)))], allS[int(math.floor(split * len(allS))) + 1:]
 
 
 
 
+    data_test = pd.read_table("~/workspace/temp/liar_dataset/test.tsv", sep='\t', header=None, names=["id", "label","data"], usecols=[0,1,2])
+    #data_test = pd.read_csv("~/workspace/temp/data/varada_constructiveness/test.csv",   header=None, names=["data", "label"], usecols=[0,1])
+    data_test = data_test.sample(frac=1).reset_index(drop=True)
+    print('test data loaded')
+    data_test.label = pd.Categorical(data_test.label)
+    data_test['target'] = data_test['label'].cat.codes
+    print( data_test.data[0:6] )
+    print( data_test.target[0:6] )
+
+    testA = data_test.data.tolist()
+    testS = data_test.target.tolist()
+    testS = [(float(s) + 1) for s in testS]
+    nclass = len(target_names)
+
+    return [trainA, trainS, []], [devA, devS, []], [testA, testS, []], nclass
 
 
 if __name__ == '__main__':
@@ -394,18 +445,18 @@ if __name__ == '__main__':
 
 
 
-    word2vec_model = w2vF.Word2vecFeatures("/Users/fa/workspace/repos/_codes/MODELS/Rob/word2vec_100_6/vectorsW.bin")
-    #lexicon_model = lexF.LexiconFeatures("/Users/fa/workspace/temp/NPOV/bias_related_lexicons")
+    #word2vec_model = w2vF.Word2vecFeatures("/Users/fa/workspace/repos/_codes/MODELS/Rob/word2vec_300_6/vectorsW.bin")
+    lexicon_model = lexF.LexiconFeatures("/Users/fa/workspace/temp/NPOV/bias_related_lexicons")
 
 
 
     ## Add specific models to ensemble
-    #ensemble.append(lexicon_model)
-    ensemble.append(word2vec_model)
+    ensemble.append(lexicon_model)
+    #ensemble.append(word2vec_model)
 
     ## Load some data for training (standard SICK dataset)
     #trainSet, devSet, testSet = load_data_SICK('../data/SICK/')
-    trainSet, devSet, testSet , nclass = load_data_constructiveness()
+    trainSet, devSet, testSet , nclass = load_data_liar()
 
     # Uncomment till the build_vocab method if using feedback model
     """
@@ -425,12 +476,12 @@ if __name__ == '__main__':
 
 
     ## Train a classifier using train and development subsets
-    classifier = train(ensemble, trainSet, devSet, extra_features = True, nclass = nclass)
+    classifier = train(ensemble, trainSet, devSet, extra_features = False, nclass = nclass)
 
     #classifier = pickle.load(open('../pretrained/classifiers/feed+fb+sts1214.file', 'rb'))
 
     ## Test the classifier on test data of the same type (coming from SICK
-    test(ensemble, classifier, testSet, extra_features = True , nclass = nclass).to_csv('../data/temp.csv')
+    test(ensemble, classifier, testSet, extra_features = False , nclass = nclass).to_csv('../data/temp.csv')
 
     ## FileName to save the trained classifier for later use
     #fileName = '../data/local/SICK-Classifier.h5'
