@@ -160,12 +160,12 @@ def train_nn_model(lrmodel, X, Y, devX, devY, devscores, nclass):
     """
     done = False
     best = -1.0
-    maxepoch = 500
+    maxepoch = 10000
     epoch = 0
     while not done:
         # Every 100 epochs, check Pearson on development set
         lrmodel.fit(X, Y, verbose=1, shuffle=False, validation_data=(devX, devY))
-        epoch = epoch + 100
+        epoch = epoch + 10
         p = lrmodel.predict_proba(devX, verbose=0)
         yhat = decode_labels(p, nclass)
         print(pd.DataFrame({'Predicted': yhat, 'Expected': devscores}))
@@ -197,15 +197,15 @@ def train_nn_model(lrmodel, X, Y, devX, devY, devscores, nclass):
 
 def prepare_nn_model(dim, nclass):
     lrmodel = Sequential()
-    lrmodel.add(Dense(200, input_dim=dim))#, activity_regularizer=regs.l1(0.01))) #set this to twice the size of sentence vector or equal to the final feature vector size
+    lrmodel.add(Dense(100, input_dim=dim))#, activity_regularizer=regs.l1(0.01))) #set this to twice the size of sentence vector or equal to the final feature vector size
     #lrmodel.add(BatchNormalization())
     #lrmodel.add(Dense(100))
     lrmodel.add(Activation('relu'))
-    lrmodel.add(Dropout(0.1))
+    lrmodel.add(Dropout(0.2))
     #lrmodel.add(Conv1D(filter_length= 10, nb_filter= 10))
-    #lrmodel.add(Dense(100))
-    #lrmodel.add(Activation('relu'))
-    #lrmodel.add(Dropout(0.1))
+    lrmodel.add(Dense(100))
+    lrmodel.add(Activation('relu'))
+    lrmodel.add(Dropout(0.2))
     lrmodel.add(Dense(nclass))
     lrmodel.add(Activation('softmax'))
     adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
@@ -320,11 +320,12 @@ def load_data_rubin(datafile = "/Users/fa/workspace/temp/rubin/data.xlsx", resam
     ## shuffle the data
     allS, allA = shuffle(allS, allA, random_state=12345)
     allS = [float(s) for s in allS]
-    allS = [(x * 4 + 1) for x in allS]
+    allS = [(x + 1) for x in allS]
+    nclass = 2
 
-    ## split into 45% train, 5% dev and remaining ~50% test
-    trainA, devA, testA = allA[0 : int(math.floor(0.70 * len(allA)))], allA[int(math.floor(0.70 * len(allA))) + 1 : int(math.floor(0.80 * len(allA))) ], allA[int(math.floor(0.80 * len(allA))) + 1 : ]
-    trainS, devS, testS = allS[0 : int(math.floor(0.70 * len(allS)))], allS[int(math.floor(0.70 * len(allS))) + 1 : int(math.floor(0.80 * len(allS))) ], allS[int(math.floor(0.80 * len(allS))) + 1 : ]
+    ## split
+    trainA, devA, testA = allA[0 : int(math.floor(0.65 * len(allA)))], allA[int(math.floor(0.65 * len(allA))) + 1 : int(math.floor(0.75 * len(allA))) ], allA[int(math.floor(0.75 * len(allA))) + 1 : ]
+    trainS, devS, testS = allS[0 : int(math.floor(0.65 * len(allS)))], allS[int(math.floor(0.65 * len(allS))) + 1 : int(math.floor(0.75 * len(allS))) ], allS[int(math.floor(0.75 * len(allS))) + 1 : ]
     if (resampling):
         trainS, trainA = balanced_resample(trainS, trainA)
         testS, testA = balanced_resample(testS, testA)
@@ -333,7 +334,7 @@ def load_data_rubin(datafile = "/Users/fa/workspace/temp/rubin/data.xlsx", resam
     print len(allA)
     print len(trainA)+len(devA)+len(testA)
     print len(trainA), len(devA), len(testA)
-    return [trainA, trainS], [devA, devS], [testA, testS]
+    return [trainA, trainS,[]], [devA, devS,[]], [testA, testS,[]], nclass
 
 
 def load_data_constructiveness(datafolder = "/Users/fa/workspace/temp/data/varada_constructiveness/"):
@@ -445,18 +446,18 @@ if __name__ == '__main__':
 
 
 
-    #word2vec_model = w2vF.Word2vecFeatures("/Users/fa/workspace/repos/_codes/MODELS/Rob/word2vec_300_6/vectorsW.bin")
-    lexicon_model = lexF.LexiconFeatures("/Users/fa/workspace/temp/NPOV/bias_related_lexicons")
+    word2vec_model = w2vF.Word2vecFeatures("/Users/fa/workspace/repos/_codes/MODELS/Rob/word2vec_300_6/vectorsW.bin")
+    #lexicon_model = lexF.LexiconFeatures("/Users/fa/workspace/temp/NPOV/bias_related_lexicons")
 
 
 
     ## Add specific models to ensemble
-    ensemble.append(lexicon_model)
-    #ensemble.append(word2vec_model)
+    #ensemble.append(lexicon_model)
+    ensemble.append(word2vec_model)
 
     ## Load some data for training (standard SICK dataset)
     #trainSet, devSet, testSet = load_data_SICK('../data/SICK/')
-    trainSet, devSet, testSet , nclass = load_data_liar()
+    trainSet, devSet, testSet , nclass = load_data_constructiveness()
 
     # Uncomment till the build_vocab method if using feedback model
     """
