@@ -1,0 +1,24 @@
+The Digital Rescue of health care - The Globe and Mail
+
+
+There are apps that connect patients to physicians, digital stethoscopes that can transmit the heartbeats of the unborn. The digital revolution is poised to transform Canadian health care - whether hospitals are ready for it or not.
+
+At Women's College Hospital in Toronto, a small number of patients enjoy this convenience as part of a pilot project. They take photos of their surgical incisions on smartphones and answer questions during the 30-day postoperative period, in which they are connected to surgeons who view the information on tablets.
+
+In Nain, the northernmost town in Newfoundland and Labrador, a remote-presence robot, operated by physicians in Goose Bay, has been used 177 times to do consultations, including emergencies. Until a year ago, the only option was to fly these patients to a Goose Bay hospital.
+
+'It's unstoppable,' said Ivar Mendez, a neurosurgeon who is chairman of the Brain Repair Centre, a Dalhousie University and Halifax hospital-affiliated institute of researchers and physicians who are creating groundbreaking treatments and technologies. 'This is going to democratize health care, because it's going to provide access.'
+
+A case in point: The Andean region of Bolivia has little water or electricity, and few doctors or nurses. What it does have is a cellular signal. As a result, physicians such as Dr. Mendez can hear a baby's heartbeat in a remote mountain community in South America from his Halifax office through a digital stethoscope. He can also perform prenatal ultrasound assessments.
+
+'I believe this technology will narrow the gap of inequality in Canada and in the developing world,' he said. 'This is an amazing thing.'
+
+The genius in these innovations is that they target system gaps such as the 30-day postoperative period, when costly readmissions to hospital often occur.
+
+Some have expressed broad fears about the privacy of medical information in the digital era. But paper records are not necessarily more secure than electronic ones; just think of a patient's laboratory results rolling off a fax machine.
+
+Privacy problems can be dealt with by incorporating solutions into the design of devices or technologies right from the start - not as an afterthought near the end of their development.
+
+Hospital staff and administrators who are on the front lines putting out fires may think they have no time to set aside for adaptation to the digital revolution. But they are mistaken if they think they have a choice.
+
+This is a make-or-break time for Canadian medicare. Innovation - rather than more money - holds the promise of the rescue of public health care.

@@ -1,0 +1,26 @@
+The perfect heart-stopping murder - The Globe and Mail
+
+
+Using genetically manipulated mice, Harvard scientists proved in 2010 that the aging process can be slowed - and, indeed, substantially reversed. Merely by tweaking chromosomes, aged and feeble mice found themselves healthy once again, and presumably happy, too. There are many people (among them, celebrated U.S. inventor Ray Kurzweil) who think we will find ways to extend the human lifespan indefinitely. Immortality by DNA manipulation isn't here yet, but it's assuredly a work in progress.
+
+As people already know, however, an 'on' switch can be turned off - sometimes from remote places, and sometimes in clandestine ways. This caveat will presumably hold with human resurrection - as empirically demonstrated four years ago when University of Washington and University of Massachusetts scientists gained wireless Internet access to a patient's implanted heart-beat regulator - and eavesdropped on the signals emitted by the tiny radio embedded in it.
+
+This was the first proof that an e-savvy entrepreneur could commit murder and mayhem with a lethal combination of remote keystrokes. Forget Colonel Mustard in the library with a candlestick. Think Mr. Hacker anywhere with a smartphone.
+
+Cybercrime sleuth Marc Goodman says that with hundreds of thousands of implanted heart defibrillators now regulating people's heartbeats, science must deal with the threat of computer-assisted murder. Unless prevented by technological adaptation, he says, 'a whole generation of devices may be implanted which are subject to remote tampering and interference.' It'll give new meaning, he says, to the term 'heart attack.'
+
+'In the past, a hacker might have been able to illegally enter a desktop computer system, read a target's personal data or even gain control of another person's financial accounts,' Mr. Goodman says. 'In comparison to the potential threat from Internet-based medical devices, the threats from 'old school' hacking seem mild.'
+
+No one worried about the Six Million Dollar Man getting lethally hacked, Mr. Goodman writes. But that was then (the TV series ran from 1974 to 1978). It wasn't until 1982 that the Jarvik-7 artificial heart (connected externally to a room full of machinery) kept Seattle dentist Barney Clark alive for 112 days. Now, or soon, millions of people will live with bodily embedded, Internet-connected devices. They should worry, Mr. Goodman says. Prominent people - such as former U.S. vice-president Dick Cheney - should worry more. An extra jolt from a pacemaker can cause cardiac arrest. An extra jolt from an insulin pump can cause diabetic coma and death.
+
+Mr. Goodman says hacker-manipulated deaths will appear natural, given the target's relatively poor health. Even a skilled pathologist conducting a forensic investigation will find nothing amiss. The evidence of criminal conduct could exist thousands of kilometres away, across oceans, in foreign lands.
+
+Mr. Goodman, founder of the Internet-based Future Crimes Institute, began his career as a Los Angeles street cop, then developed the LAPD's first Internet crime unit in the 1990s. He's now a global security adviser with academic connections to the University of Toronto (through the Munk School of Global Affairs) and the Silicon Valley's Singularity Institute, a NASA- and Google-sponsored venture studying technological innovation.
+
+In his commentary Hacking the Human Heart and in an interview published in The New York Times, Mr. Goodman explained why he thinks hackers represent an urgent threat to people with medical implants - and why they'll always run ahead of law enforcement.
+
+As with all organized crime, he says, hackers are criminal entrepreneurs. 'Anything that would motivate someone to join a start-up would motivate a criminal,' he writes. 'They want money, shares in the business, a challenge. They don't want a 9-to-5 environment.'
+
+Hackers are enormously inventive. There are 268 million pieces of malware thus far identified, Mr. Goodman says, 'in the wild.'
+
+The board game Clue was right to place the murderer, in earlier times, close at hand. His or her weapons were limited to candlestick, dagger, lead pipe, revolver, rope or wrench. In classic crime fiction, only poison permitted the physical separation of the murderer and the murdered, and only those nearby could be credible suspects. In the age of bionics, Mr. Goodman says, the person attacking you can be sitting in New York or Tokyo or Gaborone - making remote-controlled 'heart attacks' the perfect crime of the 21st century.

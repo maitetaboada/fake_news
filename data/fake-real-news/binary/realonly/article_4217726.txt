@@ -1,0 +1,18 @@
+The possible shouldn't be confused with the probable in elections - The Globe and Mail
+
+
+The Ontario Superior Court recently nullified the result of the federal election in Etobicoke Centre. Now a by-election will have to be held unless an appeal to the Supreme Court of Canada overturns that decision.
+
+Conservative candidate Ted Opitz won in Etobicoke Centre on May 2, 2011, but his margin of victory over Liberal Borys Wrzesnewskyj was only 26 votes. Mr. Wrzesnewskyj successfully applied for a judicial review to negate that result, arguing that voters had been allowed to cast ballots without proper documentation. Although he dismissed many allegations, Mr. Justice Thomas Lederer found that 79 people had been allowed to vote without adequate evidence of eligibility. Following the precedent of previous cases, he concluded that the electoral result was void because if those 79 votes had not been counted, Mr. Opitz might not have won, and so the public could not have confidence in the democratic legitimacy of the result.
+
+Judge Lederer was clear that his decision was based on the standard of the 'balance of probabilities' used in civil litigation. Although 'probability' is a mathematical term, judges normally have to arrive at the balance of probabilities without quantitative evidence. The balance of probabilities is thus a synonym for the judge's informed view of the situation, not buttressed by formal mathematical reasoning. But in a case such as this, which abounds in quantitative evidence, a judge can do better.
+
+It is obvious that counting 79 improper votes might have altered the result when the margin of victory was only 26, but how likely is it? Possible is not the same as probable. In fact, a simple statistical test, the binomial test, shows that it was highly unlikely that the 79 votes could have altered the result.
+
+Parties other than the Liberals and Conservatives got 18% of the vote in Etobicoke Centre. Between them, Mr. Opitz and Mr. Wrzesnewskyj got 82%. One has to assume that the distribution of the 79 improper votes would have been similar to the general distribution of the vote on May 2, because all parties to the case, as well as Judge Lederer, agreed there was no evidence of vote fraud. So the best prediction is that, of the 79 improper ballots, 65 (82% of 79) would have been cast for the Liberal or Conservative candidate. To upset the election result, 46 or more of those 65 votes would have to have been cast for Mr. Opitz and 19 or fewer for Mr. Wrzesnewskyj. The difference between 46 and 19 is 27 - one more than the winner's plurality - so subtracting all those votes from the total would indeed have changed the winner.
+
+That outcome is possible but extremely unlikely, just as it would be very unlikely to flip a coin 65 times and get 46 or more heads and 19 or fewer tails. According to the binomial test, the probability of such a result is only .0007. When Judge Lederer spoke of the 'balance of probabilities,' he in fact evoked a barely possible contingency.
+
+In our current climate of polarized politics, the Etobicoke Centre decision may set off a future flood of judicial challenges. There are close races in every election, and charges of impropriety will always be possible. Judicial challenges will become a routine part of the process, as campaign managers organize legal teams to get into court as soon as possible after an election is held. But if judges can develop a more mathematically precise interpretation of the 'balance of probabilities,' they may be able to forestall such an undesirable outcome and keep elections out of the courts.
+
+Tom Flanagan is professor of political science at the University of Calgary and a campaign manager for conservative parties.

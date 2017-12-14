@@ -1,0 +1,48 @@
+Half a world from Victoria, duo work to protect Siberia's snow leopards - The Globe and Mail
+
+
+Sean Burnett hunched over equipment designed to catch poachers when he spotted the first humans his group had seen in ages - seven men on horseback.
+
+He had been warned about marauders in the vast Siberian wilderness. The sight brought to mind the saying, 'In the taiga, there are no witnesses.'
+
+Mr. Burnett and his friend, Greg Carney, were in Russia's Altai Republic near the frontier with Mongolia, China and Kazakhstan. The pair had travelled from Victoria to Vancouver to Amsterdam to Moscow to 'the middle of Russia, a city called Barnaul,' he said, 'almost two-thirds of the way around the globe to get where we were going.' Joined at the airport by a Russian wildlife biologist, a conservation officer who acted as translator and a chauffeur who did double duty as guard, the party then drove hundreds of kilometres into the wilderness, passing yurts home to nomadic goat herders and continuing even farther on foot to isolated pathways favoured by poachers.
+
+The Victoria men wound up in Central Asia through the most unlikely of circumstances.
+
+Both are economists who like to tinker with electronics when away from the desk. They battle sumo-bots (homemade wheeled robots) and raced small, self-guided, solar-powered boats on Elk Lake (Sean's crashed into a rock wall at 30 kilometres an hour).
+
+A blog detailing their boat adventures caught the attention of James Gibbs, a biology professor in Syracuse, N.Y. He was intrigued they had modified a device used by hikers to transmit brief messages via satellite from anywhere on Earth. The hobbyists had hacked a SPOT GPS Messenger to respond to a circuit board of their own design. As well, they converted it to solar power.
+
+The professor works with Russian conservation authorities to help stop the illegal hunting of endangered snow leopards, as well as musk deer and argali, a wild sheep poached for meat. He asked the hobbyists if they could develop a solar-powered, autonomous device to instantaneously alert rangers about trespassers in a protected park, a wilderness so vast it was impossible to fully patrol.
+
+They took up the challenge on a shoestring budget and, last summer, found themselves in a remote and sparsely populated part of Siberia.
+
+The men wore gumboots as they marched across a bog, knobby tufts of tussock sedge serving as unsteady stepping stones. 'They're really wobbly,' Mr. Burnett said. 'If you lose your balance, you're up to your hip in marsh.' He fell in more than once.
+
+Victoria's temperate climate was poor preparation for what they faced. The weather on the elevated plain was harsh - below freezing in the morning, quickly thawing as temperatures reached 30 degrees by noon. 'More mosquitoes than I'd ever even conceived of,' Mr. Burnett said. Their rations included such unpalatable foodstuffs as fatty meat in a can.
+
+They installed six prototypes - two heat-detecting sensors in cabins and four motion sensors buried in the ground - along what the professor had identified as routes likely to be used by poachers.
+
+It was at the site of one of the installations that the horsemen were spotted in the distance.
+
+Mr. Burnett felt utterly exposed, 'like being in a school field that goes on in all directions for hundreds of kilometres.'
+
+'People have been killed in that setting by marauders on horseback. We were nervous. We honestly didn't even know if they were going to shoot at us or not.'
+
+The horsemen approached within the length of a football field, only to pass by without incident.
+
+To Mr. Burnett's delight, all six devices worked as designed, regularly sending check-in messages.
+
+After the Victoria men returned home, they were alerted to a trespasser by one of the devices. They contacted Russian rangers, who told them the interlopers were their own. At least the devices had worked.
+
+Over time, the road sensors stopped sending check-in signals. As expected, deep snow and a lack of sunshine had caused the solar-powered devices to shut down.
+
+The amateur inventors are now working on devices tripped by sound detection (an engine revving in the woods) and face detection (a computer running a webcam that will monitor for a human face in the image).
+
+'We think we've got all the ways to detect a human covered,' Mr. Burnett said. 'Now we've just got to work the bugs out.'
+
+They have a return trek to Siberia scheduled for October.
+
+Recently, they had a happy surprise. Two of the silent road sensors came back to life, the snow having melted and the sun having recharged the battery, silent sentinels helping to protect the marvellous snow leopard.
+
+Special to The Globe and Mail
