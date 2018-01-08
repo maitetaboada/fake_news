@@ -29,6 +29,8 @@ MAX_NB_WORDS = 20000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
+CLASSES = 6
+
 
 def clean_str(string):
     """
@@ -42,7 +44,7 @@ def clean_str(string):
 
 def load_data_imdb():
     print "Loading data..."
-    data_train = pd.read_csv('/Users/fa/workspace/temp/imdbReviews/labeledTrainData.tsv', sep='\t')
+    data_train = pd.read_csv('../data/imdbReviews/labeledTrainData.tsv', sep='\t')
     print data_train.shape
     texts = []
     labels = []
@@ -54,7 +56,7 @@ def load_data_imdb():
 
     return texts, labels
 
-def load_data_liar(file_name= "~/workspace/temp/liar_dataset/train.tsv"):
+def load_data_liar(file_name= "../data/liar_dataset/train.tsv"):
     print "Loading data..."
     data_train = pd.read_table(file_name, sep='\t', header=None, names=["id", "label","data"], usecols=[0,1,2])
     print data_train.shape
@@ -65,9 +67,16 @@ def load_data_liar(file_name= "~/workspace/temp/liar_dataset/train.tsv"):
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.label[idx])
 
+    transdict = {
+        'true': 0,
+        'mostly-true': 1,
+        'half-true': 2,
+        'barely-true': 3,
+        'false': 4,
+        'pants-fire': 5
+    }
+    labels = [transdict[i] for i in labels]
     labels = to_categorical(np.asarray(labels))
-    #labels = pd.Categorical(labels)
-    #labels = labels.cat.codes
 
     print(texts[0:6])
     print(labels[0:6])
@@ -95,7 +104,7 @@ def sequence_processing(texts):
     return texts, word_index
 
 
-def load_embeddings( word_index , GLOVE_FILE = "/Users/fa/workspace/temp/bigdata/glove.6B.100d.txt"):
+def load_embeddings( word_index , GLOVE_FILE = "../pretrained/glove.6B.100d.txt"):
    print "Loading embeddings..."
 
    embeddings_index = {}
@@ -137,7 +146,7 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
    l_pool3 = MaxPooling1D(35)(l_cov3)  # global max pooling
    l_flat = Flatten()(l_pool3)
    l_dense = Dense(128, activation='relu')(l_flat)
-   preds = Dense(2, activation='softmax')(l_dense)
+   preds = Dense(CLASSES, activation='softmax')(l_dense)
 
    model = Model(sequence_input, preds)
    model.compile(loss='categorical_crossentropy',
@@ -148,13 +157,21 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
 
 
 
-texts_train, labels_train = load_data_liar("~/workspace/temp/liar_dataset/train.tsv")
-texts_test,labels_test = load_data_liar("~/workspace/temp/liar_dataset/test.tsv")
+#texts_train, labels_train = load_data_liar("~/workspace/temp/liar_dataset/train.tsv")
+#texts_test,labels_test = load_data_liar("~/workspace/temp/liar_dataset/test.tsv")
+
+
+texts_train, labels_train = load_data_liar("../data/liar_dataset/train.tsv")
+texts_test,labels_test = load_data_liar("../data/liar_dataset/test.tsv")
+
 
 texts = texts_train + texts_test
 texts, word_index = sequence_processing(texts)
 texts_train = texts[:len(labels_train)]
 texts_test = texts[len(labels_train):]
+
+labels_train = np.asarray(labels_train)
+labels_test = np.asarray(labels_test)
 
 print('Shape of data tensor:', texts_train.shape)
 print('Shape of label tensor:', labels_train.shape)
@@ -180,7 +197,7 @@ model = prepare_cnn_model_1(word_index, embedding_matrix)
 print("model fitting - simplified convolutional neural network")
 model.summary()
 model.fit(x_train, y_train, validation_data=(x_val, y_val),
-             nb_epoch=1, batch_size=128)
+             nb_epoch=10, batch_size=128)
 
 
 
