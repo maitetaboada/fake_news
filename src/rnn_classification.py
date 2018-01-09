@@ -44,7 +44,7 @@ def clean_str(string):
 
 
 
-data_train = pd.read_csv('/Users/fa/workspace/temp/imdbReviews/labeledTrainData.tsv', sep='\t')
+data_train = pd.read_csv('../data/imdbReviews/labeledTrainData.tsv', sep='\t')
 print data_train.shape
 
 texts = []
@@ -83,7 +83,7 @@ print('Number of positive and negative reviews in training and validation set ')
 print y_train.sum(axis=0)
 print y_val.sum(axis=0)
 
-GLOVE_DIR = "/Users/fa/workspace/temp/bigdata"
+GLOVE_DIR = "../pretrained"
 embeddings_index = {}
 f = open(os.path.join(GLOVE_DIR, 'glove.6B.100d.txt'))
 for line in f:

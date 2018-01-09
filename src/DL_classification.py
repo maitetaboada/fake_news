@@ -107,7 +107,7 @@ def load_embeddings( word_index , GLOVE_FILE = "../pretrained/glove.6B.100d.txt"
        coefs = np.asarray(values[1:], dtype='float32')
        embeddings_index[word] = coefs
    f.close()
-   print('Total %s word vectors in Glove 6B 100d.' % len(embeddings_index))
+   print('Total %s word vectors in file.' % len(embeddings_index))
 
    embedding_matrix = np.random.random((len(word_index ) + 1, EMBEDDING_DIM))
    for word, i in word_index.items():
@@ -276,7 +276,7 @@ print('Number of instances from each class')
 print y_train.sum(axis=0)
 print y_val.sum(axis=0)
 
-model = prepare_rnn_model_1(word_index, embedding_matrix)
+model = prepare_cnn_model_1(word_index, embedding_matrix)
 print("model fitting - simplified convolutional neural network")
 model.summary()
 model.fit(x_train, y_train, validation_data=(x_val, y_val),
