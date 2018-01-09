@@ -278,7 +278,7 @@ print y_train.sum(axis=0)
 print y_val.sum(axis=0)
 
 print("Preparing the deep learning model...")
-model = prepare_rnn_model_1(word_index, embedding_matrix)
+model = prepare_cnn_model_1(word_index, embedding_matrix)
 model.summary()
 print("Model fitting...")
 model.fit(x_train, y_train, validation_data=(x_val, y_val),
