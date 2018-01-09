@@ -113,7 +113,7 @@ def sequence_processing(texts):
     word indexing and padding of the sequences
     """
 
-    tokenizer = Tokenizer(nb_words=MAX_NB_WORDS)
+    tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
     tokenizer.fit_on_texts(texts)
     sequences = tokenizer.texts_to_sequences(texts)
     word_index = tokenizer.word_index
@@ -303,7 +303,7 @@ print y_train.sum(axis=0)
 print y_val.sum(axis=0)
 
 print("Preparing the deep learning model...")
-model = prepare_rnn_model_1(word_index, embedding_matrix)
+model = prepare_rnn_model_2(word_index, embedding_matrix)
 model.summary()
 print("Model fitting...")
 model.fit(x_train, y_train, validation_data=(x_val, y_val),
