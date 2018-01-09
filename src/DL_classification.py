@@ -12,6 +12,31 @@ import os
 
 #os.environ['KERAS_BACKEND'] = 'theano'
 
+
+
+## Configuration for GPU limits:
+from keras import backend as K
+if 'tensorflow' == K.backend():
+    import tensorflow as tf
+from keras.backend.tensorflow_backend import set_session
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.8
+print("before setting allow_growth")
+print(config.gpu_options.per_process_gpu_memory_fraction)
+config.gpu_options.allow_growth = True
+config.gpu_options.visible_device_list = "0"
+print("after setting gpu memory:")
+print(config.gpu_options.per_process_gpu_memory_fraction)
+#session = tf.Session(config=config)
+set_session(tf.Session(config=config))
+
+## Check if GPU is being used:
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
+
+
+
+
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils.np_utils import to_categorical
@@ -20,11 +45,11 @@ from keras.layers import Embedding
 from keras.layers import Dense, Input, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout, LSTM, GRU, Bidirectional
 from keras.models import Model
-from keras import backend as K
 from keras.engine.topology import Layer, InputSpec
 from keras import initializers
 
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+
 
 
 MAX_SEQUENCE_LENGTH = 1000
@@ -278,7 +303,7 @@ print y_train.sum(axis=0)
 print y_val.sum(axis=0)
 
 print("Preparing the deep learning model...")
-model = prepare_cnn_model_1(word_index, embedding_matrix)
+model = prepare_rnn_model_1(word_index, embedding_matrix)
 model.summary()
 print("Model fitting...")
 model.fit(x_train, y_train, validation_data=(x_val, y_val),
