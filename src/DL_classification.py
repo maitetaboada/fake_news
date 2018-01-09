@@ -106,7 +106,6 @@ def sequence_processing(texts):
 
 def load_embeddings( word_index , GLOVE_FILE = "../pretrained/glove.6B.100d.txt"):
    print "Loading embeddings..."
-
    embeddings_index = {}
    f = open(GLOVE_FILE)
    for line in f:
@@ -226,11 +225,11 @@ print('Number of instances from each class')
 print y_train.sum(axis=0)
 print y_val.sum(axis=0)
 
-model = prepare_cnn_model_2(word_index, embedding_matrix)
+model = prepare_cnn_model_1(word_index, embedding_matrix)
 print("model fitting - simplified convolutional neural network")
 model.summary()
 model.fit(x_train, y_train, validation_data=(x_val, y_val),
-             nb_epoch=10, batch_size=128)
+             nb_epoch=2, batch_size=128)
 
 
 
