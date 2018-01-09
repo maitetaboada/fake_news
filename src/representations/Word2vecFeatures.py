@@ -9,6 +9,7 @@ import io
 import numpy as np
 import pandas as pd
 
+import gensim.models
 from gensim.models import Word2Vec
 from nltk.corpus import stopwords
 from sklearn.preprocessing import normalize
@@ -33,7 +34,7 @@ class Word2vecFeatures:
         """
 
         print("Word2VecFeatures init: loading word2vec model")
-        self.w2vModel = Word2Vec.load_word2vec_format(file, binary=True)  #gensim.models.KeyedVectors.load_word2vec_format(modelFile, binary=True)
+        self.w2vModel = gensim.models.KeyedVectors.load_word2vec_format(file, binary=True) #Word2Vec.load_word2vec_format(file, binary=True)
         return
 
     def encode(self, texts):

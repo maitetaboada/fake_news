@@ -24,7 +24,7 @@ from keras.models import Model
 
 from keras import backend as K
 from keras.engine.topology import Layer, InputSpec
-from keras import initializations
+from keras import initializers
 
 MAX_SEQUENCE_LENGTH = 1000
 MAX_NB_WORDS = 20000
@@ -79,7 +79,7 @@ y_train = labels[:-nb_validation_samples]
 x_val = data[-nb_validation_samples:]
 y_val = labels[-nb_validation_samples:]
 
-print('Number of positive and negative reviews in traing and validation set ')
+print('Number of positive and negative reviews in training and validation set ')
 print y_train.sum(axis=0)
 print y_val.sum(axis=0)
 
@@ -126,7 +126,7 @@ model.fit(x_train, y_train, validation_data=(x_val, y_val),
 # Attention GRU network
 class AttLayer(Layer):
     def __init__(self, **kwargs):
-        self.init = initializations.get('normal')
+        self.init = initializers.get('normal')
         # self.input_spec = [InputSpec(ndim=3)]
         super(AttLayer, self).__init__(**kwargs)
 

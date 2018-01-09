@@ -21,9 +21,9 @@ def convertModel(inFile, outFile, fromW2VToGlove = True):
         fout.writelines(data[1:])
     else:
         print "This conversion not implemented yet!"
-    print "Conversion finished!"                                                                    
+    print "Conversion finished!"
 
 convertEncoding("../pretrained/GoogleNews-vectors-negative300")
-convertModel("../pretrained/GoogleNews-vectors-negative300.txt", "../pretrained/Gloved-GoogleNews-vectors-negative300.txt")
+#convertModel("../pretrained/GoogleNews-vectors-negative300.txt", "../pretrained/Gloved-GoogleNews-vectors-negative300.txt")
 
 

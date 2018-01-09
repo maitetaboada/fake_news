@@ -18,8 +18,11 @@ from keras.utils.np_utils import to_categorical
 
 from keras.layers import Embedding
 from keras.layers import Dense, Input, Flatten
-from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout
+from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout, LSTM, GRU, Bidirectional
 from keras.models import Model
+from keras import backend as K
+from keras.engine.topology import Layer, InputSpec
+from keras import initializers
 
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
@@ -66,7 +69,6 @@ def load_data_liar(file_name= "../data/liar_dataset/train.tsv"):
         text = BeautifulSoup(data_train.data[idx])
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.label[idx])
-
     transdict = {
         'true': 0,
         'mostly-true': 1,
@@ -77,17 +79,9 @@ def load_data_liar(file_name= "../data/liar_dataset/train.tsv"):
     }
     labels = [transdict[i] for i in labels]
     labels = to_categorical(np.asarray(labels))
-
     print(texts[0:6])
     print(labels[0:6])
-
     return texts, labels
-
-
-
-
-
-
 
 def sequence_processing(texts):
     """
@@ -100,7 +94,6 @@ def sequence_processing(texts):
     word_index = tokenizer.word_index
     print('Found %s unique tokens.' % len(word_index))
     texts = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
-
     return texts, word_index
 
 
@@ -114,7 +107,6 @@ def load_embeddings( word_index , GLOVE_FILE = "../pretrained/glove.6B.100d.txt"
        coefs = np.asarray(values[1:], dtype='float32')
        embeddings_index[word] = coefs
    f.close()
-
    print('Total %s word vectors in Glove 6B 100d.' % len(embeddings_index))
 
    embedding_matrix = np.random.random((len(word_index ) + 1, EMBEDDING_DIM))
@@ -129,7 +121,6 @@ def load_embeddings( word_index , GLOVE_FILE = "../pretrained/glove.6B.100d.txt"
 
 
 def prepare_cnn_model_1(word_index, embedding_matrix):
-
    embedding_layer = Embedding(len(word_index) + 1,
                                EMBEDDING_DIM,
                                weights=[embedding_matrix],
@@ -146,13 +137,11 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
    l_flat = Flatten()(l_pool3)
    l_dense = Dense(128, activation='relu')(l_flat)
    preds = Dense(CLASSES, activation='softmax')(l_dense)
-
    model = Model(sequence_input, preds)
    model.compile(loss='categorical_crossentropy',
                  optimizer='rmsprop',
                  metrics=['acc'])
    return model
-
 
 
 def prepare_cnn_model_2(word_index, embedding_matrix):
@@ -177,7 +166,43 @@ def prepare_cnn_model_2(word_index, embedding_matrix):
     l_flat = Flatten()(l_pool2)
     l_dense = Dense(128, activation='relu')(l_flat)
     preds = Dense(CLASSES, activation='softmax')(l_dense)
+    model = Model(sequence_input, preds)
+    model.compile(loss='categorical_crossentropy',
+                  optimizer='rmsprop',
+                  metrics=['acc'])
+    return model
 
+
+def prepare_rnn_model_1(word_index, embedding_matrix):
+    embedding_layer = Embedding(len(word_index) + 1,
+                                EMBEDDING_DIM,
+                                weights=[embedding_matrix],
+                                input_length=MAX_SEQUENCE_LENGTH,
+                                trainable=True)
+
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    embedded_sequences = embedding_layer(sequence_input)
+    l_lstm = Bidirectional(LSTM(100))(embedded_sequences)
+    preds = Dense(CLASSES, activation='softmax')(l_lstm)
+    model = Model(sequence_input, preds)
+    model.compile(loss='categorical_crossentropy',
+                  optimizer='rmsprop',
+                  metrics=['acc'])
+    return model
+
+
+def prepare_rnn_model_2(word_index, embedding_matrix):
+    embedding_layer = Embedding(len(word_index) + 1,
+                                EMBEDDING_DIM,
+                                weights=[embedding_matrix],
+                                input_length=MAX_SEQUENCE_LENGTH,
+                                trainable=True)
+
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    embedded_sequences = embedding_layer(sequence_input)
+    l_gru = Bidirectional(GRU(100, return_sequences=True))(embedded_sequences)
+    l_att = AttLayer()(l_gru)
+    preds = Dense(CLASSES, activation='softmax')(l_att)
     model = Model(sequence_input, preds)
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
@@ -186,6 +211,32 @@ def prepare_cnn_model_2(word_index, embedding_matrix):
 
 
 
+# Attention GRU network
+class AttLayer(Layer):
+    def __init__(self, **kwargs):
+        self.init = initializers.get('normal')
+        # self.input_spec = [InputSpec(ndim=3)]
+        super(AttLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        assert len(input_shape) == 3
+        # self.W = self.init((input_shape[-1],1))
+        self.W = self.init((input_shape[-1],))
+        # self.input_spec = [InputSpec(shape=input_shape)]
+        self.trainable_weights = [self.W]
+        super(AttLayer, self).build(input_shape)  # be sure you call this somewhere!
+
+    def call(self, x, mask=None):
+        eij = K.tanh(K.dot(x, self.W))
+
+        ai = K.exp(eij)
+        weights = ai / K.sum(ai, axis=1).dimshuffle(0, 'x')
+
+        weighted_input = x * weights.dimshuffle(0, 1, 'x')
+        return weighted_input.sum(axis=1)
+
+    def get_output_shape_for(self, input_shape):
+        return (input_shape[0], input_shape[-1])
 
 
 
@@ -225,7 +276,7 @@ print('Number of instances from each class')
 print y_train.sum(axis=0)
 print y_val.sum(axis=0)
 
-model = prepare_cnn_model_1(word_index, embedding_matrix)
+model = prepare_rnn_model_1(word_index, embedding_matrix)
 print("model fitting - simplified convolutional neural network")
 model.summary()
 model.fit(x_train, y_train, validation_data=(x_val, y_val),

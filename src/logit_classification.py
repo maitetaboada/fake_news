@@ -337,7 +337,7 @@ def load_data_rubin(datafile = "/Users/fa/workspace/temp/rubin/data.xlsx", resam
     return [trainA, trainS,[]], [devA, devS,[]], [testA, testS,[]], nclass
 
 
-def load_data_constructiveness(datafolder = "/Users/fa/workspace/temp/data/varada_constructiveness/"):
+def load_data_constructiveness(datafolder = "/Users/ftorabia/workspace/shared/sfu/fake_news/data/varada_constructiveness/"):
     xl = pd.ExcelFile(datafolder+"train.xlsx")
     df = xl.parse("Sheet1")
     allA = df["Preprocessed"].tolist()
@@ -444,10 +444,11 @@ def load_data_liar():
 if __name__ == '__main__':
     ensemble = list()
 
+    import os
+    print(os.getcwd())
 
-
-    word2vec_model = w2vF.Word2vecFeatures("/Users/fa/workspace/repos/_codes/MODELS/Rob/word2vec_300_6/vectorsW.bin")
-    #lexicon_model = lexF.LexiconFeatures("/Users/fa/workspace/temp/NPOV/bias_related_lexicons")
+    word2vec_model = w2vF.Word2vecFeatures("/Users/ftorabia/workspace/temp/EMBEDDINGS/GoogleNews-vectors-negative300.bin")
+    #lexicon_model = lexF.LexiconFeatures("/Users/ftorabia/workspace/shared/sfu/fake_news/data/bias_related_lexicons")
 
 
 
