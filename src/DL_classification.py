@@ -1,15 +1,16 @@
 
 
 ## If you want to force CPU use instead of GPU
-import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+#import os
+#os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+#os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 ## Configuration for GPU limits:
 from keras import backend as K
 if 'tensorflow' == K.backend():
     import tensorflow as tf
     print(tf.__version__)
+    print(K.tensorflow_backend._get_available_gpus())
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
 print("*** Before setting allow_growth:")
