@@ -1,14 +1,15 @@
 
 
 ## If you want to force CPU use instead of GPU
-#import os
-#os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-#os.environ["CUDA_VISIBLE_DEVICES"] = ""
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 ## Configuration for GPU limits:
 from keras import backend as K
 if 'tensorflow' == K.backend():
     import tensorflow as tf
+    print(tf.__version__)
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
 print("*** Before setting allow_growth:")
@@ -637,7 +638,7 @@ print y_train.sum(axis=0)
 print y_val.sum(axis=0)
 
 print("Preparing the deep learning model...")
-model = prepare_rnn_model_2(word_index, embedding_matrix)
+model = prepare_rnn_model_1(word_index, embedding_matrix)
 model.summary()
 print("Model fitting...")
 model.fit(x_train, y_train, validation_data=(x_val, y_val),
