@@ -1,9 +1,9 @@
 
 
 ## If you want to force CPU use instead of GPU
-import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+#import os
+#os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+#os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 ## Configuration for GPU limits:
 from keras import backend as K
@@ -205,17 +205,24 @@ def prepare_cnn_model_2(word_index, embedding_matrix):
 
 
 def prepare_rnn_model_1(word_index, embedding_matrix):
+    print("*** 1")
     embedding_layer = Embedding(len(word_index) + 1,
                                 EMBEDDING_DIM,
                                 weights=[embedding_matrix],
                                 input_length=MAX_SEQUENCE_LENGTH,
                                 trainable=True)
 
+    print("*** 2")
     sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    print("*** 3")
     embedded_sequences = embedding_layer(sequence_input)
+    print("*** 4")
     l_lstm = Bidirectional(LSTM(100))(embedded_sequences)
+    print("*** 5")
     preds = Dense(CLASSES, activation='softmax')(l_lstm)
+    print("*** 6")
     model = Model(sequence_input, preds)
+    print("*** 7")
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
                   metrics=['acc'])
