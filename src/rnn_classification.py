@@ -45,7 +45,7 @@ def clean_str(string):
 
 
 data_train = pd.read_csv('../data/imdbReviews/labeledTrainData.tsv', sep='\t')
-print data_train.shape
+print(data_train.shape)
 
 texts = []
 labels = []
@@ -80,8 +80,8 @@ x_val = data[-nb_validation_samples:]
 y_val = labels[-nb_validation_samples:]
 
 print('Number of positive and negative reviews in training and validation set ')
-print y_train.sum(axis=0)
-print y_val.sum(axis=0)
+print(y_train.sum(axis=0))
+print(y_val.sum(axis=0))
 
 GLOVE_DIR = "../pretrained"
 embeddings_index = {}
