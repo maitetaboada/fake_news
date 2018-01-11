@@ -32,15 +32,13 @@ print(device_lib.list_local_devices())
 
 import numpy as np
 import pandas as pd
-import cPickle
-from collections import defaultdict
+
 import re
 
 from bs4 import BeautifulSoup
 
-import sys
-import os
 
+import os
 #os.environ['KERAS_BACKEND'] = 'theano'
 
 
@@ -48,8 +46,6 @@ import os
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils.np_utils import to_categorical
-
-from keras.layers import Embedding
 from keras.layers import Dense, Input, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout, LSTM, GRU, Bidirectional
 from keras.models import Model
