@@ -79,7 +79,7 @@ def clean_str(string):
     return string.strip().lower()
 
 def load_data_imdb():
-    print "Loading data..."
+    print ("Loading data...")
     data_train = pd.read_csv('../data/imdbReviews/labeledTrainData.tsv', sep='\t')
     print data_train.shape
     texts = []
@@ -93,7 +93,7 @@ def load_data_imdb():
     return texts, labels
 
 def load_data_liar(file_name= "../data/liar_dataset/train.tsv"):
-    print "Loading data..."
+    print ("Loading data...")
     data_train = pd.read_table(file_name, sep='\t', header=None, names=["id", "label","data"], usecols=[0,1,2])
     print data_train.shape
     texts = []
@@ -131,7 +131,7 @@ def sequence_processing(texts):
 
 
 def load_embeddings( word_index , GLOVE_FILE = "../pretrained/glove.6B.100d.txt"):
-   print "Loading embeddings..."
+   print ("Loading embeddings...")
    embeddings_index = {}
    f = open(GLOVE_FILE)
    for line in f:
@@ -407,7 +407,7 @@ def clean_str(string):
     return string.strip().lower()
 
 def load_data_imdb():
-    print "Loading data..."
+    print ("Loading data...")
     data_train = pd.read_csv('../data/imdbReviews/labeledTrainData.tsv', sep='\t')
     print data_train.shape
     texts = []
@@ -421,7 +421,7 @@ def load_data_imdb():
     return texts, labels
 
 def load_data_liar(file_name= "../data/liar_dataset/train.tsv"):
-    print "Loading data..."
+    print ("Loading data...")
     data_train = pd.read_table(file_name, sep='\t', header=None, names=["id", "label","data"], usecols=[0,1,2])
     print data_train.shape
     texts = []
@@ -459,7 +459,7 @@ def sequence_processing(texts):
 
 
 def load_embeddings( word_index , GLOVE_FILE = "../pretrained/glove.6B.100d.txt"):
-   print "Loading embeddings..."
+   print ("Loading embeddings...")
    embeddings_index = {}
    f = open(GLOVE_FILE)
    for line in f:
