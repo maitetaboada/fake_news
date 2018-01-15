@@ -157,9 +157,9 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
                                trainable=True)
    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
    embedded_sequences = embedding_layer(sequence_input)
-   l_cov1 = Conv1D(128, 5, activation='relu')(embedded_sequences)
+   l_cov1 = Conv1D(128, 2, activation='relu')(embedded_sequences)
    l_pool1 = MaxPooling1D(5)(l_cov1)
-   l_cov2 = Conv1D(128, 5, activation='relu')(l_pool1)
+   l_cov2 = Conv1D(128, 3, activation='relu')(l_pool1)
    l_pool2 = MaxPooling1D(5)(l_cov2)
    l_cov3 = Conv1D(128, 5, activation='relu')(l_pool2)
    l_pool3 = MaxPooling1D(35)(l_cov3)  # global max pooling
