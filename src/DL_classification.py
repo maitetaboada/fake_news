@@ -58,7 +58,7 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 
 MAX_SEQUENCE_LENGTH = 1000
 MAX_NB_WORDS = 20000
-EMBEDDING_DIM = 100
+EMBEDDING_DIM = 300
 VALIDATION_SPLIT = 0.2
 
 CLASSES = 6
@@ -126,7 +126,7 @@ def sequence_processing(texts):
     return texts, word_index
 
 
-def load_embeddings( word_index , GLOVE_FILE = "../pretrained/glove.6B.100d.txt"):
+def load_embeddings( word_index , GLOVE_FILE = "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"): ## "../pretrained/glove.6B.100d.txt"):
    print("Loading embeddings...")
    embeddings_index = {}
    f = open(GLOVE_FILE)
@@ -165,7 +165,8 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
    l_pool3 = MaxPooling1D(35)(l_cov3)  # global max pooling
    l_flat = Flatten()(l_pool3)
    l_dense = Dense(128, activation='relu')(l_flat)
-   preds = Dense(CLASSES, activation='softmax')(l_dense)
+   l_dropout = Dropout(0.5)(l_dense)
+   preds = Dense(CLASSES, activation='softmax')(l_dropout)
    model = Model(sequence_input, preds)
    model.compile(loss='categorical_crossentropy',
                  optimizer='rmsprop',
@@ -318,7 +319,7 @@ model = prepare_cnn_model_1(word_index, embedding_matrix)
 model.summary()
 print("Model fitting...")
 model.fit(x_train, y_train, validation_data=(x_val, y_val),
-             nb_epoch=2, batch_size=128)
+             nb_epoch=10, batch_size=64)
 
 
 
