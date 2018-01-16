@@ -324,8 +324,8 @@ y_val = labels[-nb_validation_samples:]
 
 x_train = texts_train
 y_train = labels_train
-x_valid = texts_valid
-y_valid = labels_valid
+x_val = texts_valid
+y_val = labels_valid
 
 
 print('Number of instances from each class')
