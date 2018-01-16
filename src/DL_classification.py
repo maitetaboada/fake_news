@@ -160,14 +160,15 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
    embedded_sequences = embedding_layer(sequence_input)
    l_cov1 = Conv1D(128, 2, activation='relu')(embedded_sequences)
    l_pool1 = MaxPooling1D()(l_cov1)
-   l_cov2 = Conv1D(128, 3, activation='relu')(l_pool1)
+   l_dropout1 = Dropout(0.8)(l_pool1)
+   l_cov2 = Conv1D(128, 3, activation='relu')(l_dropout1)
    l_pool2 = MaxPooling1D()(l_cov2)
    l_cov3 = Conv1D(128, 5, activation='relu')(l_pool2)
    l_pool3 = MaxPooling1D()(l_cov3)  # global max pooling
    l_flat = Flatten()(l_pool3)
    l_dense = Dense(128, activation='relu')(l_flat)
-   l_dropout = Dropout(0.8)(l_dense)
-   preds = Dense(CLASSES, activation='softmax')(l_dropout)
+   l_dropout2 = Dropout(0.8)(l_dense)
+   preds = Dense(CLASSES, activation='softmax')(l_dropout2)
    model = Model(sequence_input, preds)
    model.compile(loss='categorical_crossentropy',
                  optimizer='rmsprop',
