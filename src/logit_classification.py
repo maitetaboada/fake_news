@@ -418,11 +418,25 @@ def load_data_liar():
     allS, allA = shuffle(allS, allA,  random_state=54321)
     ## split into train and dev
     split = 0.90
-    trainA, devA = allA[0: int(math.floor(split * len(allA)))], allA[int(math.floor(split * len(allA))) + 1:]
-    trainS, devS = allS[0: int(math.floor(split * len(allS)))], allS[int(math.floor(split * len(allS))) + 1:]
+    #trainA, devA = allA[0: int(math.floor(split * len(allA)))], allA[int(math.floor(split * len(allA))) + 1:]
+    #trainS, devS = allS[0: int(math.floor(split * len(allS)))], allS[int(math.floor(split * len(allS))) + 1:]
+    trainA = allA
+    trainS = allS
 
 
+    data_dev = pd.read_table("~/workspace/temp/liar_dataset/valid.tsv", sep='\t', header=None,
+                              names=["id", "label", "data"], usecols=[0, 1, 2])
+    # data_test = pd.read_csv("~/workspace/temp/data/varada_constructiveness/test.csv",   header=None, names=["data", "label"], usecols=[0,1])
+    data_dev = data_dev.sample(frac=1).reset_index(drop=True)
+    print('test data loaded')
+    data_dev.label = pd.Categorical(data_dev.label)
+    data_dev['target'] = data_dev['label'].cat.codes
+    print(data_dev.data[0:6])
+    print(data_dev.target[0:6])
 
+    devA = data_dev.data.tolist()
+    devS = data_dev.target.tolist()
+    devS = [(float(s) + 1) for s in devS]
 
     data_test = pd.read_table("~/workspace/temp/liar_dataset/test.tsv", sep='\t', header=None, names=["id", "label","data"], usecols=[0,1,2])
     #data_test = pd.read_csv("~/workspace/temp/data/varada_constructiveness/test.csv",   header=None, names=["data", "label"], usecols=[0,1])
