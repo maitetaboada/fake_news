@@ -62,6 +62,7 @@ EMBEDDING_DIM = 300
 VALIDATION_SPLIT = 0.2
 
 CLASSES = 6
+EPOCS = 10
 
 
 def clean_str(string):
@@ -336,14 +337,13 @@ print("Preparing the deep learning model...")
 model = prepare_cnn_model_1(word_index, embedding_matrix)
 model.summary()
 print("Model fitting...")
-model.fit(x_train, y_train, validation_data=(x_val, y_val),
-             nb_epoch=10, batch_size=64)
 
-
-
-p = model.evaluate( x_val, y_val, verbose=0)
-#print(pd.DataFrame({'Predicted': p, 'Expected': y_val}))
-print(p)
+for i in range(0,EPOCS):
+    model.fit(x_train, y_train, validation_data=(x_val, y_val),
+             nb_epoch=1, batch_size=64)
+    p = model.evaluate( x_val, y_val, verbose=0)
+    #print(pd.DataFrame({'Predicted': p, 'Expected': y_val}))
+    print(p)
 
 '''
 f1 = f1_score(y_val, p, average=None)
