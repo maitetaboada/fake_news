@@ -322,6 +322,12 @@ x_val = texts[-nb_validation_samples:]
 y_val = labels[-nb_validation_samples:]
 '''
 
+x_train = texts_train
+y_train = labels_train
+x_valid = texts_valid
+y_valid = labels_valid
+
+
 print('Number of instances from each class')
 print(y_train.sum(axis=0))
 print(y_val.sum(axis=0))
