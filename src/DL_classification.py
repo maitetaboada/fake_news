@@ -282,19 +282,29 @@ class AttLayer(Layer):
 
 
 texts_train, labels_train = load_data_liar("../data/liar_dataset/train.tsv")
+texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
 texts_test,labels_test = load_data_liar("../data/liar_dataset/test.tsv")
 
 
-texts = texts_train + texts_test
+texts = texts_train + texts_valid + texts_test
 texts, word_index = sequence_processing(texts)
 texts_train = texts[:len(labels_train)]
-texts_test = texts[len(labels_train):]
+texts_valid = texts[len(labels_train): -len(labels_test)]
+texts_test = texts[-len(labels_test) : ]
 
 labels_train = np.asarray(labels_train)
+labels_valid = np.asarray(labels_valid)
 labels_test = np.asarray(labels_test)
 
 print('Shape of data tensor:', texts_train.shape)
 print('Shape of label tensor:', labels_train.shape)
+
+print('Shape of data tensor:', texts_valid.shape)
+print('Shape of label tensor:', labels_valid.shape)
+
+print('Shape of data tensor:', texts_test.shape)
+print('Shape of label tensor:', labels_test.shape)
+
 
 indices = np.arange(texts_train.shape[0])
 np.random.shuffle(indices)
@@ -303,12 +313,14 @@ labels = labels_train[indices]
 
 embedding_matrix = load_embeddings(word_index)
 
+'''
 print("Preparing validation/training data split...")
 nb_validation_samples = int(VALIDATION_SPLIT * texts.shape[0])
 x_train = texts[:-nb_validation_samples]
 y_train = labels[:-nb_validation_samples]
 x_val = texts[-nb_validation_samples:]
 y_val = labels[-nb_validation_samples:]
+'''
 
 print('Number of instances from each class')
 print(y_train.sum(axis=0))
