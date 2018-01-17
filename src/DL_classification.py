@@ -58,7 +58,7 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 
 MAX_SEQUENCE_LENGTH = 1000
 MAX_NB_WORDS = 20000
-EMBEDDING_DIM = 300
+EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
 CLASSES = 6
@@ -127,7 +127,7 @@ def sequence_processing(texts):
     return texts, word_index
 
 
-def load_embeddings( word_index , GLOVE_FILE = "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"): ## "../pretrained/glove.6B.100d.txt"):
+def load_embeddings( word_index , GLOVE_FILE = "../pretrained/glove.6B.100d.txt"): ## "../pretrained/glove.6B.100d.txt"):
    print("Loading embeddings...")
    embeddings_index = {}
    f = open(GLOVE_FILE)
@@ -288,58 +288,22 @@ from tflearn.layers.recurrent import bidirectional_rnn, BasicLSTMCell
 from tflearn.layers.estimator import regression
 
 
-def prepare_rnn_model_tf():
-    # Network building
+
+
+
+def prepare_rnn_model_tf(word_index, embedding_matrix):
     # tf.reset_default_graph()
-
-    net = input_data(shape=[None, 200])
-    # print('net:', net)
-
-    net = embedding(net, input_dim=51887, output_dim=128, trainable=False, name="EmbeddingLayer")
-
-    # net = embedding(net, input_dim=20000, output_dim=128, trainable=False, weights_init=W,
-    #                        name="EmbeddingLayer")
-    # net = tflearn.embedding(net, input_dim=20000, output_dim=128, trainable=False, weights_init = W, name="EmbeddingLayer")
-    net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
+    net = input_data(shape=[None, MAX_SEQUENCE_LENGTH])
+    net = embedding(net, input_dim=len(word_index)+1, output_dim=EMBEDDING_DIM, trainable=False, name="EmbeddingLayer")
+    net = bidirectional_rnn(net, BasicLSTMCell(EMBEDDING_DIM), BasicLSTMCell(EMBEDDING_DIM))
     net = dropout(net, 0.5)
-    net = fully_connected(net, 2, activation='softmax')
-
-    '''
-    with tf.name_scope('CustomMonitor'):
-        predictions = tf.cast(tf.greater(net, 0), tf.int64)
-        test_var = tf.reduce_sum(tf.cast(net, tf.float32), name="test_var")
-        #precision = tf.metrics.precision(tf.cast(net, tf.float32), name="precision")
-        #recall = tf.metrics.recall(tf.cast(net, tf.float32), name="precision")
-        test_const = tf.constant(32.0, name="custom_constant")
-    '''
-    net = regression(net, optimizer='adam', loss='categorical_crossentropy',
-                     # validation_monitors = [valid_mon]
-                     # validation_monitors=[test_var, test_const]
-                     # validation_monitors=vmset
-                     )
-
-    # Training
+    net = fully_connected(net, CLASSES, activation='softmax')
+    net = regression(net, optimizer='adam', loss='categorical_crossentropy')
     model = tflearn.DNN(net, clip_gradients=0., tensorboard_verbose=0)
-
-    gf = smart_open.smart_open("../pretrained/Gloved-GoogleNews-vectors-negative300.txt", "r")
-    glove_embeddings = pickle.load(gf)
-    shortened_embeddings = np.zeros((51887, EMBEDDING_DIM))
-    index = 0
-    for item in glove_embeddings:
-        shortened_embeddings[index, :] = item[:EMBEDDING_DIM]
-        index += 1
-
-    # W = tf.constant_initializer(glove_embeddings)
-
     # Retrieve embedding layer weights (only a single weight matrix, so index is 0)
     embeddingWeights = tflearn.get_layer_variables_by_name('EmbeddingLayer')[0]
     print('default embeddings: ', embeddingWeights[0])
-
-    # print('embeddingWeights', embeddingWeights)
-    # sys.exit(0)
-    # Assign your own weights (for example, a numpy array [input_dim, output_dim])
-    model.set_weights(embeddingWeights, shortened_embeddings)
-
+    model.set_weights(embeddingWeights, embedding_matrix )
     return model
 
 
@@ -375,8 +339,9 @@ np.random.shuffle(indices)
 texts = texts_train[indices]
 labels = labels_train[indices]
 
-embedding_matrix = load_embeddings(word_index)
 
+
+embedding_matrix = load_embeddings(word_index)
 '''
 print("Preparing validation/training data split...")
 nb_validation_samples = int(VALIDATION_SPLIT * texts.shape[0])
@@ -396,7 +361,7 @@ print(y_train.sum(axis=0))
 print(y_val.sum(axis=0))
 
 print("Preparing the deep learning model...")
-model = prepare_rnn_model_tf()
+model = prepare_rnn_model_tf(word_index, embedding_matrix)
 # model.summary()
 print("Model fitting...")
 
@@ -404,7 +369,6 @@ for i in range(0, EPOCS):
     # model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=64)
     model.fit(x_train, y_train, validation_set=0.1, n_epoch=10, show_metric=True, batch_size=64)
     p = model.evaluate(x_val, y_val)
-    # print(pd.DataFrame({'Predicted': p, 'Expected': y_val}))
     print(p)
 
 '''
