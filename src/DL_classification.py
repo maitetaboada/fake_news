@@ -45,7 +45,7 @@ import os
 
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
-from keras.utils.np_utils import to_categorical
+from keras.utils.np_utils import to_categorical as to_cat
 from keras.layers import Dense, Input, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout, LSTM, GRU, Bidirectional
 from keras.models import Model
@@ -85,7 +85,7 @@ def load_data_imdb():
         text = BeautifulSoup(data_train.review[idx])
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.sentiment[idx])
-    labels = to_categorical(np.asarray(labels))
+    labels = to_cat(np.asarray(labels))
 
     return texts, labels
 
@@ -108,7 +108,7 @@ def load_data_liar(file_name= "../data/liar_dataset/train.tsv"):
         'pants-fire': 5
     }
     labels = [transdict[i] for i in labels]
-    labels = to_categorical(np.asarray(labels))
+    labels = to_cat(np.asarray(labels))
     print(texts[0:6])
     print(labels[0:6])
     return texts, labels
@@ -278,21 +278,84 @@ class AttLayer(Layer):
         return (input_shape[0], input_shape[-1])
 
 
+###### Modeling using tensorflow directly with tflearn methods
+import tflearn
+import pickle, smart_open
+from tflearn.data_utils import to_categorical, pad_sequences
+from tflearn.layers.core import input_data, dropout, fully_connected
+from tflearn.layers.embedding_ops import embedding
+from tflearn.layers.recurrent import bidirectional_rnn, BasicLSTMCell
+from tflearn.layers.estimator import regression
 
-#texts_train, labels_train = load_data_liar("~/workspace/temp/liar_dataset/train.tsv")
-#texts_test,labels_test = load_data_liar("~/workspace/temp/liar_dataset/test.tsv")
+
+def prepare_rnn_model_tf():
+    # Network building
+    # tf.reset_default_graph()
+
+    net = input_data(shape=[None, 200])
+    # print('net:', net)
+
+    net = embedding(net, input_dim=51887, output_dim=128, trainable=False, name="EmbeddingLayer")
+
+    # net = embedding(net, input_dim=20000, output_dim=128, trainable=False, weights_init=W,
+    #                        name="EmbeddingLayer")
+    # net = tflearn.embedding(net, input_dim=20000, output_dim=128, trainable=False, weights_init = W, name="EmbeddingLayer")
+    net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
+    net = dropout(net, 0.5)
+    net = fully_connected(net, 2, activation='softmax')
+
+    '''
+    with tf.name_scope('CustomMonitor'):
+        predictions = tf.cast(tf.greater(net, 0), tf.int64)
+        test_var = tf.reduce_sum(tf.cast(net, tf.float32), name="test_var")
+        #precision = tf.metrics.precision(tf.cast(net, tf.float32), name="precision")
+        #recall = tf.metrics.recall(tf.cast(net, tf.float32), name="precision")
+        test_const = tf.constant(32.0, name="custom_constant")
+    '''
+    net = regression(net, optimizer='adam', loss='categorical_crossentropy',
+                     # validation_monitors = [valid_mon]
+                     # validation_monitors=[test_var, test_const]
+                     # validation_monitors=vmset
+                     )
+
+    # Training
+    model = tflearn.DNN(net, clip_gradients=0., tensorboard_verbose=0)
+
+    gf = smart_open.smart_open("../pretrained/Gloved-GoogleNews-vectors-negative300.txt", "r")
+    glove_embeddings = pickle.load(gf)
+    shortened_embeddings = np.zeros((51887, EMBEDDING_DIM))
+    index = 0
+    for item in glove_embeddings:
+        shortened_embeddings[index, :] = item[:EMBEDDING_DIM]
+        index += 1
+
+    # W = tf.constant_initializer(glove_embeddings)
+
+    # Retrieve embedding layer weights (only a single weight matrix, so index is 0)
+    embeddingWeights = tflearn.get_layer_variables_by_name('EmbeddingLayer')[0]
+    print('default embeddings: ', embeddingWeights[0])
+
+    # print('embeddingWeights', embeddingWeights)
+    # sys.exit(0)
+    # Assign your own weights (for example, a numpy array [input_dim, output_dim])
+    model.set_weights(embeddingWeights, shortened_embeddings)
+
+    return model
+
+
+# texts_train, labels_train = load_data_liar("~/workspace/temp/liar_dataset/train.tsv")
+# texts_test,labels_test = load_data_liar("~/workspace/temp/liar_dataset/test.tsv")
 
 
 texts_train, labels_train = load_data_liar("../data/liar_dataset/train.tsv")
 texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
-texts_test,labels_test = load_data_liar("../data/liar_dataset/test.tsv")
-
+texts_test, labels_test = load_data_liar("../data/liar_dataset/test.tsv")
 
 texts = texts_train + texts_valid + texts_test
 texts, word_index = sequence_processing(texts)
 texts_train = texts[:len(labels_train)]
 texts_valid = texts[len(labels_train): -len(labels_test)]
-texts_test = texts[-len(labels_test) : ]
+texts_test = texts[-len(labels_test):]
 
 labels_train = np.asarray(labels_train)
 labels_valid = np.asarray(labels_valid)
@@ -306,7 +369,6 @@ print('Shape of label tensor:', labels_valid.shape)
 
 print('Shape of data tensor:', texts_test.shape)
 print('Shape of label tensor:', labels_test.shape)
-
 
 indices = np.arange(texts_train.shape[0])
 np.random.shuffle(indices)
@@ -329,21 +391,20 @@ y_train = labels_train
 x_val = texts_valid
 y_val = labels_valid
 
-
 print('Number of instances from each class')
 print(y_train.sum(axis=0))
 print(y_val.sum(axis=0))
 
 print("Preparing the deep learning model...")
-model = prepare_cnn_model_1(word_index, embedding_matrix)
-model.summary()
+model = prepare_rnn_model_tf()
+# model.summary()
 print("Model fitting...")
 
-for i in range(0,EPOCS):
-    model.fit(x_train, y_train, validation_data=(x_val, y_val),
-             nb_epoch=1, batch_size=64)
-    p = model.evaluate( x_val, y_val, verbose=0)
-    #print(pd.DataFrame({'Predicted': p, 'Expected': y_val}))
+for i in range(0, EPOCS):
+    # model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=64)
+    model.fit(x_train, y_train, validation_set=0.1, n_epoch=10, show_metric=True, batch_size=64)
+    p = model.evaluate(x_val, y_val)
+    # print(pd.DataFrame({'Predicted': p, 'Expected': y_val}))
     print(p)
 
 '''
@@ -368,26 +429,26 @@ print("********************************")
        if embedding_vector is not None:
            # words not found in embedding index will be all-zeros.
            embedding_matrix[i] = embedding_vector
-   
+
    embedding_layer = Embedding(len(word_index) + 1,
                                EMBEDDING_DIM,
                                weights=[embedding_matrix],
                                input_length=MAX_SEQUENCE_LENGTH,
                                trainable=True)
-   
-   
+
+
    # applying a more complex convolutional approach
    convs = []
    filter_sizes = [3, 4, 5]
-   
+
    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
    embedded_sequences = embedding_layer(sequence_input)
-   
+
    for fsz in filter_sizes:
        l_conv = Conv1D(nb_filter=128, filter_length=fsz, activation='relu')(embedded_sequences)
        l_pool = MaxPooling1D(5)(l_conv)
        convs.append(l_pool)
-   
+
    l_merge = Merge(mode='concat', concat_axis=1)(convs)
    l_cov1 = Conv1D(128, 5, activation='relu')(l_merge)
    l_pool1 = MaxPooling1D(5)(l_cov1)
@@ -396,12 +457,12 @@ print("********************************")
    l_flat = Flatten()(l_pool2)
    l_dense = Dense(128, activation='relu')(l_flat)
    preds = Dense(2, activation='softmax')(l_dense)
-   
+
    model = Model(sequence_input, preds)
    model.compile(loss='categorical_crossentropy',
                  optimizer='rmsprop',
                  metrics=['acc'])
-   
+
    print("model fitting - more complex convolutional neural network")
    model.summary()
    model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=20, batch_size=50)
