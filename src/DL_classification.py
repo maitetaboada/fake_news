@@ -63,7 +63,7 @@ EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
 CLASSES = 4
-EPOCS = 10
+EPOCS = 20
 USEKERAS = True
 
 
@@ -422,8 +422,8 @@ for i in range(0, EPOCS):
     else:
         model.fit(x_train, y_train, validation_set=0.1, n_epoch=1, show_metric=True, batch_size=64)
     prev_loss = current_loss
-    l = model.evaluate(x_val, y_val)[0]
-    print("Loss on validation set: " + str(l))
+    current_loss = round(model.evaluate(x_val, y_val)[0],1)
+    print("Loss on validation set: " + str(current_loss))
     if( current_loss > prev_loss):
         print("SHOULD STOP HERE!")
     p = model.evaluate(x_test1, y_test1)
