@@ -63,7 +63,7 @@ EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
 CLASSES = 4
-EPOCS = 20
+EPOCS = 30
 USEKERAS = True
 
 
@@ -126,7 +126,7 @@ def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.label[idx])
     transdict = {
-        'no factual content': 1,
+        'no factual content': 0,
         'mostly true': 1,
         'mixture of true and false': 2,
         'mostly false': 3
@@ -408,6 +408,7 @@ print("Model fitting...")
 current_loss = 10000
 
 for i in range(0, EPOCS):
+    print("EPOC: " + str(i))
     x_train, y_train = shuffle(x_train, y_train)
     if( USEKERAS ):
         model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=64)
