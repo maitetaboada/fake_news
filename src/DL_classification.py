@@ -53,6 +53,7 @@ from keras.engine.topology import Layer, InputSpec
 from keras import initializers
 
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.utils import shuffle
 
 
 
@@ -61,8 +62,9 @@ MAX_NB_WORDS = 20000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
-CLASSES = 6
+CLASSES = 4
 EPOCS = 10
+USEKERAS = True
 
 
 def clean_str(string):
@@ -89,7 +91,7 @@ def load_data_imdb():
 
     return texts, labels
 
-def load_data_liar(file_name= "../data/liar_dataset/train.tsv"):
+def load_data_liar(file_name):
     print("Loading data...")
     data_train = pd.read_table(file_name, sep='\t', header=None, names=["id", "label","data"], usecols=[0,1,2])
     print(data_train.shape)
@@ -100,18 +102,41 @@ def load_data_liar(file_name= "../data/liar_dataset/train.tsv"):
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.label[idx])
     transdict = {
-        'true': 0,
+        'true': 1,
         'mostly-true': 1,
         'half-true': 2,
-        'barely-true': 3,
-        'false': 4,
-        'pants-fire': 5
+        'barely-true': 2,
+        'false': 3,
+        'pants-fire': 3
     }
     labels = [transdict[i] for i in labels]
     labels = to_cat(np.asarray(labels))
     print(texts[0:6])
     print(labels[0:6])
     return texts, labels
+
+def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
+    print("Loading data...")
+    data_train = pd.read_table(file_name, sep='\t', header= None, names=["ID",	"URL",	"label",	"data",	"error"], usecols=[2,3])
+    print(data_train.shape)
+    texts = []
+    labels = []
+    for idx in range(data_train.data.shape[0]):
+        text = BeautifulSoup(data_train.data[idx])
+        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
+        labels.append(data_train.label[idx])
+    transdict = {
+        'no factual content': 1,
+        'mostly true': 1,
+        'mixture of true and false': 2,
+        'mostly false': 3
+    }
+    labels = [transdict[i] for i in labels]
+    labels = to_cat(np.asarray(labels))
+    print(texts[0:6])
+    print(labels[0:6])
+    return texts, labels
+
 
 def sequence_processing(texts):
     """
@@ -280,11 +305,13 @@ class AttLayer(Layer):
 
 ###### Modeling using tensorflow directly with tflearn methods
 import tflearn
-import pickle, smart_open
-from tflearn.data_utils import to_categorical, pad_sequences
+#import tensorflow.nn.static_bidirectional_rnn as bidirectional_rnn
+#import tensorflow.contrib.rnn.static_bidirectional_rnn as bidirectional_rnn
+#from tensorflow.contrib.rnn import static_bidirectional_rnn as bidirectional_rnn
+from tflearn.data_utils import pad_sequences
 from tflearn.layers.core import input_data, dropout, fully_connected
 from tflearn.layers.embedding_ops import embedding
-from tflearn.layers.recurrent import bidirectional_rnn, BasicLSTMCell
+from tflearn.layers.recurrent import BasicLSTMCell ,bidirectional_rnn
 from tflearn.layers.estimator import regression
 
 
@@ -311,19 +338,29 @@ def prepare_rnn_model_tf(word_index, embedding_matrix):
 # texts_test,labels_test = load_data_liar("~/workspace/temp/liar_dataset/test.tsv")
 
 
+## USE LIAR DATA FOR TRAINING A MODEL AND TEST DATA BOTH FROM LIAR AND BUZZFEED
 texts_train, labels_train = load_data_liar("../data/liar_dataset/train.tsv")
 texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
-texts_test, labels_test = load_data_liar("../data/liar_dataset/test.tsv")
+texts_test1, labels_test1 = load_data_liar("../data/liar_dataset/test.tsv")
 
-texts = texts_train + texts_valid + texts_test
+texts_test2, labels_test2 = load_data_buzzfeed()
+
+#texts, labels = shuffle(texts, labels,random_state=123)
+#labels_train = labels[:len(labels)/2]
+#labels_valid = labels[len(labels)/2: -len(labels)/4]
+#labels_test = labels[-len(labels)/4:]
+
+texts = texts_train + texts_valid + texts_test1 + texts_test2
 texts, word_index = sequence_processing(texts)
 texts_train = texts[:len(labels_train)]
-texts_valid = texts[len(labels_train): -len(labels_test)]
-texts_test = texts[-len(labels_test):]
+texts_valid = texts[len(labels_train): len(labels_train) + len(labels_valid)]
+texts_test1 = texts[len(labels_train) + len(labels_valid): len(labels_train) + len(labels_valid) + len(labels_test1)]
+texts_test2 = texts[len(labels_train) + len(labels_valid) + len(labels_test1):]
 
 labels_train = np.asarray(labels_train)
 labels_valid = np.asarray(labels_valid)
-labels_test = np.asarray(labels_test)
+labels_test1 = np.asarray(labels_test1)
+labels_test2 = np.asarray(labels_test2)
 
 print('Shape of data tensor:', texts_train.shape)
 print('Shape of label tensor:', labels_train.shape)
@@ -331,17 +368,16 @@ print('Shape of label tensor:', labels_train.shape)
 print('Shape of data tensor:', texts_valid.shape)
 print('Shape of label tensor:', labels_valid.shape)
 
-print('Shape of data tensor:', texts_test.shape)
-print('Shape of label tensor:', labels_test.shape)
+print('Shape of data tensor:', texts_test1.shape)
+print('Shape of label tensor:', labels_test1.shape)
 
-indices = np.arange(texts_train.shape[0])
-np.random.shuffle(indices)
-texts = texts_train[indices]
-labels = labels_train[indices]
+print('Shape of data tensor:', texts_test2.shape)
+print('Shape of label tensor:', labels_test2.shape)
 
 
 
 embedding_matrix = load_embeddings(word_index)
+
 '''
 print("Preparing validation/training data split...")
 nb_validation_samples = int(VALIDATION_SPLIT * texts.shape[0])
@@ -355,20 +391,36 @@ x_train = texts_train
 y_train = labels_train
 x_val = texts_valid
 y_val = labels_valid
+x_test1 = texts_test1
+y_test1 = labels_test1
+x_test2 = texts_test2
+y_test2 = labels_test2
+
 
 print('Number of instances from each class')
 print(y_train.sum(axis=0))
 print(y_val.sum(axis=0))
 
+print('Baseline accuracies:')
+print (y_train.max())
+print (y_val.max())
+print (y_test1.max())
+print (y_test2.max())
+
+
 print("Preparing the deep learning model...")
-model = prepare_rnn_model_tf(word_index, embedding_matrix)
+model = prepare_cnn_model_1(word_index, embedding_matrix)
 # model.summary()
 print("Model fitting...")
 
 for i in range(0, EPOCS):
-    # model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=64)
-    model.fit(x_train, y_train, validation_set=0.1, n_epoch=10, show_metric=True, batch_size=64)
-    p = model.evaluate(x_val, y_val)
+    x_train, y_train = shuffle(x_train, y_train)
+    if( USEKERAS ):
+        model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=64)
+    else:
+        model.fit(x_train, y_train, validation_set=0.1, n_epoch=10, show_metric=True, batch_size=64)
+    p = model.evaluate(x_test1, y_test1)
+    p = model.evaluate(x_test2, y_test2)
     print(p)
 
 '''
