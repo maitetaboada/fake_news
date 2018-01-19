@@ -64,7 +64,7 @@ VALIDATION_SPLIT = 0.2
 
 CLASSES = 4
 EPOCS = 30
-USEKERAS = True
+USEKERAS = False#True
 
 
 def clean_str(string):
