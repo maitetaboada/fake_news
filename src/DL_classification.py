@@ -408,7 +408,7 @@ print("Model fitting...")
 current_loss = 10000
 
 for i in range(0, EPOCS):
-    print("EPOC: " + str(i))
+    print("\n*** EPOC: " + str(i) )
     x_train, y_train = shuffle(x_train, y_train)
     if( USEKERAS ):
         model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=64)
