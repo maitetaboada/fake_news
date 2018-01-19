@@ -345,10 +345,10 @@ texts_test1, labels_test1 = load_data_liar("../data/liar_dataset/test.tsv")
 
 texts_test2, labels_test2 = load_data_buzzfeed()
 
-#texts, labels = shuffle(texts, labels,random_state=123)
-#labels_train = labels[:len(labels)/2]
-#labels_valid = labels[len(labels)/2: -len(labels)/4]
-#labels_test = labels[-len(labels)/4:]
+## FOR LATER USE:
+#texts, labels = load_data_buzzfeed()
+#texts_valid2, labels_valid2 = texts[:len(labels)/2], labels[:len(labels)/2]
+#texts_test2, labels_test2 = texts[len(labels)/2:], labels[len(labels)/2:]
 
 texts = texts_train + texts_valid + texts_test1 + texts_test2
 texts, word_index = sequence_processing(texts)
@@ -378,14 +378,6 @@ print('Shape of label tensor:', labels_test2.shape)
 
 embedding_matrix = load_embeddings(word_index)
 
-'''
-print("Preparing validation/training data split...")
-nb_validation_samples = int(VALIDATION_SPLIT * texts.shape[0])
-x_train = texts[:-nb_validation_samples]
-y_train = labels[:-nb_validation_samples]
-x_val = texts[-nb_validation_samples:]
-y_val = labels[-nb_validation_samples:]
-'''
 
 x_train = texts_train
 y_train = labels_train
@@ -402,10 +394,10 @@ print(y_train.sum(axis=0))
 print(y_val.sum(axis=0))
 
 print('Baseline accuracies:')
-print (y_train.sum()/1.0*len(y_train))
-print (y_val.sum()/1.0*len(y_val))
-print (y_test1.sum()/1.0*len(y_test1))
-print (y_test2.sum()/1.0*len(y_test2))
+print (y_train.sum(axis=0)/(1.0*len(y_train)))
+print (y_val.sum(axis=0)/(1.0*len(y_val)))
+print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
+print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
 
 
 print("Preparing the deep learning model...")
@@ -422,14 +414,27 @@ for i in range(0, EPOCS):
     else:
         model.fit(x_train, y_train, validation_set=0.1, n_epoch=1, show_metric=True, batch_size=64)
     prev_loss = current_loss
-    current_loss = round(model.evaluate(x_val, y_val)[0],1)
+    current_loss = round(model.evaluate(x_val, y_val)[0],2)
     print("Loss on validation set: " + str(current_loss))
     if( current_loss > prev_loss):
-        print("SHOULD STOP HERE!")
+        print("\n\n*** SHOULD STOP HERE! ***\n\n")
     p = model.evaluate(x_test1, y_test1)
     print("Accuracy on liar test: " + str(p))
     p = model.evaluate(x_test2, y_test2)
     print("Accuracy on buzzfeed test: " + str(p))
+
+
+
+### SCRATCH CODE:
+
+'''
+print("Preparing validation/training data split...")
+nb_validation_samples = int(VALIDATION_SPLIT * texts.shape[0])
+x_train = texts[:-nb_validation_samples]
+y_train = labels[:-nb_validation_samples]
+x_val = texts[-nb_validation_samples:]
+y_val = labels[-nb_validation_samples:]
+'''
 
 '''
 f1 = f1_score(y_val, p, average=None)
