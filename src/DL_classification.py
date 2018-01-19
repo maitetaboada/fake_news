@@ -64,7 +64,7 @@ VALIDATION_SPLIT = 0.2
 
 CLASSES = 4
 EPOCS = 30
-USEKERAS = False#True
+USEKERAS = True
 
 
 def clean_str(string):
@@ -401,7 +401,7 @@ print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
 
 
 print("Preparing the deep learning model...")
-model = prepare_rnn_model_tf(word_index, embedding_matrix)
+model = prepare_rnn_model_1(word_index, embedding_matrix)
 # model.summary()
 print("Model fitting...")
 
