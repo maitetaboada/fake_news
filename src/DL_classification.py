@@ -402,10 +402,10 @@ print(y_train.sum(axis=0))
 print(y_val.sum(axis=0))
 
 print('Baseline accuracies:')
-print (y_train.max())
-print (y_val.max())
-print (y_test1.max())
-print (y_test2.max())
+print (y_train.sum()/1.0*len(y_train))
+print (y_val.sum()/1.0*len(y_val))
+print (y_test1.sum()/1.0*len(y_test1))
+print (y_test2.sum()/1.0*len(y_test2))
 
 
 print("Preparing the deep learning model...")
@@ -413,12 +413,19 @@ model = prepare_cnn_model_1(word_index, embedding_matrix)
 # model.summary()
 print("Model fitting...")
 
+current_loss = 10000
+
 for i in range(0, EPOCS):
     x_train, y_train = shuffle(x_train, y_train)
     if( USEKERAS ):
-        model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=10, batch_size=64)
+        model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=64)
     else:
-        model.fit(x_train, y_train, validation_set=0.1, n_epoch=10, show_metric=True, batch_size=64)
+        model.fit(x_train, y_train, validation_set=0.1, n_epoch=1, show_metric=True, batch_size=64)
+    prev_loss = current_loss
+    l = model.evaluate(x_val, y_val)[0]
+    print("Loss on validation set: " + str(l))
+    if( current_loss > prev_loss):
+        print("SHOULD STOP HERE!")
     p = model.evaluate(x_test1, y_test1)
     print("Accuracy on liar test: " + str(p))
     p = model.evaluate(x_test2, y_test2)
