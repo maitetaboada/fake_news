@@ -416,12 +416,13 @@ print("Model fitting...")
 for i in range(0, EPOCS):
     x_train, y_train = shuffle(x_train, y_train)
     if( USEKERAS ):
-        model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=64)
+        model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=10, batch_size=64)
     else:
         model.fit(x_train, y_train, validation_set=0.1, n_epoch=10, show_metric=True, batch_size=64)
     p = model.evaluate(x_test1, y_test1)
+    print("Accuracy on liar test: " + str(p))
     p = model.evaluate(x_test2, y_test2)
-    print(p)
+    print("Accuracy on buzzfeed test: " + str(p))
 
 '''
 f1 = f1_score(y_val, p, average=None)
