@@ -401,7 +401,7 @@ print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
 
 
 print("Preparing the deep learning model...")
-model = prepare_rnn_model_1(word_index, embedding_matrix)
+model = prepare_rnn_model_tf(word_index, embedding_matrix)
 # model.summary()
 print("Model fitting...")
 
