@@ -62,8 +62,8 @@ MAX_NB_WORDS = 20000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
-CLASSES = 4
-EPOCS = 30
+CLASSES = 2
+EPOCS = 1
 USEKERAS = True
 
 
@@ -102,12 +102,12 @@ def load_data_liar(file_name):
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.label[idx])
     transdict = {
-        'true': 1,
-        'mostly-true': 1,
-        'half-true': 2,
-        'barely-true': 2,
-        'false': 3,
-        'pants-fire': 3
+        'true': 0,
+        'mostly-true': 0,
+        'half-true': 0,
+        'barely-true': 1,
+        'false': 1,
+        'pants-fire': 1
     }
     labels = [transdict[i] for i in labels]
     labels = to_cat(np.asarray(labels))
@@ -137,6 +137,28 @@ def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
     print(labels[0:6])
     return texts, labels
 
+def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/combined-v02.txt"):
+    print("Loading data...")
+    data_train = pd.read_table(file_name, sep='\t', header= None, names=["ID",	"URL",	"label", "data", "source"], usecols=[2,3])
+    print(data_train.shape)
+    texts = []
+    labels = []
+    for idx in range(data_train.data.shape[0]):
+        text = BeautifulSoup(data_train.data[idx])
+        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
+        labels.append(data_train.label[idx])
+    transdict = {
+        'ftrue': 0,
+        'mtrue': 0,
+        'mixture': 1,
+        'mfalse':1,
+        'ffalse': 1
+    }
+    labels = [transdict[i] for i in labels]
+    labels = to_cat(np.asarray(labels))
+    print(texts[0:6])
+    print(labels[0:6])
+    return texts, labels
 
 def sequence_processing(texts):
     """
@@ -339,11 +361,16 @@ def prepare_rnn_model_tf(word_index, embedding_matrix):
 
 
 ## USE LIAR DATA FOR TRAINING A MODEL AND TEST DATA BOTH FROM LIAR AND BUZZFEED
-texts_train, labels_train = load_data_liar("../data/liar_dataset/train.tsv")
+#texts_train, labels_train = load_data_liar("../data/liar_dataset/train.tsv")
+#texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
+#texts_test1, labels_test1 = load_data_liar("../data/liar_dataset/test.tsv")
+#texts_test2, labels_test2 = load_data_combined()
+
+
+texts_train, labels_train = load_data_combined() #load_data_liar("../data/liar_dataset/train.tsv")#load_data_combined()
 texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
 texts_test1, labels_test1 = load_data_liar("../data/liar_dataset/test.tsv")
-
-texts_test2, labels_test2 = load_data_buzzfeed()
+texts_test2, labels_test2 = load_data_combined()
 
 ## FOR LATER USE:
 #texts, labels = load_data_buzzfeed()
@@ -394,14 +421,14 @@ print(y_train.sum(axis=0))
 print(y_val.sum(axis=0))
 
 print('Baseline accuracies:')
-print (y_train.sum(axis=0)/(1.0*len(y_train)))
-print (y_val.sum(axis=0)/(1.0*len(y_val)))
-print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
-print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
+print (y_train.sum(axis=0))#/(1.0*len(y_train)))
+print (y_val.sum(axis=0))#/(1.0*len(y_val)))
+print (y_test1.sum(axis=0))#/(1.0*len(y_test1)))
+print (y_test2.sum(axis=0))#/(1.0*len(y_test2)))
 
 
 print("Preparing the deep learning model...")
-model = prepare_rnn_model_1(word_index, embedding_matrix)
+model = prepare_cnn_model_1(word_index, embedding_matrix)
 # model.summary()
 print("Model fitting...")
 
