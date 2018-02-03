@@ -33,11 +33,6 @@ from sklearn.neighbors import NearestCentroid
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.utils.extmath import density
 from sklearn import metrics
-from bs4 import BeautifulSoup
-import re
-import pandas as pd
-from keras.utils.np_utils import to_categorical as to_cat
-
 
 
 # Display progress logs on stdout
@@ -90,146 +85,114 @@ op.print_help()
 print()
 
 
+'''
+# #############################################################################
+# Load some categories from the training set
+if opts.all_categories:
+    categories = None
 
 
-def clean_str(string):
-    """
-    Tokenization/string cleaning for dataset
-    Every dataset is lower cased except
-    """
-    string = re.sub(r"\\", "", string.decode("utf-8"))
-    string = re.sub(r"\'", "", string.decode("utf-8"))
-    string = re.sub(r"\"", "", string.decode("utf-8"))
-    return string.strip().lower()
+else:
+    categories = [
+        'alt.atheism',
+        'talk.religion.misc',
+        'comp.graphics',
+        'sci.space',
+    ]
+
+if opts.filtered:
+    remove = ('headers', 'footers', 'quotes')
+else:
+    remove = ()
+
+print("Loading 20 newsgroups dataset for categories:")
+print(categories if categories else "all")
+
+data_train = fetch_20newsgroups(subset='train', categories=categories,
+                                shuffle=True, random_state=42,
+                                remove=remove)
+
+data_test = fetch_20newsgroups(subset='test', categories=categories,
+                               shuffle=True, random_state=42,
+                               remove=remove)
+                               
+                               
+def load_data_tsv(data_file):
+    data = []
+    with open(data_file) as csvfile:
+        reader = csv.DictReader(csvfile, delimiter='\t')
+        print(reader.)
+        for row in reader:
+            data.append(row)
+            #print(row['ID'], row['Gender'])
+
+'''
+import pandas as pd
 
 
-def load_data_liar(file_name):
-    print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header=None, names=["id", "label","data"], usecols=[0,1,2])
-    print(data_train.shape)
-    texts = []
-    labels = []
-    for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(data_train.label[idx])
-    transdict = {
-        'true': 1,
-        'mostly-true': 2,
-        'half-true': 3,
-        'barely-true': 4,
-        'false': 5,
-        'pants-fire': 6
-    }
-    labels = [transdict[i] for i in labels]
-    #labels = to_cat(np.asarray(labels))  #uncomment this for vectorized one-hot representation
-    print(texts[0:6])
-    print(labels[0:6])
-    return texts, labels
+data_train = pd.read_table("../data/liar_dataset/train.tsv", sep='\t', header=None, names=["id", "label","data"], usecols=[0,1,2])
+#data_train = pd.read_csv("~/workspace/temp/data/varada_constructiveness/train.csv",  header=None, names=["data", "label"], usecols=[0,1])
+data_train = data_train.sample(frac=1).reset_index(drop=True)
+print('Train data loaded')
+data_train.label = pd.Categorical(data_train.label)
+data_train['target'] = data_train['label'].cat.codes
+print( data_train.data[0:6] )
+print( data_train.target[0:6] )
+# order of labels in `target_names` can be different from `categories`
+target_names = data_train['label'].values
+categories = target_names
+
+data_test = pd.read_table("../data/liar_dataset/test.tsv", sep='\t', header=None, names=["id", "label","data"], usecols=[0,1,2])
+#data_test = pd.read_csv("~/workspace/temp/data/varada_constructiveness/test.csv",   header=None, names=["data", "label"], usecols=[0,1])
+data_test = data_test.sample(frac=1).reset_index(drop=True)
+print('test data loaded')
+data_test.label = pd.Categorical(data_test.label)
+data_test['target'] = data_test['label'].cat.codes
+print( data_test.data[0:6] )
+print( data_test.target[0:6] )
 
 
-def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/combined-v03.txt"):
-    print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header= None, names=["ID",	"URL",	"label", "data", "source"], usecols=[2,3])
-    print(data_train.shape)
-    texts = []
-    labels = []
-    for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(data_train.label[idx])
-    transdict = {
-        'ftrue': 1,
-        'mtrue': 2,
-        'mixture': 3 ,
-        'mfalse':4,
-        'ffalse': 5,
-        'pantsfire': 6,
-        'nofact': 7
-    }
-    labels = [transdict[i] for i in labels]
-    #labels = to_cat(np.asarray(labels))
-    print(labels[0:6])
-    return texts, labels
 
 
-def load_data_rashkin(file_name = "../data/rashkin/train.txt"):
-    print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t',  header= None, names=["label", "data"], usecols=[0,1], dtype = {"label": np.str, "data": np.str})
-    print(data_train.shape)
-    print(data_train[0:6])
-    texts = []
-    labels = []
-    for i in range(data_train.data.shape[0]):
-        print(i, type(data_train.data[i]))
-    for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(str(data_train.label[idx]))
-    transdict = {
-        '1': 3, #Satire
-        '2': 4, #Hoax
-        '3': 2, #Propaganda
-        '4': 1  #Truested
-    }
-    labels = [transdict[i] for i in labels]
-    #labels = to_cat(np.asarray(labels))
-    print(texts[0:6])
-    print(labels[0:6])
-    return texts, labels
+def size_mb(docs):
+    #return sum(len(s.encode('utf-8')) for s in docs) / 1e6
+    return sum(len(s) for s in docs) / 1e6
 
-def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
-    print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header= None, names=["ID",	"URL",	"label",	"data",	"error"], usecols=[2,3])
-    print(data_train.shape)
-    texts = []
-    labels = []
-    for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(data_train.label[idx])
-    transdict = {
-        'no factual content': 0,
-        'mostly true': 1,
-        'mixture of true and false': 2,
-        'mostly false': 3
-    }
-    labels = [transdict[i] for i in labels]
-    #labels = to_cat(np.asarray(labels))
-    print(texts[0:6])
-    print(labels[0:6])
-    return texts, labels
+data_train_size_mb = size_mb(data_train.data)
+data_test_size_mb = size_mb(data_test.data)
 
+print("%d documents - %0.3fMB (training set)" % (
+    len(data_train.data), data_train_size_mb))
+print("%d documents - %0.3fMB (test set)" % (
+    len(data_test.data), data_test_size_mb))
+print("%d categories" % len(categories))
+print()
 
-## USE LIAR DATA FOR TRAINING A MODEL AND TEST DATA BOTH FROM LIAR AND BUZZFEED
-texts_train, labels_train = load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/train.txt")#load_data_liar("../data/liar_dataset/train.tsv")##load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/train.txt")#load_data_combined()
-#texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
-#texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
-texts_test1, labels_test1 = load_data_combined("../data/buzzfeed-debunk-combined/combined-v04.txt")#load_data_liar("../data/liar_dataset/test.tsv")#load_data_combined("../data/buzzfeed-debunk-combined/combined-v04.txt")#load_data_buzzfeed()#load_data_combined()
-
-#texts_test2, labels_test2 = load_data_combined()
-
-y_train = labels_train
-y_test = labels_test1
-target_names, counts = np.unique(y_train, return_counts= True)
-print(np.asarray((target_names, counts)).T)
+# split a training set and a test set
+y_train, y_test = data_train.target, data_test.target
 
 print("Extracting features from the training data using a sparse vectorizer")
 t0 = time()
 if opts.use_hashing:
     vectorizer = HashingVectorizer(stop_words='english', alternate_sign=False,
                                    n_features=opts.n_features)
-    X_train = vectorizer.transform(texts_train)
+    X_train = vectorizer.transform(data_train.data)
 else:
     vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
                                  stop_words='english')
-    X_train = vectorizer.fit_transform(texts_train)
+    X_train = vectorizer.fit_transform(data_train.data)
+duration = time() - t0
+print("done in %fs at %0.3fMB/s" % (duration, data_train_size_mb / duration))
 print("n_samples: %d, n_features: %d" % X_train.shape)
+print()
 
 print("Extracting features from the test data using the same vectorizer")
-X_test = vectorizer.transform(texts_test1)
+t0 = time()
+X_test = vectorizer.transform(data_test.data)
+duration = time() - t0
+print("done in %fs at %0.3fMB/s" % (duration, data_test_size_mb / duration))
 print("n_samples: %d, n_features: %d" % X_test.shape)
-
+print()
 
 # mapping from integer feature name to original token string
 if opts.use_hashing:
@@ -290,14 +253,14 @@ def benchmark(clf):
                 print(trim("%s: %s" % (label, " ".join(feature_names[top10]))))
         print()
 
-    if (False):
+    if opts.print_report:
         print("classification report:")
         print(metrics.classification_report(y_test, pred,
                                             target_names=target_names))
-    if (True):
+
+    if opts.print_cm:
         print("confusion matrix:")
         print(metrics.confusion_matrix(y_test, pred))
-        print(pd.DataFrame({'Predicted': pred, 'Expected': y_test}))
 
     print()
     clf_descr = str(clf).split('(')[0]
@@ -305,7 +268,6 @@ def benchmark(clf):
 
 
 results = []
-'''
 for clf, name in (
         (RidgeClassifier(tol=1e-2, solver="lsqr"), "Ridge Classifier"),
         (Perceptron(n_iter=50), "Perceptron"),
@@ -315,7 +277,7 @@ for clf, name in (
     print('=' * 80)
     print(name)
     results.append(benchmark(clf))
-'''
+
 for penalty in ["l2", "l1"]:
     print('=' * 80)
     print("%s penalty" % penalty.upper())
@@ -326,7 +288,7 @@ for penalty in ["l2", "l1"]:
     # Train SGD model
     results.append(benchmark(SGDClassifier(alpha=.0001, n_iter=50,
                                            penalty=penalty)))
-'''
+
 # Train SGD with Elastic Net penalty
 print('=' * 80)
 print("Elastic-Net penalty")
@@ -379,5 +341,3 @@ for i, c in zip(indices, clf_names):
     plt.text(-.3, i, c)
 
 plt.show()
-
-'''

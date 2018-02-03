@@ -115,6 +115,58 @@ def load_data_liar(file_name):
     print(labels[0:6])
     return texts, labels
 
+def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/combined-v03.txt"):
+    print("Loading data...")
+    data_train = pd.read_table(file_name, sep='\t', header= None, names=["ID",	"URL",	"label", "data", "source"], usecols=[2,3])
+    print(data_train.shape)
+    texts = []
+    labels = []
+    for idx in range(data_train.data.shape[0]):
+        text = BeautifulSoup(data_train.data[idx])
+        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
+        labels.append(data_train.label[idx])
+    transdict = {
+        'ftrue': 1,
+        'mtrue': 2,
+        'mixture': 3 ,
+        'mfalse':4,
+        'ffalse': 5,
+        'pantsfire': 6,
+        'nofact': 7
+    }
+    labels = [transdict[i] for i in labels]
+    labels = to_cat(np.asarray(labels))
+    print(labels[0:6])
+    return texts, labels
+
+
+def load_data_rashkin(file_name = "../data/rashkin/train.txt"):
+    print("Loading data...")
+    data_train = pd.read_table(file_name, sep='\t',  header= None, names=["label", "data"], usecols=[0,1], dtype = {"label": np.str, "data": np.str})
+    print(data_train.shape)
+    print(data_train[0:6])
+    texts = []
+    labels = []
+    for i in range(data_train.data.shape[0]):
+        print(i, type(data_train.data[i]))
+    for idx in range(data_train.data.shape[0]):
+        text = BeautifulSoup(data_train.data[idx])
+        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
+        labels.append(str(data_train.label[idx]))
+    transdict = {
+        '1': 3, #Satire
+        '2': 4, #Hoax
+        '3': 2, #Propaganda
+        '4': 1  #Truested
+    }
+    labels = [transdict[i] for i in labels]
+    labels = to_cat(np.asarray(labels))
+    print(texts[0:6])
+    print(labels[0:6])
+    return texts, labels
+
+
+
 def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
     print("Loading data...")
     data_train = pd.read_table(file_name, sep='\t', header= None, names=["ID",	"URL",	"label",	"data",	"error"], usecols=[2,3])
@@ -130,29 +182,6 @@ def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
         'mostly true': 1,
         'mixture of true and false': 2,
         'mostly false': 3
-    }
-    labels = [transdict[i] for i in labels]
-    labels = to_cat(np.asarray(labels))
-    print(texts[0:6])
-    print(labels[0:6])
-    return texts, labels
-
-def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/combined-v02.txt"):
-    print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header= None, names=["ID",	"URL",	"label", "data", "source"], usecols=[2,3])
-    print(data_train.shape)
-    texts = []
-    labels = []
-    for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(data_train.label[idx])
-    transdict = {
-        'ftrue': 0,
-        'mtrue': 0,
-        'mixture': 1,
-        'mfalse':1,
-        'ffalse': 1
     }
     labels = [transdict[i] for i in labels]
     labels = to_cat(np.asarray(labels))
@@ -367,10 +396,19 @@ def prepare_rnn_model_tf(word_index, embedding_matrix):
 #texts_test2, labels_test2 = load_data_combined()
 
 
-texts_train, labels_train = load_data_combined() #load_data_liar("../data/liar_dataset/train.tsv")#load_data_combined()
-texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
-texts_test1, labels_test1 = load_data_liar("../data/liar_dataset/test.tsv")
-texts_test2, labels_test2 = load_data_combined()
+texts, labels = load_data_rashkin("../data/rashkin/train.txt")
+#texts_train, labels_train = load_data_combined() #load_data_liar("../data/liar_dataset/train.tsv")#load_data_combined()
+#texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
+texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
+texts_test2, labels_test2 = load_data_combined("../data/buzzfeed-debunk-combined/combined-v04.txt")
+
+print("Preparing validation/training data split...")
+nb_validation_samples = int(VALIDATION_SPLIT * texts.shape[0])
+texts_train = texts[:-nb_validation_samples]
+labels_train = labels[:-nb_validation_samples]
+texts_valid = texts[-nb_validation_samples:]
+labels_valid = labels[-nb_validation_samples:]
+
 
 ## FOR LATER USE:
 #texts, labels = load_data_buzzfeed()
