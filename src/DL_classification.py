@@ -62,8 +62,8 @@ MAX_NB_WORDS = 20000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
-CLASSES = 5
-EPOCS = 1
+CLASSES = 4
+EPOCS = 10
 USEKERAS = True
 
 
@@ -156,10 +156,10 @@ def load_data_rashkin(file_name = "../data/rashkin/train.txt"):
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(str(data_train.label[idx]))
     transdict = {
-        '1': 3, #Satire
-        '2': 4, #Hoax
-        '3': 2, #Propaganda
-        '4': 1  #Truested
+        '1': 2, #Satire
+        '2': 3, #Hoax
+        '3': 1, #Propaganda
+        '4': 0  #Truested
     }
     labels = [transdict[i] for i in labels]
     labels = to_cat(np.asarray(labels))
