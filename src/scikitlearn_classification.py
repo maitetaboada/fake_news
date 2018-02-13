@@ -128,10 +128,30 @@ def load_data_liar(file_name):
     return texts, labels
 
 
-def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/combined-v03.txt"):
+
+def load_data_rubin(file_name = "../data/rubin/data.txt"):
     print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header= None, names=["ID",	"URL",	"label", "data", "source"], usecols=[2,3])
+    data_train = pd.read_table(file_name, sep='\t', header= None, names=["label", "data"], usecols=[0,1])
     print(data_train.shape)
+    texts = []
+    labels = []
+    for idx in range(data_train.data.shape[0]):
+        text = BeautifulSoup(data_train.data[idx])
+        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
+        labels.append(data_train.label[idx])
+    #labels = to_cat(np.asarray(labels))
+    print(labels[0:6])
+    return texts, labels
+
+
+
+def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/all-v02.txt"):
+    print("Loading data...")
+    data_train = pd.read_table(file_name, sep='\t', header= None, names=["id",	"url",	"label", "data", "domain", "source"],usecols=[2,3])
+    print(data_train.shape)
+    print(data_train.label[0:10])
+    print(data_train.label.unique())
+    #print(data_train[data_train["label"].isnull()])
     texts = []
     labels = []
     for idx in range(data_train.data.shape[0]):
@@ -152,6 +172,41 @@ def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/combined-v0
     print(labels[0:6])
     return texts, labels
 
+import random
+
+def balance_data(texts, labels, sample_size, discard_labels = [] , seed = 123):
+    np.random.seed(seed)
+    ## sample size is the number of items we want to have from EACH class
+    unique, counts = np.unique(labels, return_counts=True)
+    print(np.asarray((unique, counts)).T)
+    all_index = np.empty([0], dtype=int)
+    for l, f in zip(unique, counts):
+        if (l in discard_labels ):
+            print ("Discarding items for label " + str( l))
+            continue
+        l_index = (np.where( labels ==  l )[0]).tolist()  ## index of input data with current label
+        if( sample_size - f > 0 ):
+            #print "Upsampling ", sample_size - f, " items for class ", l
+            x = np.random.choice(f, sample_size - f).tolist()
+            l_index = np.append(np.asarray(l_index) , np.asarray(l_index)[x])
+        else:
+            #print "Downsampling ", sample_size , " items for class ", l
+            l_index = random.sample(l_index, sample_size)
+        all_index = np.append(all_index, l_index)
+    bal_labels = np.asarray(labels)[all_index.tolist()]
+    bal_texts = np.asarray(texts)[all_index.tolist()]
+    remaining = [i for i in range(0, np.sum(counts)) if i not in all_index.tolist()]
+    rem_texts = np.asarray(texts)[remaining]
+    rem_labels = np.asarray(labels)[remaining]
+    print ("Final size of dataset:")
+    unique, counts = np.unique(bal_labels, return_counts=True)
+    print (np.asarray((unique, counts)).T)
+    print ("Final size of remaining dataset:")
+    unique, counts = np.unique(rem_labels, return_counts=True)
+    print (np.asarray((unique, counts)).T)
+    return bal_texts, bal_labels, rem_texts, rem_labels
+
+
 
 def load_data_rashkin(file_name = "../data/rashkin/train.txt"):
     print("Loading data...")
@@ -160,8 +215,8 @@ def load_data_rashkin(file_name = "../data/rashkin/train.txt"):
     print(data_train[0:6])
     texts = []
     labels = []
-    for i in range(data_train.data.shape[0]):
-        print(i, type(data_train.data[i]))
+    #for i in range(data_train.data.shape[0]):
+    #    print(i, type(data_train.data[i]))
     for idx in range(data_train.data.shape[0]):
         text = BeautifulSoup(data_train.data[idx])
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
@@ -200,12 +255,21 @@ def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
     print(labels[0:6])
     return texts, labels
 
-
+#texts_test1, labels_test1 = load_data_combined("../data/buzzfeed-debunk-combined/rumor-v02.txt")#load_data_rubin()#load_data_liar("../data/liar_dataset/test.tsv")
 ## USE LIAR DATA FOR TRAINING A MODEL AND TEST DATA BOTH FROM LIAR AND BUZZFEED
-texts_train, labels_train = load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/train.txt")#load_data_liar("../data/liar_dataset/train.tsv")##load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/train.txt")#load_data_combined()
-#texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
-#texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
-texts_test1, labels_test1 = load_data_combined("../data/buzzfeed-debunk-combined/combined-v04.txt")#load_data_liar("../data/liar_dataset/test.tsv")#load_data_combined("../data/buzzfeed-debunk-combined/combined-v04.txt")#load_data_buzzfeed()#load_data_combined()
+#texts_train, labels_train = load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#
+##texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
+##texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
+
+texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+
+texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,7])
+texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,7])
+
+
+
+
+
 
 #texts_test2, labels_test2 = load_data_combined()
 
@@ -277,6 +341,10 @@ def benchmark(clf):
     print("test time:  %0.3fs" % test_time)
 
     score = metrics.accuracy_score(y_test, pred)
+    precision = metrics.precision_score(y_test, pred, average = 'macro')
+    recall = metrics.recall_score(y_test, pred, average = 'macro')
+    f1 = metrics.f1_score(y_test, pred, average = 'macro')
+
     print("accuracy:   %0.3f" % score)
 
     if hasattr(clf, 'coef_'):
@@ -301,22 +369,24 @@ def benchmark(clf):
 
     print()
     clf_descr = str(clf).split('(')[0]
-    return clf_descr, score, train_time, test_time
+    return clf_descr, score, precision, recall, f1
 
 
 results = []
+
 '''
 for clf, name in (
-        (RidgeClassifier(tol=1e-2, solver="lsqr"), "Ridge Classifier"),
-        (Perceptron(n_iter=50), "Perceptron"),
-        (PassiveAggressiveClassifier(n_iter=50), "Passive-Aggressive"),
-        (KNeighborsClassifier(n_neighbors=10), "kNN"),
+        #(RidgeClassifier(tol=1e-2, solver="lsqr"), "Ridge Classifier"),
+        #(Perceptron(n_iter=50), "Perceptron"),
+        #(PassiveAggressiveClassifier(n_iter=50), "Passive-Aggressive"),
+        #(KNeighborsClassifier(n_neighbors=10), "kNN"),
         (RandomForestClassifier(n_estimators=100), "Random forest")):
     print('=' * 80)
     print(name)
     results.append(benchmark(clf))
 '''
-for penalty in ["l2", "l1"]:
+
+for penalty in ["l2"]:#, "l1"]:
     print('=' * 80)
     print("%s penalty" % penalty.upper())
     # Train Liblinear model
@@ -326,6 +396,8 @@ for penalty in ["l2", "l1"]:
     # Train SGD model
     results.append(benchmark(SGDClassifier(alpha=.0001, n_iter=50,
                                            penalty=penalty)))
+
+
 '''
 # Train SGD with Elastic Net penalty
 print('=' * 80)
@@ -338,12 +410,15 @@ print('=' * 80)
 print("NearestCentroid (aka Rocchio classifier)")
 results.append(benchmark(NearestCentroid()))
 
+'''
+
 # Train sparse Naive Bayes classifiers
 print('=' * 80)
 print("Naive Bayes")
 results.append(benchmark(MultinomialNB(alpha=.01)))
-results.append(benchmark(BernoulliNB(alpha=.01)))
+#results.append(benchmark(BernoulliNB(alpha=.01)))
 
+'''
 print('=' * 80)
 print("LinearSVC with L1-based feature selection")
 # The smaller C, the stronger the regularization.
@@ -352,6 +427,14 @@ results.append(benchmark(Pipeline([
   ('feature_selection', SelectFromModel(LinearSVC(penalty="l1", dual=False,
                                                   tol=1e-3))),
   ('classification', LinearSVC(penalty="l2"))])))
+  
+'''
+
+print("="*100)
+print(results)
+
+
+'''
 
 # make some plots
 

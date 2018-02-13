@@ -62,7 +62,7 @@ MAX_NB_WORDS = 20000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
-CLASSES = 2
+CLASSES = 5
 EPOCS = 1
 USEKERAS = True
 
@@ -115,6 +115,8 @@ def load_data_liar(file_name):
     print(labels[0:6])
     return texts, labels
 
+
+
 def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/combined-v03.txt"):
     print("Loading data...")
     data_train = pd.read_table(file_name, sep='\t', header= None, names=["ID",	"URL",	"label", "data", "source"], usecols=[2,3])
@@ -147,8 +149,8 @@ def load_data_rashkin(file_name = "../data/rashkin/train.txt"):
     print(data_train[0:6])
     texts = []
     labels = []
-    for i in range(data_train.data.shape[0]):
-        print(i, type(data_train.data[i]))
+    #for i in range(data_train.data.shape[0]):
+    #   print(i, type(data_train.data[i]))
     for idx in range(data_train.data.shape[0]):
         text = BeautifulSoup(data_train.data[idx])
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
@@ -396,18 +398,20 @@ def prepare_rnn_model_tf(word_index, embedding_matrix):
 #texts_test2, labels_test2 = load_data_combined()
 
 
-texts, labels = load_data_rashkin("../data/rashkin/train.txt")
-#texts_train, labels_train = load_data_combined() #load_data_liar("../data/liar_dataset/train.tsv")#load_data_combined()
-#texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
+#texts, labels = load_data_rashkin("../data/rashkin/xtrain.txt")
+texts_train, labels_train = load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_combined() #load_data_liar("../data/liar_dataset/train.tsv")#load_data_combined()
+texts_valid, labels_valid = load_data_rashkin("../data/rashkin/xdev.txt")
 texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
-texts_test2, labels_test2 = load_data_combined("../data/buzzfeed-debunk-combined/combined-v04.txt")
+#texts_test2, labels_test2 = load_data_combined("../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")
 
+'''
 print("Preparing validation/training data split...")
-nb_validation_samples = int(VALIDATION_SPLIT * texts.shape[0])
+nb_validation_samples = int(VALIDATION_SPLIT * len(texts))
 texts_train = texts[:-nb_validation_samples]
 labels_train = labels[:-nb_validation_samples]
 texts_valid = texts[-nb_validation_samples:]
 labels_valid = labels[-nb_validation_samples:]
+'''
 
 
 ## FOR LATER USE:
@@ -415,17 +419,19 @@ labels_valid = labels[-nb_validation_samples:]
 #texts_valid2, labels_valid2 = texts[:len(labels)/2], labels[:len(labels)/2]
 #texts_test2, labels_test2 = texts[len(labels)/2:], labels[len(labels)/2:]
 
-texts = texts_train + texts_valid + texts_test1 + texts_test2
+
+texts = texts_train + texts_valid + texts_test1 #+ texts_test2
 texts, word_index = sequence_processing(texts)
 texts_train = texts[:len(labels_train)]
 texts_valid = texts[len(labels_train): len(labels_train) + len(labels_valid)]
 texts_test1 = texts[len(labels_train) + len(labels_valid): len(labels_train) + len(labels_valid) + len(labels_test1)]
-texts_test2 = texts[len(labels_train) + len(labels_valid) + len(labels_test1):]
+#texts_test2 = texts[len(labels_train) + len(labels_valid) + len(labels_test1):]
+
 
 labels_train = np.asarray(labels_train)
 labels_valid = np.asarray(labels_valid)
 labels_test1 = np.asarray(labels_test1)
-labels_test2 = np.asarray(labels_test2)
+#labels_test2 = np.asarray(labels_test2)
 
 print('Shape of data tensor:', texts_train.shape)
 print('Shape of label tensor:', labels_train.shape)
@@ -436,8 +442,8 @@ print('Shape of label tensor:', labels_valid.shape)
 print('Shape of data tensor:', texts_test1.shape)
 print('Shape of label tensor:', labels_test1.shape)
 
-print('Shape of data tensor:', texts_test2.shape)
-print('Shape of label tensor:', labels_test2.shape)
+#print('Shape of data tensor:', texts_test2.shape)
+#print('Shape of label tensor:', labels_test2.shape)
 
 
 
@@ -450,8 +456,8 @@ x_val = texts_valid
 y_val = labels_valid
 x_test1 = texts_test1
 y_test1 = labels_test1
-x_test2 = texts_test2
-y_test2 = labels_test2
+#x_test2 = texts_test2
+#y_test2 = labels_test2
 
 
 print('Number of instances from each class')
@@ -462,7 +468,7 @@ print('Baseline accuracies:')
 print (y_train.sum(axis=0))#/(1.0*len(y_train)))
 print (y_val.sum(axis=0))#/(1.0*len(y_val)))
 print (y_test1.sum(axis=0))#/(1.0*len(y_test1)))
-print (y_test2.sum(axis=0))#/(1.0*len(y_test2)))
+#print (y_test2.sum(axis=0))#/(1.0*len(y_test2)))
 
 
 print("Preparing the deep learning model...")
@@ -485,9 +491,9 @@ for i in range(0, EPOCS):
     if( current_loss > prev_loss):
         print("\n\n*** SHOULD STOP HERE! ***\n\n")
     p = model.evaluate(x_test1, y_test1)
-    print("Accuracy on liar test: " + str(p))
-    p = model.evaluate(x_test2, y_test2)
-    print("Accuracy on buzzfeed test: " + str(p))
+    print("Accuracy on test1: " + str(p))
+#    p = model.evaluate(x_test2, y_test2)
+#    print("Accuracy on  test2: " + str(p))
 
 
 
