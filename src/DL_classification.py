@@ -36,7 +36,7 @@ import pandas as pd
 import re
 
 from bs4 import BeautifulSoup
-
+import random
 
 import os
 #os.environ['KERAS_BACKEND'] = 'theano'
@@ -62,7 +62,7 @@ MAX_NB_WORDS = 20000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
-CLASSES = 4
+CLASSES = 5
 EPOCS = 10
 USEKERAS = True
 
@@ -75,6 +75,7 @@ def clean_str(string):
     string = re.sub(r"\\", "", string.decode("utf-8"))
     string = re.sub(r"\'", "", string.decode("utf-8"))
     string = re.sub(r"\"", "", string.decode("utf-8"))
+    string = ''.join(e for e in string if (e.isspace() or e.isalnum()))
     return string.strip().lower()
 
 def load_data_imdb():
@@ -117,10 +118,13 @@ def load_data_liar(file_name):
 
 
 
-def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/combined-v03.txt"):
+def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/all-v02.txt"):
     print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header= None, names=["ID",	"URL",	"label", "data", "source"], usecols=[2,3])
+    data_train = pd.read_table(file_name, sep='\t', header= None, names=["id",	"url",	"label", "data", "domain", "source"],usecols=[2,3])
     print(data_train.shape)
+    print(data_train.label[0:10])
+    print(data_train.label.unique())
+    #print(data_train[data_train["label"].isnull()])
     texts = []
     labels = []
     for idx in range(data_train.data.shape[0]):
@@ -128,19 +132,18 @@ def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/combined-v0
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.label[idx])
     transdict = {
-        'ftrue': 1,
-        'mtrue': 2,
-        'mixture': 3 ,
-        'mfalse':4,
-        'ffalse': 5,
-        'pantsfire': 6,
-        'nofact': 7
+        'ftrue': 0,
+        'mtrue': 1,
+        'mixture': 2 ,
+        'mfalse':3,
+        'ffalse': 4,
+        'pantsfire': 5,
+        'nofact': 6
     }
     labels = [transdict[i] for i in labels]
-    labels = to_cat(np.asarray(labels))
+    #labels = to_cat(np.asarray(labels))
     print(labels[0:6])
     return texts, labels
-
 
 def load_data_rashkin(file_name = "../data/rashkin/train.txt"):
     print("Loading data...")
@@ -190,6 +193,44 @@ def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
     print(texts[0:6])
     print(labels[0:6])
     return texts, labels
+
+
+
+def balance_data(texts, labels, sample_size, discard_labels = [] , seed = 123):
+    np.random.seed(seed)
+    ## sample size is the number of items we want to have from EACH class
+    unique, counts = np.unique(labels, return_counts=True)
+    print(np.asarray((unique, counts)).T)
+    all_index = np.empty([0], dtype=int)
+    for l, f in zip(unique, counts):
+        if (l in discard_labels ):
+            print ("Discarding items for label " + str( l))
+            continue
+        l_index = (np.where( labels ==  l )[0]).tolist()  ## index of input data with current label
+        if( sample_size - f > 0 ):
+            #print "Upsampling ", sample_size - f, " items for class ", l
+            x = np.random.choice(f, sample_size - f).tolist()
+            l_index = np.append(np.asarray(l_index) , np.asarray(l_index)[x])
+        else:
+            #print "Downsampling ", sample_size , " items for class ", l
+            l_index = random.sample(l_index, sample_size)
+        all_index = np.append(all_index, l_index)
+    bal_labels = np.asarray(labels)[all_index.tolist()]
+    bal_texts = np.asarray(texts)[all_index.tolist()]
+    remaining = [i for i in range(0, np.sum(counts)) if i not in all_index.tolist()]
+    rem_texts = np.asarray(texts)[remaining]
+    rem_labels = np.asarray(labels)[remaining]
+    print ("Final size of dataset:")
+    unique, counts = np.unique(bal_labels, return_counts=True)
+    print (np.asarray((unique, counts)).T)
+    print ("Final size of remaining dataset:")
+    unique, counts = np.unique(rem_labels, return_counts=True)
+    print (np.asarray((unique, counts)).T)
+    return bal_texts, bal_labels, rem_texts, rem_labels
+
+
+
+
 
 def sequence_processing(texts):
     """
@@ -387,6 +428,7 @@ def prepare_rnn_model_tf(word_index, embedding_matrix):
     return model
 
 
+
 # texts_train, labels_train = load_data_liar("~/workspace/temp/liar_dataset/train.tsv")
 # texts_test,labels_test = load_data_liar("~/workspace/temp/liar_dataset/test.tsv")
 
@@ -399,10 +441,22 @@ def prepare_rnn_model_tf(word_index, embedding_matrix):
 
 
 #texts, labels = load_data_rashkin("../data/rashkin/xtrain.txt")
-texts_train, labels_train = load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_combined() #load_data_liar("../data/liar_dataset/train.tsv")#load_data_combined()
-texts_valid, labels_valid = load_data_rashkin("../data/rashkin/xdev.txt")
-texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
+#texts_train, labels_train = load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_combined() #load_data_liar("../data/liar_dataset/train.tsv")#load_data_combined()
+#texts_valid, labels_valid = load_data_rashkin("../data/rashkin/xdev.txt")
+#texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
 #texts_test2, labels_test2 = load_data_combined("../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")
+
+
+
+texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
+texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
+texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
+labels_test1 = to_cat(np.asarray(labels_test1))
+labels_valid = to_cat(np.asarray(labels_valid))
+labels_train = to_cat(np.asarray(labels_train))
+
+
 
 '''
 print("Preparing validation/training data split...")
@@ -419,8 +473,12 @@ labels_valid = labels[-nb_validation_samples:]
 #texts_valid2, labels_valid2 = texts[:len(labels)/2], labels[:len(labels)/2]
 #texts_test2, labels_test2 = texts[len(labels)/2:], labels[len(labels)/2:]
 
+print(texts_train[0:6])
 
-texts = texts_train + texts_valid + texts_test1 #+ texts_test2
+#texts = texts_train + texts_valid + texts_test1 #+ texts_test2
+texts = np.concatenate((texts_train , texts_valid , texts_test1))
+
+
 texts, word_index = sequence_processing(texts)
 texts_train = texts[:len(labels_train)]
 texts_valid = texts[len(labels_train): len(labels_train) + len(labels_valid)]

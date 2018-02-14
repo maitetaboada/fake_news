@@ -39,11 +39,10 @@ def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/all-v02.txt
     labels = [transdict[i] for i in labels]
     #labels = to_cat(np.asarray(labels))
     print(labels[0:6])
-    train_texts, train_labels = balance_data(texts, labels, 1000, discard_labels = [6,7])
     return texts, labels
 
-def balance_data(texts, labels, sample_size, discard_labels = [] ):
-    np.random.seed(123)
+def balance_data(texts, labels, sample_size, discard_labels = [] , seed = 123):
+    np.random.seed(seed)
     ## sample size is the number of items we want to have from EACH class
     unique, counts = np.unique(labels, return_counts=True)
     print np.asarray((unique, counts)).T
@@ -81,5 +80,21 @@ def news_data_summary(file_name = "../data/buzzfeed-debunk-combined/all-v02.txt"
     print pd.crosstab(df.domain, df.label)
 
 
+def news_data_sampler(texts, labels,  train_size, dev_size, test_size, seed = 123):
+    print("Sampling data for seed " + str(seed))
+    texts_test, labels_test, texts, labels = balance_data(texts, labels, test_size, [6, 7], seed )
+    pd.DataFrame(data= [texts_test, labels_test],columns=["text", "label"]).to_pickle("../pickle/test", protocol=2)
+    texts_dev, labels_dev, texts, labels = balance_data(texts, labels, dev_size, [6, 7], seed )
+    pd.DataFrame(data=[texts_dev, labels_dev], columns=["text", "label"]).to_pickle("../pickle/dev", protocol=2)
+    texts_train, labels_train, texts, labels = balance_data(texts, labels, train_size, [6, 7], seed )
+
+
+
 news_data_summary()
-#load_data_combined(file_name = "../data/buzzfeed-debunk-combined/all-v02.txt")
+texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+news_data_sampler(texts, labels,  train_size = 700, dev_size = 200, test_size = 200)
+
+
+
+
+

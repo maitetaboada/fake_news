@@ -259,10 +259,11 @@ def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
 ## USE LIAR DATA FOR TRAINING A MODEL AND TEST DATA BOTH FROM LIAR AND BUZZFEED
 #texts_train, labels_train = load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#
 ##texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
-##texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
+#texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
 
 texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
 
+texts_test2, labels_test2, texts, labels = balance_data(texts, labels, 200, [6,7])
 texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,7])
 texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,7])
 
@@ -344,6 +345,7 @@ def benchmark(clf):
     precision = metrics.precision_score(y_test, pred, average = 'macro')
     recall = metrics.recall_score(y_test, pred, average = 'macro')
     f1 = metrics.f1_score(y_test, pred, average = 'macro')
+    mse = metrics.mean_squared_error(y_test, pred)
 
     print("accuracy:   %0.3f" % score)
 
