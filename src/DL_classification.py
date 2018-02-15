@@ -285,7 +285,7 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
    l_cov3 = Conv1D(128, 5, activation='relu')(l_pool2)
    l_pool3 = MaxPooling1D()(l_cov3)  # global max pooling
    l_flat = Flatten()(l_pool3)
-   l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.01))(l_flat)
+   l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.1))(l_flat)
    l_dropout2 = Dropout(0.8)(l_dense)
    preds = Dense(CLASSES, activation='softmax')(l_dropout2)
    model = Model(sequence_input, preds)
