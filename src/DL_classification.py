@@ -50,7 +50,7 @@ from keras.layers import Dense, Input, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout, LSTM, GRU, Bidirectional
 from keras.models import Model
 from keras.engine.topology import Layer, InputSpec
-from keras import initializers
+from keras import initializers, regularizers
 
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.utils import shuffle
@@ -285,7 +285,7 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
    l_cov3 = Conv1D(128, 5, activation='relu')(l_pool2)
    l_pool3 = MaxPooling1D()(l_cov3)  # global max pooling
    l_flat = Flatten()(l_pool3)
-   l_dense = Dense(128, activation='relu')(l_flat)
+   l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.01))(l_flat)
    l_dropout2 = Dropout(0.8)(l_dense)
    preds = Dense(CLASSES, activation='softmax')(l_dropout2)
    model = Model(sequence_input, preds)
@@ -310,13 +310,13 @@ def prepare_cnn_model_2(word_index, embedding_matrix):
         l_pool = MaxPooling1D(5)(l_conv)
         convs.append(l_pool)
     l_merge = Merge(mode='concat', concat_axis=1)(convs)
-    l_cov1 = Conv1D(64, 5, activation='relu')(l_merge)
+    l_cov1 = Conv1D(128, 5, activation='relu')(l_merge)
     l_pool1 = MaxPooling1D(5)(l_cov1)
     l_dropout1 = Dropout(0.5)(l_pool1)
     l_cov2 = Conv1D(128, 5, activation='relu')(l_dropout1)
     l_pool2 = MaxPooling1D(30)(l_cov2)
     l_flat = Flatten()(l_pool2)
-    l_dense = Dense(256, activation='relu')(l_flat)
+    l_dense = Dense(128, activation='relu')(l_flat)
     l_dropout2 = Dropout(0.5)(l_dense)
     preds = Dense(CLASSES, activation='softmax')(l_dropout2)
     model = Model(sequence_input, preds)
