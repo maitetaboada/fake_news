@@ -59,7 +59,7 @@ from sklearn.utils import shuffle
 
 MAX_SEQUENCE_LENGTH = 1000
 MAX_NB_WORDS = 20000
-EMBEDDING_DIM = 100
+EMBEDDING_DIM = 300
 VALIDATION_SPLIT = 0.2
 
 CLASSES = 5
@@ -246,7 +246,7 @@ def sequence_processing(texts):
     return texts, word_index
 
 
-def load_embeddings( word_index , GLOVE_FILE = "../pretrained/glove.6B.100d.txt"): ## "../pretrained/glove.6B.100d.txt"):
+def load_embeddings( word_index , GLOVE_FILE = "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"): ## "../pretrained/glove.6B.100d.txt"):
    print("Loading embeddings...")
    embeddings_index = {}
    f = open(GLOVE_FILE)
@@ -316,7 +316,8 @@ def prepare_cnn_model_2(word_index, embedding_matrix):
     l_pool2 = MaxPooling1D(30)(l_cov2)
     l_flat = Flatten()(l_pool2)
     l_dense = Dense(128, activation='relu')(l_flat)
-    preds = Dense(CLASSES, activation='softmax')(l_dense)
+    l_dropout2 = Dropout(0.5)(l_dense)
+    preds = Dense(CLASSES, activation='softmax')(l_dropout2)
     model = Model(sequence_input, preds)
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
