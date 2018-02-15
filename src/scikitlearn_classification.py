@@ -159,13 +159,13 @@ def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/all-v02.txt
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.label[idx])
     transdict = {
-        'ftrue': 1,
-        'mtrue': 2,
-        'mixture': 3 ,
-        'mfalse':4,
-        'ffalse': 5,
-        'pantsfire': 6,
-        'nofact': 7
+        'ftrue': 0,
+        'mtrue': 1,
+        'mixture': 2 ,
+        'mfalse':3,
+        'ffalse': 4,
+        'pantsfire': 5,
+        'nofact': 6
     }
     labels = [transdict[i] for i in labels]
     #labels = to_cat(np.asarray(labels))
@@ -263,11 +263,9 @@ def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
 
 texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
 
-texts_test2, labels_test2, texts, labels = balance_data(texts, labels, 200, [6,7])
-texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,7])
-texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,7])
-
-
+texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
+texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
+texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
 
 
 
