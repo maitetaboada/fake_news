@@ -63,7 +63,7 @@ EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
 CLASSES = 5
-EPOCS = 10
+EPOCS = 20
 USEKERAS = True
 
 
@@ -530,7 +530,7 @@ print (y_test1.sum(axis=0))#/(1.0*len(y_test1)))
 
 
 print("Preparing the deep learning model...")
-model = prepare_cnn_model_1(word_index, embedding_matrix)
+model = prepare_cnn_model_2(word_index, embedding_matrix)
 # model.summary()
 print("Model fitting...")
 
