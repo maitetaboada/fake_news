@@ -11,6 +11,11 @@ if 'tensorflow' == K.backend():
     import tensorflow as tf
     print(tf.__version__)
     print(K.tensorflow_backend._get_available_gpus())
+else:
+    import theano as tf
+    print(tf.__version__)
+    print(K.tensorflow_backend._get_available_gpus())
+
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
 print("*** Before setting allow_growth:")
@@ -57,13 +62,13 @@ from sklearn.utils import shuffle
 
 
 
-MAX_SEQUENCE_LENGTH = 2000
+MAX_SEQUENCE_LENGTH = 1000
 MAX_NB_WORDS = 20000
-EMBEDDING_DIM = 300
+EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
 CLASSES = 5
-EPOCS = 20
+EPOCS = 10
 USEKERAS = True
 
 
@@ -246,7 +251,7 @@ def sequence_processing(texts):
     return texts, word_index
 
 
-def load_embeddings( word_index , GLOVE_FILE = "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"): ## "../pretrained/glove.6B.100d.txt"):
+def load_embeddings( word_index , GLOVE_FILE = "../pretrained/glove.6B.100d.txt"): ## "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"):
    print("Loading embeddings...")
    embeddings_index = {}
    f = open(GLOVE_FILE)
@@ -327,24 +332,16 @@ def prepare_cnn_model_2(word_index, embedding_matrix):
 
 
 def prepare_rnn_model_1(word_index, embedding_matrix):
-    print("*** 1")
     embedding_layer = Embedding(len(word_index) + 1,
                                 EMBEDDING_DIM,
                                 weights=[embedding_matrix],
                                 input_length=MAX_SEQUENCE_LENGTH,
                                 trainable=True)
-
-    print("*** 2")
     sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
-    print("*** 3")
     embedded_sequences = embedding_layer(sequence_input)
-    print("*** 4")
     l_lstm = Bidirectional(LSTM(100))(embedded_sequences)
-    print("*** 5")
     preds = Dense(CLASSES, activation='softmax')(l_lstm)
-    print("*** 6")
     model = Model(sequence_input, preds)
-    print("*** 7")
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
                   metrics=['acc'])
@@ -379,6 +376,7 @@ class AttLayer(Layer):
         super(AttLayer, self).__init__(**kwargs)
 
     def build(self, input_shape):
+        print(input_shape)
         assert len(input_shape) == 3
         # self.W = self.init((input_shape[-1],1))
         self.W = self.init((input_shape[-1],))
@@ -407,7 +405,7 @@ import tflearn
 from tflearn.data_utils import pad_sequences
 from tflearn.layers.core import input_data, dropout, fully_connected
 from tflearn.layers.embedding_ops import embedding
-from tflearn.layers.recurrent import BasicLSTMCell ,bidirectional_rnn
+from tflearn.layers.recurrent import BasicLSTMCell ,bidirectional_rnn, GRUCell
 from tflearn.layers.estimator import regression
 
 
@@ -420,6 +418,27 @@ def prepare_rnn_model_tf(word_index, embedding_matrix):
     net = embedding(net, input_dim=len(word_index)+1, output_dim=EMBEDDING_DIM, trainable=False, name="EmbeddingLayer")
     net = bidirectional_rnn(net, BasicLSTMCell(EMBEDDING_DIM), BasicLSTMCell(EMBEDDING_DIM))
     net = dropout(net, 0.5)
+    net = fully_connected(net, CLASSES, activation='softmax')
+    net = regression(net, optimizer='adam', loss='categorical_crossentropy')
+    model = tflearn.DNN(net, clip_gradients=0., tensorboard_verbose=0)
+    # Retrieve embedding layer weights (only a single weight matrix, so index is 0)
+    embeddingWeights = tflearn.get_layer_variables_by_name('EmbeddingLayer')[0]
+    print('default embeddings: ', embeddingWeights[0])
+    model.set_weights(embeddingWeights, embedding_matrix )
+    return model
+
+
+
+def prepare_rnn_attn_model_tf(word_index, embedding_matrix):
+    # tf.reset_default_graph()
+    net = input_data(shape=[None, MAX_SEQUENCE_LENGTH])
+    net = embedding(net, input_dim=len(word_index)+1, output_dim=EMBEDDING_DIM, trainable=False, name="EmbeddingLayer")
+    ## KERAS MODEL:
+    ##l_gru = Bidirectional(GRU(100, return_sequences=True))(embedded_sequences)
+    ##l_att = AttLayer()(l_gru)
+    bigru = bidirectional_rnn(net, GRUCell(EMBEDDING_DIM), GRUCell(EMBEDDING_DIM))
+    net = AttLayer()(bigru)
+    #net = dropout(net, 0.5)
     net = fully_connected(net, CLASSES, activation='softmax')
     net = regression(net, optimizer='adam', loss='categorical_crossentropy')
     model = tflearn.DNN(net, clip_gradients=0., tensorboard_verbose=0)
@@ -453,7 +472,7 @@ def prepare_rnn_model_tf(word_index, embedding_matrix):
 texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
 texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
 texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
-texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
+texts_train, labels_train, texts, labels = balance_data(texts, labels, 2000, [6,5])
 labels_test1 = to_cat(np.asarray(labels_test1))
 labels_valid = to_cat(np.asarray(labels_valid))
 labels_train = to_cat(np.asarray(labels_train))
@@ -525,14 +544,14 @@ print(y_train.sum(axis=0))
 print(y_val.sum(axis=0))
 
 print('Baseline accuracies:')
-print (y_train.sum(axis=0))#/(1.0*len(y_train)))
-print (y_val.sum(axis=0))#/(1.0*len(y_val)))
-print (y_test1.sum(axis=0))#/(1.0*len(y_test1)))
-#print (y_test2.sum(axis=0))#/(1.0*len(y_test2)))
+print (y_train.sum(axis=0)/(1.0*len(y_train)))
+print (y_val.sum(axis=0)/(1.0*len(y_val)))
+print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
+#print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
 
 
 print("Preparing the deep learning model...")
-model = prepare_cnn_model_1(word_index, embedding_matrix)
+model = prepare_cnn_model_2(word_index, embedding_matrix)#prepare_rnn_attn_model_tf(word_index, embedding_matrix)
 # model.summary()
 print("Model fitting...")
 
