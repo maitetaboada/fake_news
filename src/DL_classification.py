@@ -70,6 +70,7 @@ VALIDATION_SPLIT = 0.2
 CLASSES = 5
 EPOCS = 10
 USEKERAS = True
+LOAD_DATA_FROM_DISK = False
 
 
 def clean_str(string):
@@ -290,7 +291,7 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
    l_cov3 = Conv1D(128, 5, activation='relu')(l_pool2)
    l_pool3 = MaxPooling1D()(l_cov3)  # global max pooling
    l_flat = Flatten()(l_pool3)
-   l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.2))(l_flat)
+   l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.2),activity_regularizer=regularizers.l1(0.1))(l_flat)
    l_dropout2 = Dropout(0.5)(l_dense)
    preds = Dense(CLASSES, activation='softmax')(l_dropout2)
    model = Model(sequence_input, preds)
@@ -469,48 +470,49 @@ def prepare_rnn_attn_model_tf(word_index, embedding_matrix):
 
 
 
-texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
-texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
-texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
-texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
-labels_test1 = to_cat(np.asarray(labels_test1))
-labels_valid = to_cat(np.asarray(labels_valid))
-labels_train = to_cat(np.asarray(labels_train))
 
+if LOAD_DATA_FROM_DISK:
+    texts_train = np.load("../dump/train")
+    texts_valid = np.load("../dump/valid")
+    texts_test1 = np.load("../dump/test")
+    labels_train = np.load("../dump/trainl")
+    labels_valid = np.load("../dump/validl")
+    labels_test1 = np.load("../dump/testl")
 
+    print("Data loaded from disk!")
 
-'''
-print("Preparing validation/training data split...")
-nb_validation_samples = int(VALIDATION_SPLIT * len(texts))
-texts_train = texts[:-nb_validation_samples]
-labels_train = labels[:-nb_validation_samples]
-texts_valid = texts[-nb_validation_samples:]
-labels_valid = labels[-nb_validation_samples:]
-'''
+else:
+    texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+    texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
+    texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
+    texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
+    labels_test1 = to_cat(np.asarray(labels_test1))
+    labels_valid = to_cat(np.asarray(labels_valid))
+    labels_train = to_cat(np.asarray(labels_train))
+    print(texts_train[0:6])
 
+    labels_train = np.asarray(labels_train)
+    labels_valid = np.asarray(labels_valid)
+    labels_test1 = np.asarray(labels_test1)
+    # labels_test2 = np.asarray(labels_test2)
 
-## FOR LATER USE:
-#texts, labels = load_data_buzzfeed()
-#texts_valid2, labels_valid2 = texts[:len(labels)/2], labels[:len(labels)/2]
-#texts_test2, labels_test2 = texts[len(labels)/2:], labels[len(labels)/2:]
+    texts_train.dump("../dump/train")
+    texts_valid.dump("../dump/valid")
+    texts_test1.dump("../dump/test")
+    labels_train.dump("../dump/trainl")
+    labels_valid.dump("../dump/validl")
+    labels_test1.dump("../dump/testl")
 
-print(texts_train[0:6])
+    print("Data dumped to disk!")
 
 #texts = texts_train + texts_valid + texts_test1 #+ texts_test2
 texts = np.concatenate((texts_train , texts_valid , texts_test1))
-
-
 texts, word_index = sequence_processing(texts)
 texts_train = texts[:len(labels_train)]
 texts_valid = texts[len(labels_train): len(labels_train) + len(labels_valid)]
 texts_test1 = texts[len(labels_train) + len(labels_valid): len(labels_train) + len(labels_valid) + len(labels_test1)]
 #texts_test2 = texts[len(labels_train) + len(labels_valid) + len(labels_test1):]
 
-
-labels_train = np.asarray(labels_train)
-labels_valid = np.asarray(labels_valid)
-labels_test1 = np.asarray(labels_test1)
-#labels_test2 = np.asarray(labels_test2)
 
 print('Shape of data tensor:', texts_train.shape)
 print('Shape of label tensor:', labels_train.shape)
