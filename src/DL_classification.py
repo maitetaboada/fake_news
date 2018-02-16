@@ -59,6 +59,7 @@ from keras import initializers, regularizers
 
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.utils import shuffle
+import pickle
 
 
 
@@ -478,6 +479,8 @@ if LOAD_DATA_FROM_DISK:
     labels_train = np.load("../dump/trainl")
     labels_valid = np.load("../dump/validl")
     labels_test1 = np.load("../dump/testl")
+    file = open("../dump/wordIndex", "rb")
+    word_index = pickle.load(file)
 
     print("Data loaded from disk!")
 
@@ -496,22 +499,26 @@ else:
     labels_test1 = np.asarray(labels_test1)
     # labels_test2 = np.asarray(labels_test2)
 
+
+    #texts = texts_train + texts_valid + texts_test1 #+ texts_test2
+    texts = np.concatenate((texts_train , texts_valid , texts_test1))
+    texts, word_index = sequence_processing(texts)
+    texts_train = texts[:len(labels_train)]
+    texts_valid = texts[len(labels_train): len(labels_train) + len(labels_valid)]
+    texts_test1 = texts[len(labels_train) + len(labels_valid): len(labels_train) + len(labels_valid) + len(labels_test1)]
+    #texts_test2 = texts[len(labels_train) + len(labels_valid) + len(labels_test1):]
+
+
     texts_train.dump("../dump/train")
     texts_valid.dump("../dump/valid")
     texts_test1.dump("../dump/test")
     labels_train.dump("../dump/trainl")
     labels_valid.dump("../dump/validl")
     labels_test1.dump("../dump/testl")
+    file = open("../dump/wordIndex", "wb")
+    pickle.dump(word_index, file)
 
     print("Data dumped to disk!")
-
-#texts = texts_train + texts_valid + texts_test1 #+ texts_test2
-texts = np.concatenate((texts_train , texts_valid , texts_test1))
-texts, word_index = sequence_processing(texts)
-texts_train = texts[:len(labels_train)]
-texts_valid = texts[len(labels_train): len(labels_train) + len(labels_valid)]
-texts_test1 = texts[len(labels_train) + len(labels_valid): len(labels_train) + len(labels_valid) + len(labels_test1)]
-#texts_test2 = texts[len(labels_train) + len(labels_valid) + len(labels_test1):]
 
 
 print('Shape of data tensor:', texts_train.shape)
