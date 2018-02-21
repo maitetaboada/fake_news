@@ -285,8 +285,10 @@ if opts.use_hashing:
     X_train = vectorizer.transform(texts_train)
 else:
     vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
-                                 stop_words='english')
+                                 stop_words='english',ngram_range=(1,2))
     X_train = vectorizer.fit_transform(texts_train)
+    features = vectorizer.get_feature_names()
+    print(features[10000:10200])
 print("n_samples: %d, n_features: %d" % X_train.shape)
 
 print("Extracting features from the test data using the same vectorizer")
@@ -339,6 +341,7 @@ def benchmark(clf):
     test_time = time() - t0
     print("test time:  %0.3fs" % test_time)
 
+    trainScore = metrics.accuracy_score(y_train, clf.predict(X_train))
     score = metrics.accuracy_score(y_test, pred)
     precision = metrics.precision_score(y_test, pred, average = 'macro')
     recall = metrics.recall_score(y_test, pred, average = 'macro')
@@ -369,7 +372,7 @@ def benchmark(clf):
 
     print()
     clf_descr = str(clf).split('(')[0]
-    return clf_descr, score, precision, recall, f1
+    return clf_descr, trainScore, score, precision, recall, f1
 
 
 results = []

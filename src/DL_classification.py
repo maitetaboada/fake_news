@@ -61,17 +61,18 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 from sklearn.utils import shuffle
 import pickle
 
-
-
-MAX_SEQUENCE_LENGTH = 1000
-MAX_NB_WORDS = 20000
 EMBEDDING_DIM = 300
+GLOVEFILE = "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"#../pretrained/glove.6B.100d.txt"): ## "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"):
+MAX_SEQUENCE_LENGTH = 500
+MAX_NB_WORDS = 20000
 VALIDATION_SPLIT = 0.2
 
 CLASSES = 5
 EPOCS = 10
+BATCHSIZE = 64
 USEKERAS = True
 LOAD_DATA_FROM_DISK = False
+
 
 
 def clean_str(string):
@@ -253,10 +254,10 @@ def sequence_processing(texts):
     return texts, word_index
 
 
-def load_embeddings( word_index , GLOVE_FILE = "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"):#../pretrained/glove.6B.100d.txt"): ## "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"):
+def load_embeddings( word_index , embedding_file = GLOVEFILE):
    print("Loading embeddings...")
    embeddings_index = {}
-   f = open(GLOVE_FILE)
+   f = open(embedding_file)
    for line in f:
        values = line.split()
        word = values[0]
@@ -565,23 +566,28 @@ model = prepare_cnn_model_2(word_index, embedding_matrix)#prepare_rnn_attn_model
 print("Model fitting...")
 
 current_loss = 10000
-
+results = ""
 for i in range(0, EPOCS):
     print("\n*** EPOC: " + str(i) )
     x_train, y_train = shuffle(x_train, y_train)
     if( USEKERAS ):
-        model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=64)
+        model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=BATCHSIZE)
     else:
-        model.fit(x_train, y_train, validation_set=0.1, n_epoch=1, show_metric=True, batch_size=64)
+        model.fit(x_train, y_train, validation_set=0.1, n_epoch=1, show_metric=True, batch_size=BATCHSIZE)
     prev_loss = current_loss
     current_loss = round(model.evaluate(x_val, y_val)[0],2)
     print("Loss on validation set: " + str(current_loss))
     if( current_loss > prev_loss):
         print("\n\n*** SHOULD STOP HERE! ***\n\n")
-    p = model.evaluate(x_test1, y_test1)
-    print("Accuracy on test1: " + str(p))
+    p1 = model.evaluate(x_train, y_train)
+    print("Accuracy on train: " + str(p1))
+    p2 = model.evaluate(x_val, y_val)
+    print("Accuracy on validation: " + str(p2))
 #    p = model.evaluate(x_test2, y_test2)
 #    print("Accuracy on  test2: " + str(p))
+    epoch_results = str(p1) + "\t" + str(p2) + "\n"
+    results = results + epoch_results
+print(results)
 
 
 
