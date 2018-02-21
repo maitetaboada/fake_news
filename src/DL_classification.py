@@ -1,5 +1,4 @@
 
-
 ## If you want to force CPU use instead of GPU
 #import os
 #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
@@ -15,7 +14,6 @@ else:
     import theano as tf
     print(tf.__version__)
     print(K.tensorflow_backend._get_available_gpus())
-
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
 print("*** Before setting allow_growth:")
@@ -27,26 +25,18 @@ print("*** After setting allow_growth:")
 print(config.gpu_options.per_process_gpu_memory_fraction)
 #session = tf.Session(config=config)
 set_session(tf.Session(config=config))
-
 ## Check if GPU is being used:
 from tensorflow.python.client import device_lib
 print("*** Listing devices:")
 print(device_lib.list_local_devices())
 
-
-
 import numpy as np
 import pandas as pd
-
 import re
-
 from bs4 import BeautifulSoup
 import random
-
 import os
 #os.environ['KERAS_BACKEND'] = 'theano'
-
-
 
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
@@ -61,6 +51,19 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 from sklearn.utils import shuffle
 import pickle
 
+
+## Setting random states
+np.random.seed(123)
+random.seed(123)
+tf.set_random_seed(123)
+# Force TensorFlow to use single thread.
+# Multiple threads are a potential source of
+# non-reproducible results.
+# For further details, see: https://stackoverflow.com/questions/42022950/which-seeds-have-to-be-set-where-to-realize-100-reproducibility-of-training-res
+# session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+
+
+
 EMBEDDING_DIM = 300
 GLOVEFILE = "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"#../pretrained/glove.6B.100d.txt"): ## "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"):
 MAX_SEQUENCE_LENGTH = 500
@@ -68,10 +71,71 @@ MAX_NB_WORDS = 20000
 VALIDATION_SPLIT = 0.2
 
 CLASSES = 5
-EPOCS = 10
-BATCHSIZE = 64
+EPOCS = 30
+BATCHSIZE = 128
 USEKERAS = True
 LOAD_DATA_FROM_DISK = False
+
+
+
+
+def prepare_cnn_model_1(word_index, embedding_matrix):
+   embedding_layer = Embedding(len(word_index) + 1,
+                               EMBEDDING_DIM,
+                               weights=[embedding_matrix],
+                               input_length=MAX_SEQUENCE_LENGTH,
+                               trainable=True)
+   sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+   embedded_sequences = embedding_layer(sequence_input)
+   l_cov1 = Conv1D(128, 2, activation='relu')(embedded_sequences)
+   l_pool1 = MaxPooling1D()(l_cov1)
+   l_dropout1 = Dropout(0.5)(l_pool1)
+   l_cov2 = Conv1D(128, 3, activation='relu')(l_dropout1)
+   l_pool2 = MaxPooling1D()(l_cov2)
+   l_cov3 = Conv1D(128, 5, activation='relu')(l_pool2)
+   l_pool3 = MaxPooling1D()(l_cov3)  # global max pooling
+   l_flat = Flatten()(l_pool3)
+   l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.05))(l_flat)
+   l_dropout2 = Dropout(0.25)(l_dense)
+   preds = Dense(CLASSES, activation='softmax')(l_dropout2)
+   model = Model(sequence_input, preds)
+   model.compile(loss='categorical_crossentropy',
+                 optimizer='rmsprop',
+                 metrics=['acc'])
+   return model
+
+
+def prepare_cnn_model_2(word_index, embedding_matrix):
+    embedding_layer = Embedding(len(word_index) + 1,
+                                EMBEDDING_DIM,
+                                weights=[embedding_matrix],
+                                input_length=MAX_SEQUENCE_LENGTH,
+                                trainable=True)
+    convs = []
+    filter_sizes = [3, 4, 5]
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    embedded_sequences = embedding_layer(sequence_input)
+    for fsz in filter_sizes:
+        l_conv = Conv1D(nb_filter=128, filter_length=fsz, activation='relu')(embedded_sequences)
+        l_pool = MaxPooling1D(5)(l_conv)
+        convs.append(l_pool)
+    l_merge = Merge(mode='concat', concat_axis=1)(convs)
+    l_cov1 = Conv1D(128, 5, activation='relu')(l_merge)
+    l_pool1 = MaxPooling1D(5)(l_cov1)
+    l_dropout1 = Dropout(0.5)(l_pool1)
+    l_cov2 = Conv1D(128, 5, activation='relu')(l_dropout1)
+    l_pool2 = MaxPooling1D(30)(l_cov2)
+    l_flat = Flatten()(l_pool2)
+    l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.2))(l_flat)
+    l_dropout2 = Dropout(0.5)(l_dense)
+    preds = Dense(CLASSES, activation='softmax')(l_dropout2)
+    model = Model(sequence_input, preds)
+    model.compile(loss='categorical_crossentropy',
+                  optimizer='rmsprop',
+                  metrics=['acc'])
+    return model
+
+
 
 
 
@@ -204,8 +268,7 @@ def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
 
 
 
-def balance_data(texts, labels, sample_size, discard_labels = [] , seed = 123):
-    np.random.seed(seed)
+def balance_data(texts, labels, sample_size, discard_labels = [] ):
     ## sample size is the number of items we want to have from EACH class
     unique, counts = np.unique(labels, return_counts=True)
     print(np.asarray((unique, counts)).T)
@@ -276,62 +339,6 @@ def load_embeddings( word_index , embedding_file = GLOVEFILE):
    return embedding_matrix
 
 
-
-def prepare_cnn_model_1(word_index, embedding_matrix):
-   embedding_layer = Embedding(len(word_index) + 1,
-                               EMBEDDING_DIM,
-                               weights=[embedding_matrix],
-                               input_length=MAX_SEQUENCE_LENGTH,
-                               trainable=True)
-   sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
-   embedded_sequences = embedding_layer(sequence_input)
-   l_cov1 = Conv1D(128, 2, activation='relu')(embedded_sequences)
-   l_pool1 = MaxPooling1D()(l_cov1)
-   l_dropout1 = Dropout(0.5)(l_pool1)
-   l_cov2 = Conv1D(128, 3, activation='relu')(l_dropout1)
-   l_pool2 = MaxPooling1D()(l_cov2)
-   l_cov3 = Conv1D(128, 5, activation='relu')(l_pool2)
-   l_pool3 = MaxPooling1D()(l_cov3)  # global max pooling
-   l_flat = Flatten()(l_pool3)
-   l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.2),activity_regularizer=regularizers.l1(0.1))(l_flat)
-   l_dropout2 = Dropout(0.5)(l_dense)
-   preds = Dense(CLASSES, activation='softmax')(l_dropout2)
-   model = Model(sequence_input, preds)
-   model.compile(loss='categorical_crossentropy',
-                 optimizer='rmsprop',
-                 metrics=['acc'])
-   return model
-
-
-def prepare_cnn_model_2(word_index, embedding_matrix):
-    embedding_layer = Embedding(len(word_index) + 1,
-                                EMBEDDING_DIM,
-                                weights=[embedding_matrix],
-                                input_length=MAX_SEQUENCE_LENGTH,
-                                trainable=True)
-    convs = []
-    filter_sizes = [3, 4, 5]
-    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
-    embedded_sequences = embedding_layer(sequence_input)
-    for fsz in filter_sizes:
-        l_conv = Conv1D(nb_filter=128, filter_length=fsz, activation='relu')(embedded_sequences)
-        l_pool = MaxPooling1D(5)(l_conv)
-        convs.append(l_pool)
-    l_merge = Merge(mode='concat', concat_axis=1)(convs)
-    l_cov1 = Conv1D(128, 5, activation='relu')(l_merge)
-    l_pool1 = MaxPooling1D(5)(l_cov1)
-    l_dropout1 = Dropout(0.5)(l_pool1)
-    l_cov2 = Conv1D(128, 5, activation='relu')(l_dropout1)
-    l_pool2 = MaxPooling1D(30)(l_cov2)
-    l_flat = Flatten()(l_pool2)
-    l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.2))(l_flat)
-    l_dropout2 = Dropout(0.5)(l_dense)
-    preds = Dense(CLASSES, activation='softmax')(l_dropout2)
-    model = Model(sequence_input, preds)
-    model.compile(loss='categorical_crossentropy',
-                  optimizer='rmsprop',
-                  metrics=['acc'])
-    return model
 
 
 def prepare_rnn_model_1(word_index, embedding_matrix):
@@ -561,7 +568,7 @@ print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
 
 
 print("Preparing the deep learning model...")
-model = prepare_cnn_model_2(word_index, embedding_matrix)#prepare_rnn_attn_model_tf(word_index, embedding_matrix)
+model = prepare_cnn_model_1(word_index, embedding_matrix)#prepare_rnn_attn_model_tf(word_index, embedding_matrix)
 # model.summary()
 print("Model fitting...")
 
