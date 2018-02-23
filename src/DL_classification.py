@@ -71,14 +71,14 @@ EMBEDDING_DIM = 300
 GLOVEFILE = "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"#../pretrained/glove.6B.100d.txt"): ## "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"):
 MAX_SEQUENCE_LENGTH = 1000
 MAX_NB_WORDS = 20000
-VALIDATION_SPLIT = 0.2
+
 
 CLASSES = 5
 EPOCS = 20
-BATCHSIZE = 128
+BATCHSIZE = 64
 USEKERAS = True
 LOAD_DATA_FROM_DISK = False
-RUNS = 30
+RUNS = 10
 
 
 
@@ -97,9 +97,9 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
    #l_cov2 = Conv1D(64, 3, activation='relu')(l_pool1)
    #l_pool2 = MaxPooling1D()(l_cov2)
    l_flat = Flatten()(l_pool1)
-   l_dense = Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.2))(l_flat)
-   l_dropout2 = Dropout(0.5)(l_dense)
-   preds = Dense(CLASSES, activation='softmax')(l_dropout2)
+   l_dense = Dense(64, activation='relu')(l_flat)
+   #l_dropout2 = Dropout(0.5)(l_dense)
+   preds = Dense(CLASSES, activation='softmax')(l_dense)
    model = Model(sequence_input, preds)
    model.compile(loss='categorical_crossentropy',
                  optimizer='rmsprop',
