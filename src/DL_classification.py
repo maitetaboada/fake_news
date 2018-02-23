@@ -69,7 +69,7 @@ import pickle
 
 EMBEDDING_DIM = 300
 GLOVEFILE = "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"#../pretrained/glove.6B.100d.txt"): ## "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"):
-MAX_SEQUENCE_LENGTH = 500
+MAX_SEQUENCE_LENGTH = 3000
 MAX_NB_WORDS = 20000
 VALIDATION_SPLIT = 0.2
 
@@ -78,7 +78,7 @@ EPOCS = 20
 BATCHSIZE = 128
 USEKERAS = True
 LOAD_DATA_FROM_DISK = True
-RUNS = 10
+RUNS = 30
 
 
 
@@ -641,16 +641,18 @@ for r in range(0, RUNS):
             run_results = "Best accuracy found at epoch " + str(i) + " : " + str(p1) + "\t" + str(p2) + "\t" + str(p3) + "\n"
             best_accuracy = accuracy
 
-    result2 = results2 + run_results
+    results2 = results2 + run_results
     print(results2)
-
-
 
 print("CNN 1 model:")
 print(results1)
 
 print("CNN 2 model:")
 print(results2)
+
+results_file = open("results" , 'w')
+results_file.write(results1 + results2)
+results_file.close()
 
 
 
