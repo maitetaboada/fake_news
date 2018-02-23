@@ -74,10 +74,10 @@ MAX_NB_WORDS = 20000
 VALIDATION_SPLIT = 0.2
 
 CLASSES = 5
-EPOCS = 30
+EPOCS = 20
 BATCHSIZE = 128
 USEKERAS = True
-LOAD_DATA_FROM_DISK = False
+LOAD_DATA_FROM_DISK = True
 RUNS = 10
 
 
@@ -91,15 +91,15 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
                                trainable=True)
    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
    embedded_sequences = embedding_layer(sequence_input)
-   l_cov1 = Conv1D(128, 2, activation='relu')(embedded_sequences)
+   l_cov1 = Conv1D(64, 2, activation='relu')(embedded_sequences)
    l_pool1 = MaxPooling1D()(l_cov1)
    l_dropout1 = Dropout(0.5)(l_pool1)
-   l_cov2 = Conv1D(128, 3, activation='relu')(l_dropout1)
+   l_cov2 = Conv1D(64, 3, activation='relu')(l_dropout1)
    l_pool2 = MaxPooling1D()(l_cov2)
-   l_cov3 = Conv1D(128, 5, activation='relu')(l_pool2)
+   l_cov3 = Conv1D(64, 5, activation='relu')(l_pool2)
    l_pool3 = MaxPooling1D()(l_cov3)  # global max pooling
    l_flat = Flatten()(l_pool3)
-   l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.05))(l_flat)
+   l_dense = Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.1))(l_flat)
    l_dropout2 = Dropout(0.5)(l_dense)
    preds = Dense(CLASSES, activation='softmax')(l_dropout2)
    model = Model(sequence_input, preds)
@@ -573,6 +573,7 @@ print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
 results = ""
 for r in range(0, RUNS):
     run_results = ""
+    best_accuracy = 0
     print("Preparing the deep learning model...")
     model = prepare_cnn_model_1(word_index, embedding_matrix)#prepare_rnn_attn_model_tf(word_index, embedding_matrix)
     # model.summary()
