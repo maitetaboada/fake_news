@@ -98,7 +98,7 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
    #l_pool2 = MaxPooling1D()(l_cov2)
    l_flat = Flatten()(l_pool1)
    l_dense = Dense(64, activation='relu')(l_flat)
-   #l_dropout2 = Dropout(0.5)(l_dense)
+   l_dropout2 = Dropout(0.5)(l_dense)
    preds = Dense(CLASSES, activation='softmax')(l_dense)
    model = Model(sequence_input, preds)
    model.compile(loss='categorical_crossentropy',
