@@ -609,6 +609,7 @@ for r in range(0, RUNS):
 
 results2 = ""
 for r in range(0, RUNS):
+    K.clear_session()
     run_results = ""
     best_accuracy = 0
     print("Preparing the deep learning model CNN2..."+ str(r))
