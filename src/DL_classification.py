@@ -91,14 +91,12 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
                                trainable=True)
    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
    embedded_sequences = embedding_layer(sequence_input)
-   l_cov1 = Conv1D(64, 2, activation='relu')(embedded_sequences)
+   l_cov1 = Conv1D(64, 3, activation='relu')(embedded_sequences)
    l_pool1 = MaxPooling1D()(l_cov1)
    #l_dropout1 = Dropout(0.5)(l_pool1)
-   l_cov2 = Conv1D(64, 3, activation='relu')(l_pool1)
-   l_pool2 = MaxPooling1D()(l_cov2)
-   l_cov3 = Conv1D(64, 5, activation='relu')(l_pool2)
-   l_pool3 = MaxPooling1D()(l_cov3)  # global max pooling
-   l_flat = Flatten()(l_pool3)
+   #l_cov2 = Conv1D(64, 3, activation='relu')(l_pool1)
+   #l_pool2 = MaxPooling1D()(l_cov2)
+   l_flat = Flatten()(l_pool1)
    l_dense = Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.1))(l_flat)
    l_dropout2 = Dropout(0.5)(l_dense)
    preds = Dense(CLASSES, activation='softmax')(l_dropout2)
@@ -608,6 +606,7 @@ for r in range(0, RUNS):
     print(results1)
 
 results2 = ""
+'''
 for r in range(0, RUNS):
     K.clear_session()
     run_results = ""
@@ -644,7 +643,7 @@ for r in range(0, RUNS):
 
     results2 = results2 + run_results
     print(results2)
-
+'''
 print("CNN 1 model:")
 print(results1)
 
