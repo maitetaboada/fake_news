@@ -4,6 +4,16 @@
 #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
 #os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
+import numpy as np
+import pandas as pd
+import re
+from bs4 import BeautifulSoup
+import random
+
+## Setting random states
+np.random.seed(123)
+random.seed(123)
+
 ## Configuration for GPU limits:
 from keras import backend as K
 if 'tensorflow' == K.backend():
@@ -14,6 +24,9 @@ else:
     import theano as tf
     print(tf.__version__)
     print(K.tensorflow_backend._get_available_gpus())
+
+## Setting random states
+tf.set_random_seed(123)
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
 print("*** Before setting allow_growth:")
@@ -30,13 +43,6 @@ from tensorflow.python.client import device_lib
 print("*** Listing devices:")
 print(device_lib.list_local_devices())
 
-import numpy as np
-import pandas as pd
-import re
-from bs4 import BeautifulSoup
-import random
-import os
-#os.environ['KERAS_BACKEND'] = 'theano'
 
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
@@ -46,16 +52,13 @@ from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout, LSTM, 
 from keras.models import Model
 from keras.engine.topology import Layer, InputSpec
 from keras import initializers, regularizers
-
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.utils import shuffle
 import pickle
 
 
-## Setting random states
-np.random.seed(123)
-random.seed(123)
-tf.set_random_seed(123)
+
+
 # Force TensorFlow to use single thread.
 # Multiple threads are a potential source of
 # non-reproducible results.
@@ -75,6 +78,7 @@ EPOCS = 30
 BATCHSIZE = 128
 USEKERAS = True
 LOAD_DATA_FROM_DISK = False
+RUNS = 10
 
 
 
@@ -566,34 +570,40 @@ print (y_val.sum(axis=0)/(1.0*len(y_val)))
 print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
 #print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
 
-
-print("Preparing the deep learning model...")
-model = prepare_cnn_model_1(word_index, embedding_matrix)#prepare_rnn_attn_model_tf(word_index, embedding_matrix)
-# model.summary()
-print("Model fitting...")
-
-current_loss = 10000
 results = ""
-for i in range(0, EPOCS):
-    print("\n*** EPOC: " + str(i) )
-    x_train, y_train = shuffle(x_train, y_train)
-    if( USEKERAS ):
-        model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=BATCHSIZE)
-    else:
-        model.fit(x_train, y_train, validation_set=0.1, n_epoch=1, show_metric=True, batch_size=BATCHSIZE)
-    prev_loss = current_loss
-    current_loss = round(model.evaluate(x_val, y_val)[0],2)
-    print("Loss on validation set: " + str(current_loss))
-    if( current_loss > prev_loss):
-        print("\n\n*** SHOULD STOP HERE! ***\n\n")
-    p1 = model.evaluate(x_train, y_train)
-    print("Accuracy on train: " + str(p1))
-    p2 = model.evaluate(x_val, y_val)
-    print("Accuracy on validation: " + str(p2))
-#    p = model.evaluate(x_test2, y_test2)
-#    print("Accuracy on  test2: " + str(p))
-    epoch_results = str(p1) + "\t" + str(p2) + "\n"
-    results = results + epoch_results
+for r in range(0, RUNS):
+    run_results = ""
+    print("Preparing the deep learning model...")
+    model = prepare_cnn_model_1(word_index, embedding_matrix)#prepare_rnn_attn_model_tf(word_index, embedding_matrix)
+    # model.summary()
+    print("Model fitting...")
+    current_loss = 10000
+    for i in range(0, EPOCS):
+        print("\n*** EPOC: " + str(i) )
+        x_train, y_train = shuffle(x_train, y_train)
+        if( USEKERAS ):
+            model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=BATCHSIZE)
+        else:
+            model.fit(x_train, y_train, validation_set=0.1, n_epoch=1, show_metric=True, batch_size=BATCHSIZE)
+        prev_loss = current_loss
+        current_loss = round(model.evaluate(x_val, y_val)[0],2)
+        print("Loss on validation set: " + str(current_loss))
+        if( current_loss > prev_loss):
+            print("\n\n*** SHOULD STOP HERE! ***\n\n")
+        p1 = model.evaluate(x_train, y_train)
+        print("Accuracy on train: " + str(p1))
+        p2 = model.evaluate(x_val, y_val)
+        print("Accuracy on validation: " + str(p2))
+    #    p = model.evaluate(x_test2, y_test2)
+    #    print("Accuracy on  test2: " + str(p))
+        accuracy = p2[1]
+        print("Accuracy number" + str(accuracy))
+        if( best_accuracy < accuracy):
+            p3 = model.evaluate(x_test1, y_test1)
+            run_results = "Best accuracy found at epoch " + str(i) + " : " + str(p1) + "\t" + str(p2) + "\t" + str(p3) + "\n"
+            best_accuracy = accuracy
+
+    results = results + run_results
 print(results)
 
 
