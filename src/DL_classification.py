@@ -77,7 +77,7 @@ CLASSES = 5
 EPOCS = 20
 BATCHSIZE = 128
 USEKERAS = True
-LOAD_DATA_FROM_DISK = True
+LOAD_DATA_FROM_DISK = True      
 RUNS = 30
 
 
@@ -97,7 +97,7 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
    #l_cov2 = Conv1D(64, 3, activation='relu')(l_pool1)
    #l_pool2 = MaxPooling1D()(l_cov2)
    l_flat = Flatten()(l_pool1)
-   l_dense = Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.1))(l_flat)
+   l_dense = Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.2))(l_flat)
    l_dropout2 = Dropout(0.5)(l_dense)
    preds = Dense(CLASSES, activation='softmax')(l_dropout2)
    model = Model(sequence_input, preds)
@@ -554,6 +554,7 @@ print('Shape of label tensor:', labels_test1.shape)
 embedding_matrix = load_embeddings(word_index)
 
 
+
 x_train = texts_train
 y_train = labels_train
 x_val = texts_valid
@@ -573,6 +574,10 @@ print (y_train.sum(axis=0)/(1.0*len(y_train)))
 print (y_val.sum(axis=0)/(1.0*len(y_val)))
 print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
 #print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
+
+print("Maximum string length:")
+mylen = np.vectorize(len)
+print (mylen(x_train))
 
 results1 = ""
 for r in range(0, RUNS):
