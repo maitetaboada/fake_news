@@ -69,7 +69,7 @@ import pickle
 
 EMBEDDING_DIM = 300
 GLOVEFILE = "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"#../pretrained/glove.6B.100d.txt"): ## "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"):
-MAX_SEQUENCE_LENGTH = 500
+MAX_SEQUENCE_LENGTH = 1000
 MAX_NB_WORDS = 20000
 VALIDATION_SPLIT = 0.2
 
@@ -499,6 +499,14 @@ else:
     texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
     texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
     texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
+
+    texts_train.dump("../dump/trainRaw")
+    texts_valid.dump("../dump/validRaw")
+    texts_test1.dump("../dump/testRaw")
+    labels_train.dump("../dump/trainlRaw")
+    labels_valid.dump("../dump/validlRaw")
+    labels_test1.dump("../dump/testlRaw")
+
     labels_test1 = to_cat(np.asarray(labels_test1))
     labels_valid = to_cat(np.asarray(labels_valid))
     labels_train = to_cat(np.asarray(labels_train))
@@ -509,7 +517,6 @@ else:
     labels_test1 = np.asarray(labels_test1)
     # labels_test2 = np.asarray(labels_test2)
 
-
     #texts = texts_train + texts_valid + texts_test1 #+ texts_test2
     texts = np.concatenate((texts_train , texts_valid , texts_test1))
     texts, word_index = sequence_processing(texts)
@@ -517,7 +524,6 @@ else:
     texts_valid = texts[len(labels_train): len(labels_train) + len(labels_valid)]
     texts_test1 = texts[len(labels_train) + len(labels_valid): len(labels_train) + len(labels_valid) + len(labels_test1)]
     #texts_test2 = texts[len(labels_train) + len(labels_valid) + len(labels_test1):]
-
 
     texts_train.dump("../dump/train")
     texts_valid.dump("../dump/valid")
