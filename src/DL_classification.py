@@ -93,8 +93,8 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
    embedded_sequences = embedding_layer(sequence_input)
    l_cov1 = Conv1D(64, 2, activation='relu')(embedded_sequences)
    l_pool1 = MaxPooling1D()(l_cov1)
-   l_dropout1 = Dropout(0.5)(l_pool1)
-   l_cov2 = Conv1D(64, 3, activation='relu')(l_dropout1)
+   #l_dropout1 = Dropout(0.5)(l_pool1)
+   l_cov2 = Conv1D(64, 3, activation='relu')(l_pool1)
    l_pool2 = MaxPooling1D()(l_cov2)
    l_cov3 = Conv1D(64, 5, activation='relu')(l_pool2)
    l_pool3 = MaxPooling1D()(l_cov3)  # global max pooling
@@ -126,11 +126,11 @@ def prepare_cnn_model_2(word_index, embedding_matrix):
     l_merge = Merge(mode='concat', concat_axis=1)(convs)
     l_cov1 = Conv1D(128, 5, activation='relu')(l_merge)
     l_pool1 = MaxPooling1D(5)(l_cov1)
-    l_dropout1 = Dropout(0.5)(l_pool1)
-    l_cov2 = Conv1D(128, 5, activation='relu')(l_dropout1)
+    #l_dropout1 = Dropout(0.5)(l_pool1)
+    l_cov2 = Conv1D(128, 5, activation='relu')(l_pool1)
     l_pool2 = MaxPooling1D(30)(l_cov2)
     l_flat = Flatten()(l_pool2)
-    l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.2))(l_flat)
+    l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.1))(l_flat)
     l_dropout2 = Dropout(0.5)(l_dense)
     preds = Dense(CLASSES, activation='softmax')(l_dropout2)
     model = Model(sequence_input, preds)
@@ -570,7 +570,7 @@ print (y_val.sum(axis=0)/(1.0*len(y_val)))
 print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
 #print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
 
-results = ""
+results1 = ""
 for r in range(0, RUNS):
     run_results = ""
     best_accuracy = 0
@@ -604,8 +604,49 @@ for r in range(0, RUNS):
             run_results = "Best accuracy found at epoch " + str(i) + " : " + str(p1) + "\t" + str(p2) + "\t" + str(p3) + "\n"
             best_accuracy = accuracy
 
-    results = results + run_results
-print(results)
+    results1 = results1 + run_results
+
+results2 = ""
+for r in range(0, RUNS):
+    run_results = ""
+    best_accuracy = 0
+    print("Preparing the deep learning model...")
+    model = prepare_cnn_model_2(word_index, embedding_matrix)#prepare_rnn_attn_model_tf(word_index, embedding_matrix)
+    # model.summary()
+    print("Model fitting...")
+    current_loss = 10000
+    for i in range(0, EPOCS):
+        print("\n*** EPOC: " + str(i) )
+        x_train, y_train = shuffle(x_train, y_train)
+        if( USEKERAS ):
+            model.fit(x_train, y_train, validation_data=(x_val, y_val), nb_epoch=1, batch_size=BATCHSIZE)
+        else:
+            model.fit(x_train, y_train, validation_set=0.1, n_epoch=1, show_metric=True, batch_size=BATCHSIZE)
+        prev_loss = current_loss
+        current_loss = round(model.evaluate(x_val, y_val)[0],2)
+        print("Loss on validation set: " + str(current_loss))
+        if( current_loss > prev_loss):
+            print("\n\n*** SHOULD STOP HERE! ***\n\n")
+        p1 = model.evaluate(x_train, y_train)
+        print("Accuracy on train: " + str(p1))
+        p2 = model.evaluate(x_val, y_val)
+        print("Accuracy on validation: " + str(p2))
+    #    p = model.evaluate(x_test2, y_test2)
+    #    print("Accuracy on  test2: " + str(p))
+        accuracy = p2[1]
+        print("Accuracy number" + str(accuracy))
+        if( best_accuracy < accuracy):
+            p3 = model.evaluate(x_test1, y_test1)
+            run_results = "Best accuracy found at epoch " + str(i) + " : " + str(p1) + "\t" + str(p2) + "\t" + str(p3) + "\n"
+            best_accuracy = accuracy
+
+    result2 = results2 + run_results
+
+print("CNN 1 model:")
+print(results1)
+
+print("CNN 2 model:")
+print(results2)
 
 
 
