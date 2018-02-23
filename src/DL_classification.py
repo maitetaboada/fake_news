@@ -77,7 +77,7 @@ CLASSES = 5
 EPOCS = 20
 BATCHSIZE = 128
 USEKERAS = True
-LOAD_DATA_FROM_DISK = True      
+LOAD_DATA_FROM_DISK = False
 RUNS = 30
 
 
@@ -496,6 +496,10 @@ if LOAD_DATA_FROM_DISK:
 
 else:
     texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+    print("Maximum string length:")
+    mylen = np.vectorize(len)
+    print (mylen(texts))
+
     texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
     texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
     texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
@@ -574,10 +578,6 @@ print (y_train.sum(axis=0)/(1.0*len(y_train)))
 print (y_val.sum(axis=0)/(1.0*len(y_val)))
 print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
 #print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
-
-print("Maximum string length:")
-mylen = np.vectorize(len)
-print (mylen(x_train))
 
 results1 = ""
 for r in range(0, RUNS):
