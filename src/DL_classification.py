@@ -69,7 +69,7 @@ import pickle
 
 EMBEDDING_DIM = 300
 GLOVEFILE = "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"#../pretrained/glove.6B.100d.txt"): ## "../pretrained/Gloved-GoogleNews-vectors-negative300.txt"):
-MAX_SEQUENCE_LENGTH = 3000
+MAX_SEQUENCE_LENGTH = 500
 MAX_NB_WORDS = 20000
 VALIDATION_SPLIT = 0.2
 
