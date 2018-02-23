@@ -574,7 +574,7 @@ results1 = ""
 for r in range(0, RUNS):
     run_results = ""
     best_accuracy = 0
-    print("Preparing the deep learning model...")
+    print("Preparing the deep learning model CNN1..." + str(r))
     model = prepare_cnn_model_1(word_index, embedding_matrix)#prepare_rnn_attn_model_tf(word_index, embedding_matrix)
     # model.summary()
     print("Model fitting...")
@@ -605,12 +605,13 @@ for r in range(0, RUNS):
             best_accuracy = accuracy
 
     results1 = results1 + run_results
+    print(results1)
 
 results2 = ""
 for r in range(0, RUNS):
     run_results = ""
     best_accuracy = 0
-    print("Preparing the deep learning model...")
+    print("Preparing the deep learning model CNN2..."+ str(r))
     model = prepare_cnn_model_2(word_index, embedding_matrix)#prepare_rnn_attn_model_tf(word_index, embedding_matrix)
     # model.summary()
     print("Model fitting...")
@@ -641,6 +642,9 @@ for r in range(0, RUNS):
             best_accuracy = accuracy
 
     result2 = results2 + run_results
+    print(results2)
+
+
 
 print("CNN 1 model:")
 print(results1)
