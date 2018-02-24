@@ -97,7 +97,7 @@ def prepare_cnn_model_1(word_index, embedding_matrix):
    #l_cov2 = Conv1D(64, 3, activation='relu')(l_pool1)
    #l_pool2 = MaxPooling1D()(l_cov2)
    l_flat = Flatten()(l_pool1)
-   l_dense = Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.3))(l_flat)
+   l_dense = Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.1))(l_flat)
    l_dropout2 = Dropout(0.5)(l_dense)
    preds = Dense(CLASSES, activation='softmax')(l_dropout2)
    model = Model(sequence_input, preds)
@@ -128,7 +128,7 @@ def prepare_cnn_model_2(word_index, embedding_matrix):
     l_cov2 = Conv1D(128, 5, activation='relu')(l_pool1)
     l_pool2 = MaxPooling1D(30)(l_cov2)
     l_flat = Flatten()(l_pool2)
-    l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.3))(l_flat)
+    l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.5))(l_flat)
     l_dropout2 = Dropout(0.5)(l_dense)
     preds = Dense(CLASSES, activation='softmax')(l_dropout2)
     model = Model(sequence_input, preds)
@@ -580,7 +580,7 @@ print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
 #print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
 
 results1 = ""
-
+'''
 for r in range(0, RUNS):
     run_results = ""
     best_accuracy = 0
@@ -616,9 +616,8 @@ for r in range(0, RUNS):
 
     results1 = results1 + run_results
     print(results1)
-
-results2 = ""
 '''
+results2 = ""
 for r in range(0, RUNS):
     K.clear_session()
     run_results = ""
@@ -655,7 +654,7 @@ for r in range(0, RUNS):
 
     results2 = results2 + run_results
     print(results2)
-'''
+
 print("CNN 1 model:")
 print(results1)
 
