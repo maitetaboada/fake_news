@@ -73,12 +73,12 @@ MAX_SEQUENCE_LENGTH = 1000
 MAX_NB_WORDS = 20000
 
 
-CLASSES = 5
+CLASSES = 2
 EPOCS = 20
 BATCHSIZE = 64
 USEKERAS = True
-LOAD_DATA_FROM_DISK = True
-RUNS = 10
+LOAD_DATA_FROM_DISK = False
+RUNS = 3
 
 
 
@@ -128,7 +128,7 @@ def prepare_cnn_model_2(word_index, embedding_matrix):
     l_cov2 = Conv1D(128, 5, activation='relu')(l_pool1)
     l_pool2 = MaxPooling1D(30)(l_cov2)
     l_flat = Flatten()(l_pool2)
-    l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.5))(l_flat)
+    l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.3))(l_flat)
     l_dropout2 = Dropout(0.5)(l_dense)
     preds = Dense(CLASSES, activation='softmax')(l_dropout2)
     model = Model(sequence_input, preds)
@@ -205,15 +205,28 @@ def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/all-v02.txt
         text = BeautifulSoup(data_train.data[idx])
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.label[idx])
-    transdict = {
-        'ftrue': 0,
-        'mtrue': 1,
-        'mixture': 2 ,
-        'mfalse':3,
-        'ffalse': 4,
-        'pantsfire': 5,
-        'nofact': 6
-    }
+    if( CLASSES == 2):
+        transdict = {
+            'ftrue': 0,
+            'mtrue': 0,
+            'mfalse': 1,
+            'ffalse': 1,
+
+            'mixture': 4,
+            'pantsfire': 5,
+            'nofact': 6
+        }
+    else:
+        transdict = {
+            'ftrue': 0,
+            'mtrue': 1,
+            'mixture': 2 ,
+            'mfalse':3,
+            'ffalse': 4,
+
+            'pantsfire': 5,
+            'nofact': 6
+        }
     labels = [transdict[i] for i in labels]
     #labels = to_cat(np.asarray(labels))
     print(labels[0:6])
@@ -500,9 +513,15 @@ else:
     mylen = np.vectorize(len)
     print (mylen(texts))
 
-    texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
-    texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
-    texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
+    if( CLASSES == 2 ):
+        texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [2,3,4,5,6])
+        texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [2,3,4,5,6])
+        texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [2,3,4,5,6])
+
+    else:
+        texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
+        texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
+        texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
 
     texts_train.dump("../dump/trainRaw")
     texts_valid.dump("../dump/validRaw")
@@ -580,7 +599,7 @@ print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
 #print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
 
 results1 = ""
-'''
+
 for r in range(0, RUNS):
     run_results = ""
     best_accuracy = 0
@@ -616,7 +635,7 @@ for r in range(0, RUNS):
 
     results1 = results1 + run_results
     print(results1)
-'''
+
 results2 = ""
 for r in range(0, RUNS):
     K.clear_session()
