@@ -514,9 +514,9 @@ else:
     print (mylen(texts))
 
     if( CLASSES == 2 ):
-        texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [2,3,4,5,6])
-        texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [2,3,4,5,6])
-        texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [2,3,4,5,6])
+        texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 400, [2,3,4,5,6])
+        texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 400, [2,3,4,5,6])
+        texts_train, labels_train, texts, labels = balance_data(texts, labels, 1400, [2,3,4,5,6])
 
     else:
         texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
