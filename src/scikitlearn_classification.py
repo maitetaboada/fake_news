@@ -40,6 +40,12 @@ from keras.utils.np_utils import to_categorical as to_cat
 
 
 
+
+LOAD_DATA_FROM_DISK = True
+CLASSES = 2
+
+
+
 # Display progress logs on stdout
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s')
@@ -261,19 +267,56 @@ def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
 ##texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
 #texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
 
-texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
-
-texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
-texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
-texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
 
 
+#texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+
+#texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
+#texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
+#texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
 
 
-#texts_test2, labels_test2 = load_data_combined()
+import pickle
+
+if LOAD_DATA_FROM_DISK:
+    texts_train = np.load("../dump/trainRaw")
+    texts_valid = np.load("../dump/validRaw")
+    texts_test1 = np.load("../dump/testRaw")
+    labels_train = np.load("../dump/trainlRaw")
+    labels_valid = np.load("../dump/validlRaw")
+    labels_test1 = np.load("../dump/testlRaw")
+
+    print("Data loaded from disk!")
+
+else:
+    texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+    print("Maximum string length:")
+    mylen = np.vectorize(len)
+    print (mylen(texts))
+
+    if( CLASSES == 2 ):
+        texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 400, [2,3,4,5,6])
+        texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 400, [2,3,4,5,6])
+        texts_train, labels_train, texts, labels = balance_data(texts, labels, 1400, [2,3,4,5,6])
+
+    else:
+        texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
+        texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
+        texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
+
+    texts_train.dump("../dump/trainRaw")
+    texts_valid.dump("../dump/validRaw")
+    texts_test1.dump("../dump/testRaw")
+    labels_train.dump("../dump/trainlRaw")
+    labels_valid.dump("../dump/validlRaw")
+    labels_test1.dump("../dump/testlRaw")
+
+    print("Data dumped to disk!")
+
+
 
 y_train = labels_train
-y_test = labels_test1
+y_test = labels_valid
 target_names, counts = np.unique(y_train, return_counts= True)
 print(np.asarray((target_names, counts)).T)
 
@@ -292,7 +335,7 @@ else:
 print("n_samples: %d, n_features: %d" % X_train.shape)
 
 print("Extracting features from the test data using the same vectorizer")
-X_test = vectorizer.transform(texts_test1)
+X_test = vectorizer.transform(texts_valid)
 print("n_samples: %d, n_features: %d" % X_test.shape)
 
 
