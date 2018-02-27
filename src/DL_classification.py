@@ -128,7 +128,7 @@ def prepare_cnn_model_2(word_index, embedding_matrix):
     l_cov2 = Conv1D(128, 5, activation='relu')(l_pool1)
     l_pool2 = MaxPooling1D(30)(l_cov2)
     l_flat = Flatten()(l_pool2)
-    l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.3))(l_flat)
+    l_dense = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.1))(l_flat)
     l_dropout2 = Dropout(0.5)(l_dense)
     preds = Dense(CLASSES, activation='softmax')(l_dropout2)
     model = Model(sequence_input, preds)
