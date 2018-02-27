@@ -78,7 +78,7 @@ EPOCS = 20
 BATCHSIZE = 64
 USEKERAS = True
 LOAD_DATA_FROM_DISK = True
-RUNS = 5
+RUNS = 10
 
 
 
@@ -599,7 +599,7 @@ print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
 #print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
 
 results1 = ""
-
+'''
 for r in range(0, RUNS):
     run_results = ""
     best_accuracy = 0
@@ -635,7 +635,7 @@ for r in range(0, RUNS):
 
     results1 = results1 + run_results
     print(results1)
-
+'''
 results2 = ""
 for r in range(0, RUNS):
     K.clear_session()
