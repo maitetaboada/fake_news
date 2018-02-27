@@ -36,13 +36,12 @@ from sklearn import metrics
 from bs4 import BeautifulSoup
 import re
 import pandas as pd
-from keras.utils.np_utils import to_categorical as to_cat
 
 
 
 
 LOAD_DATA_FROM_DISK = True
-CLASSES = 2
+CLASSES = 5
 
 
 
@@ -276,7 +275,7 @@ def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
 #texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
 
 
-import pickle
+
 
 if LOAD_DATA_FROM_DISK:
     texts_train = np.load("../dump/trainRaw")
@@ -316,26 +315,26 @@ else:
 
 
 y_train = labels_train
-y_test = labels_valid
+y_test = labels_test1
 target_names, counts = np.unique(y_train, return_counts= True)
 print(np.asarray((target_names, counts)).T)
 
 print("Extracting features from the training data using a sparse vectorizer")
 t0 = time()
-if opts.use_hashing:
+if (False): #opts.use_hashing:
     vectorizer = HashingVectorizer(stop_words='english', alternate_sign=False,
                                    n_features=opts.n_features)
     X_train = vectorizer.transform(texts_train)
 else:
-    vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
-                                 stop_words='english',ngram_range=(1,2))
+    vectorizer = TfidfVectorizer(sublinear_tf=False, max_df=0.5,
+                                 stop_words='english',ngram_range=(1,3))
     X_train = vectorizer.fit_transform(texts_train)
     features = vectorizer.get_feature_names()
-    print(features[10000:10200])
+    print(features[300000:300200])
 print("n_samples: %d, n_features: %d" % X_train.shape)
 
 print("Extracting features from the test data using the same vectorizer")
-X_test = vectorizer.transform(texts_valid)
+X_test = vectorizer.transform(texts_test1)
 print("n_samples: %d, n_features: %d" % X_test.shape)
 
 
@@ -415,7 +414,7 @@ def benchmark(clf):
 
     print()
     clf_descr = str(clf).split('(')[0]
-    return clf_descr, trainScore, score, precision, recall, f1
+    return clf_descr, trainScore, score, precision, recall, f1, mse
 
 
 results = []
