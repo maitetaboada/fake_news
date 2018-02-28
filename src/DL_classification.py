@@ -73,7 +73,7 @@ MAX_SEQUENCE_LENGTH = 1000
 MAX_NB_WORDS = 20000
 
 
-CLASSES = 2
+CLASSES = 5
 EPOCS = 20
 BATCHSIZE = 64
 USEKERAS = True
@@ -502,6 +502,7 @@ if LOAD_DATA_FROM_DISK:
     labels_train = np.load("../dump/trainl")
     labels_valid = np.load("../dump/validl")
     labels_test1 = np.load("../dump/testl")
+    labels_test1_point = np.load("../dump/testlRaw")
     file = open("../dump/wordIndex", "rb")
     word_index = pickle.load(file)
 
@@ -636,8 +637,8 @@ for r in range(0, RUNS):
             print("*"*30)
             pred = model.predict(x_test1)
             print("confusion matrix:")
+            print(pd.DataFrame({'Predicted': pred, 'Expected': labels_test1_point}))
             print(metrics.confusion_matrix(y_test1, pred))
-            print(pd.DataFrame({'Predicted': pred, 'Expected': y_test1}))
             print("*" * 30)
 
     results1 = results1 + run_results
