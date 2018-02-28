@@ -637,7 +637,8 @@ for r in range(0, RUNS):
             print("*"*30)
             pred = model.predict(x_test1)
             print("confusion matrix:")
-            print(pd.DataFrame({'Predicted': pred, 'Expected': labels_test1_point}))
+            #print(pd.DataFrame({'Predicted': pred, 'Expected': labels_test1_point}))
+            print(np.amax(pred, axis = 1))
             print(metrics.confusion_matrix(y_test1, pred))
             print("*" * 30)
 
