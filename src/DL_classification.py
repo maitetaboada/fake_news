@@ -55,7 +55,7 @@ from keras import initializers, regularizers
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.utils import shuffle
 import pickle
-
+from sklearn import metrics
 
 
 
@@ -78,7 +78,7 @@ EPOCS = 20
 BATCHSIZE = 64
 USEKERAS = True
 LOAD_DATA_FROM_DISK = True
-RUNS = 5
+RUNS = 1
 
 
 
@@ -599,7 +599,7 @@ print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
 #print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
 
 results1 = ""
-'''
+
 for r in range(0, RUNS):
     run_results = ""
     best_accuracy = 0
@@ -632,6 +632,13 @@ for r in range(0, RUNS):
             p3 = model.evaluate(x_test1, y_test1)
             run_results = "Best accuracy found at epoch " + str(i) + " : " + str(p1) + "\t" + str(p2) + "\t" + str(p3) + "\n"
             best_accuracy = accuracy
+
+            print("*"*30)
+            pred = model.predict(x_test1)
+            print("confusion matrix:")
+            print(metrics.confusion_matrix(y_test1, pred))
+            print(pd.DataFrame({'Predicted': pred, 'Expected': y_test1}))
+            print("*" * 30)
 
     results1 = results1 + run_results
     print(results1)
@@ -673,7 +680,7 @@ for r in range(0, RUNS):
 
     results2 = results2 + run_results
     print(results2)
-
+'''
 print("CNN 1 model:")
 print(results1)
 
