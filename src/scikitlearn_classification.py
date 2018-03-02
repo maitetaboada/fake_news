@@ -423,7 +423,7 @@ def plot_tfidf_classfeats_h(dfs):
         plt.subplots_adjust(bottom=0.09, right=0.97, left=0.15, top=0.95, wspace=0.52)
     plt.show()
 
-'''
+
 features = vectorizer.get_feature_names()
 
 indices = np.argsort(vectorizer.idf_)[::-1]
@@ -434,7 +434,7 @@ print(top_features)
 dfs = top_feats_by_class(X_train, y_train, features, min_tfidf=0.2, top_n=40)
 print(dfs)
 plot_tfidf_classfeats_h(dfs)
-'''
+
 
 
 
