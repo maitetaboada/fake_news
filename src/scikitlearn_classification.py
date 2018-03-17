@@ -41,7 +41,7 @@ import pandas as pd
 
 
 LOAD_DATA_FROM_DISK = True
-CLASSES = 5
+CLASSES = 2
 
 
 
@@ -447,6 +447,9 @@ plot_tfidf_classfeats_h(dfs)
 def benchmark(clf):
     print('_' * 80)
     print("Training: ")
+
+    print("Sample training vectors:")
+    #print(X_train[0])
     print(clf)
     t0 = time()
     clf.fit(X_train, y_train)

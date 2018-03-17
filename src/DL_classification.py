@@ -504,9 +504,13 @@ if LOAD_DATA_FROM_DISK:
     labels_test1 = np.load("../dump/testl")
     labels_test1_point = np.load("../dump/testlRaw")
     file = open("../dump/wordIndex", "rb")
+
     word_index = pickle.load(file)
 
+
     print("Data loaded from disk!")
+
+'''
 
 else:
     texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
@@ -530,6 +534,12 @@ else:
     labels_train.dump("../dump/trainlRaw")
     labels_valid.dump("../dump/validlRaw")
     labels_test1.dump("../dump/testlRaw")
+    labels_test1.dump("../dump/testlRaw")
+    np.savetxt("../dump/trainTable.csv", texts_train, delimiter=",", fmt="%s")
+    np.savetxt("../dump/validTable.csv", texts_valid, delimiter=",", fmt="%s")
+    np.savetxt("../dump/testTable.csv", texts_test1, delimiter=",", fmt="%s")
+
+
 
     labels_test1 = to_cat(np.asarray(labels_test1))
     labels_valid = to_cat(np.asarray(labels_valid))
@@ -557,6 +567,12 @@ else:
     labels_test1.dump("../dump/testl")
     file = open("../dump/wordIndex", "wb")
     pickle.dump(word_index, file)
+    
+    keys = word_index.keys()
+    thefile = open("../dump/vocab.txt","w")
+    for item in keys: 
+        thefile.write("%s\n" % item)
+    
 
     print("Data dumped to disk!")
 
@@ -644,7 +660,7 @@ for r in range(0, RUNS):
 
     results1 = results1 + run_results
     print(results1)
-'''
+
 results2 = ""
 for r in range(0, RUNS):
     K.clear_session()
@@ -682,7 +698,7 @@ for r in range(0, RUNS):
 
     results2 = results2 + run_results
     print(results2)
-'''
+
 print("CNN 1 model:")
 print(results1)
 
@@ -693,6 +709,7 @@ results_file = open("results" , 'w')
 results_file.write(results1 + results2)
 results_file.close()
 
+'''
 
 
 ### SCRATCH CODE:

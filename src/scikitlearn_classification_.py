@@ -36,14 +36,13 @@ from sklearn import metrics
 from bs4 import BeautifulSoup
 import re
 import pandas as pd
-from keras.utils.np_utils import to_categorical as to_cat
 
-
+LOAD_DATA_FROM_DISK = True
+CLASSES = 5
 
 # Display progress logs on stdout
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s')
-
 
 # parse commandline arguments
 op = OptionParser()
@@ -67,7 +66,7 @@ op.add_option("--use_hashing",
               action="store_true",
               help="Use a hashing vectorizer.")
 op.add_option("--n_features",
-              action="store", type=int, default=2 ** 16, #default=2 ** 16,
+              action="store", type=int, default=2 ** 16,  # default=2 ** 16,
               help="n_features when using the hashing vectorizer.")
 op.add_option("--filtered",
               action="store_true",
@@ -77,6 +76,7 @@ op.add_option("--filtered",
 
 def is_interactive():
     return not hasattr(sys.modules['__main__'], '__file__')
+
 
 # work-around for Jupyter notebook and IPython console
 argv = [] if is_interactive() else sys.argv[1:]
@@ -88,8 +88,6 @@ if len(args) > 0:
 print(__doc__)
 op.print_help()
 print()
-
-
 
 
 def clean_str(string):
@@ -105,7 +103,7 @@ def clean_str(string):
 
 def load_data_liar(file_name):
     print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header=None, names=["id", "label","data"], usecols=[0,1,2])
+    data_train = pd.read_table(file_name, sep='\t', header=None, names=["id", "label", "data"], usecols=[0, 1, 2])
     print(data_train.shape)
     texts = []
     labels = []
@@ -122,16 +120,15 @@ def load_data_liar(file_name):
         'pants-fire': 6
     }
     labels = [transdict[i] for i in labels]
-    #labels = to_cat(np.asarray(labels))  #uncomment this for vectorized one-hot representation
+    # labels = to_cat(np.asarray(labels))  #uncomment this for vectorized one-hot representation
     print(texts[0:6])
     print(labels[0:6])
     return texts, labels
 
 
-
-def load_data_rubin(file_name = "../data/rubin/data.txt"):
+def load_data_rubin(file_name="../data/rubin/data.txt"):
     print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header= None, names=["label", "data"], usecols=[0,1])
+    data_train = pd.read_table(file_name, sep='\t', header=None, names=["label", "data"], usecols=[0, 1])
     print(data_train.shape)
     texts = []
     labels = []
@@ -139,16 +136,19 @@ def load_data_rubin(file_name = "../data/rubin/data.txt"):
         text = BeautifulSoup(data_train.data[idx])
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.label[idx])
-    #labels = to_cat(np.asarray(labels))
+    # labels = to_cat(np.asarray(labels))
     print(labels[0:6])
     return texts, labels
 
 
-
-def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/rumor-buzzfeed-v01-all.txt"):
+def load_data_combined(file_name="../data/buzzfeed-debunk-combined/all-v02.txt"):
     print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header= None, names=["id",	"url",	"label", "data", "source", "domain"], usecols=[2,3])
+    data_train = pd.read_table(file_name, sep='\t', header=None,
+                               names=["id", "url", "label", "data", "domain", "source"], usecols=[2, 3])
     print(data_train.shape)
+    print(data_train.label[0:10])
+    print(data_train.label.unique())
+    # print(data_train[data_train["label"].isnull()])
     texts = []
     labels = []
     for idx in range(data_train.data.shape[0]):
@@ -156,38 +156,40 @@ def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/rumor-buzzf
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.label[idx])
     transdict = {
-        'ftrue': 1,
-        'mtrue': 2,
-        'mixture': 3 ,
-        'mfalse':4,
-        'ffalse': 5,
-        'pantsfire': 6,
-        'nofact': 7
+        'ftrue': 0,
+        'mtrue': 1,
+        'mixture': 2,
+        'mfalse': 3,
+        'ffalse': 4,
+        'pantsfire': 5,
+        'nofact': 6
     }
     labels = [transdict[i] for i in labels]
-    #labels = to_cat(np.asarray(labels))
+    # labels = to_cat(np.asarray(labels))
     print(labels[0:6])
     return texts, labels
 
+
 import random
 
-def balance_data(texts, labels, sample_size, discard_labels = [] ):
-    np.random.seed(123)
+
+def balance_data(texts, labels, sample_size, discard_labels=[], seed=123):
+    np.random.seed(seed)
     ## sample size is the number of items we want to have from EACH class
     unique, counts = np.unique(labels, return_counts=True)
     print(np.asarray((unique, counts)).T)
     all_index = np.empty([0], dtype=int)
     for l, f in zip(unique, counts):
-        if (l in discard_labels ):
-            print ("Discarding items for label " + str( l))
+        if (l in discard_labels):
+            print("Discarding items for label " + str(l))
             continue
-        l_index = (np.where( labels ==  l )[0]).tolist()  ## index of input data with current label
-        if( sample_size - f > 0 ):
-            #print "Upsampling ", sample_size - f, " items for class ", l
+        l_index = (np.where(labels == l)[0]).tolist()  ## index of input data with current label
+        if (sample_size - f > 0):
+            # print "Upsampling ", sample_size - f, " items for class ", l
             x = np.random.choice(f, sample_size - f).tolist()
-            l_index = np.append(np.asarray(l_index) , np.asarray(l_index)[x])
+            l_index = np.append(np.asarray(l_index), np.asarray(l_index)[x])
         else:
-            #print "Downsampling ", sample_size , " items for class ", l
+            # print "Downsampling ", sample_size , " items for class ", l
             l_index = random.sample(l_index, sample_size)
         all_index = np.append(all_index, l_index)
     bal_labels = np.asarray(labels)[all_index.tolist()]
@@ -195,44 +197,46 @@ def balance_data(texts, labels, sample_size, discard_labels = [] ):
     remaining = [i for i in range(0, np.sum(counts)) if i not in all_index.tolist()]
     rem_texts = np.asarray(texts)[remaining]
     rem_labels = np.asarray(labels)[remaining]
-    print ("Final size of dataset:")
+    print("Final size of dataset:")
     unique, counts = np.unique(bal_labels, return_counts=True)
-    print (np.asarray((unique, counts)).T)
-    print ("Final size of remaining dataset:")
+    print(np.asarray((unique, counts)).T)
+    print("Final size of remaining dataset:")
     unique, counts = np.unique(rem_labels, return_counts=True)
-    print (np.asarray((unique, counts)).T)
+    print(np.asarray((unique, counts)).T)
     return bal_texts, bal_labels, rem_texts, rem_labels
 
 
-
-def load_data_rashkin(file_name = "../data/rashkin/train.txt"):
+def load_data_rashkin(file_name="../data/rashkin/train.txt"):
     print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t',  header= None, names=["label", "data"], usecols=[0,1], dtype = {"label": np.str, "data": np.str})
+    data_train = pd.read_table(file_name, sep='\t', header=None, names=["label", "data"], usecols=[0, 1],
+                               dtype={"label": np.str, "data": np.str})
     print(data_train.shape)
     print(data_train[0:6])
     texts = []
     labels = []
-    #for i in range(data_train.data.shape[0]):
+    # for i in range(data_train.data.shape[0]):
     #    print(i, type(data_train.data[i]))
     for idx in range(data_train.data.shape[0]):
         text = BeautifulSoup(data_train.data[idx])
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(str(data_train.label[idx]))
     transdict = {
-        '1': 3, #Satire
-        '2': 4, #Hoax
-        '3': 2, #Propaganda
-        '4': 1  #Truested
+        '1': 3,  # Satire
+        '2': 4,  # Hoax
+        '3': 2,  # Propaganda
+        '4': 1  # Truested
     }
     labels = [transdict[i] for i in labels]
-    #labels = to_cat(np.asarray(labels))
+    # labels = to_cat(np.asarray(labels))
     print(texts[0:6])
     print(labels[0:6])
     return texts, labels
 
-def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
+
+def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/bf_fb.txt"):
     print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header= None, names=["ID",	"URL",	"label",	"data",	"error"], usecols=[2,3])
+    data_train = pd.read_table(file_name, sep='\t', header=None, names=["ID", "URL", "label", "data", "error"],
+                               usecols=[2, 3])
     print(data_train.shape)
     texts = []
     labels = []
@@ -247,12 +251,109 @@ def load_data_buzzfeed(file_name = "../data/buzzfeed-facebook/bf_fb.txt"):
         'mostly false': 3
     }
     labels = [transdict[i] for i in labels]
-    #labels = to_cat(np.asarray(labels))
+    # labels = to_cat(np.asarray(labels))
     print(texts[0:6])
     print(labels[0:6])
     return texts, labels
 
 
+# texts_test1, labels_test1 = load_data_combined("../data/buzzfeed-debunk-combined/rumor-v02.txt")#load_data_rubin()#load_data_liar("../data/liar_dataset/test.tsv")
+## USE LIAR DATA FOR TRAINING A MODEL AND TEST DATA BOTH FROM LIAR AND BUZZFEED
+# texts_train, labels_train = load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#
+##texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
+# texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
+
+
+
+# texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+
+# texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
+# texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
+# texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
+
+
+
+
+if LOAD_DATA_FROM_DISK:
+    texts_train = np.load("../dump/trainRaw")
+    texts_valid = np.load("../dump/validRaw")
+    texts_test1 = np.load("../dump/testRaw")
+    labels_train = np.load("../dump/trainlRaw")
+    labels_valid = np.load("../dump/validlRaw")
+    labels_test1 = np.load("../dump/testlRaw")
+
+    print("Data loaded from disk!")
+
+else:
+    texts, labels = load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+    print("Maximum string length:")
+    mylen = np.vectorize(len)
+    print(mylen(texts))
+
+    if (CLASSES == 2):
+        texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 400, [2, 3, 4, 5, 6])
+        texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 400, [2, 3, 4, 5, 6])
+        texts_train, labels_train, texts, labels = balance_data(texts, labels, 1400, [2, 3, 4, 5, 6])
+
+    else:
+        texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6, 5])
+        texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6, 5])
+        texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6, 5])
+
+    texts_train.dump("../dump/trainRaw")
+    texts_valid.dump("../dump/validRaw")
+    texts_test1.dump("../dump/testRaw")
+    labels_train.dump("../dump/trainlRaw")
+    labels_valid.dump("../dump/validlRaw")
+    labels_test1.dump("../dump/testlRaw")
+
+    print("Data dumped to disk!")
+
+y_train = labels_train
+y_test = labels_test1
+target_names, counts = np.unique(y_train, return_counts=True)
+print(np.asarray((target_names, counts)).T)
+
+print("Extracting features from the training data using a sparse vectorizer")
+t0 = time()
+if (False):  # opts.use_hashing:
+    vectorizer = HashingVectorizer(stop_words='english', alternate_sign=False,
+                                   n_features=opts.n_features)
+    X_train = vectorizer.transform(texts_train)
+else:
+    vectorizer = TfidfVectorizer(sublinear_tf=False, max_df=0.5,
+                                 stop_words='english', ngram_range=(1, 3))
+    X_train = vectorizer.fit_transform(texts_train)
+    features = vectorizer.get_feature_names()
+    print(features[300000:300200])
+print("n_samples: %d, n_features: %d" % X_train.shape)
+
+print("Extracting features from the test data using the same vectorizer")
+X_test = vectorizer.transform(texts_test1)
+print("n_samples: %d, n_features: %d" % X_test.shape)
+
+# mapping from integer feature name to original token string
+if opts.use_hashing:
+    feature_names = None
+else:
+    feature_names = vectorizer.get_feature_names()
+
+if opts.select_chi2:
+    print("Extracting %d best features by a chi-squared test" %
+          opts.select_chi2)
+    t0 = time()
+    ch2 = SelectKBest(chi2, k=opts.select_chi2)
+    X_train = ch2.fit_transform(X_train, y_train)
+    X_test = ch2.transform(X_test)
+    if feature_names:
+        # keep selected feature names
+        feature_names = [feature_names[i] for i
+                         in ch2.get_support(indices=True)]
+    print("done in %fs" % (time() - t0))
+    print()
+
+if feature_names:
+    feature_names = np.asarray(feature_names)
 
 
 def trim(s):
@@ -276,7 +377,13 @@ def benchmark(clf):
     test_time = time() - t0
     print("test time:  %0.3fs" % test_time)
 
+    trainScore = metrics.accuracy_score(y_train, clf.predict(X_train))
     score = metrics.accuracy_score(y_test, pred)
+    precision = metrics.precision_score(y_test, pred, average='macro')
+    recall = metrics.recall_score(y_test, pred, average='macro')
+    f1 = metrics.f1_score(y_test, pred, average='macro')
+    mse = metrics.mean_squared_error(y_test, pred)
+
     print("accuracy:   %0.3f" % score)
 
     if hasattr(clf, 'coef_'):
@@ -297,105 +404,37 @@ def benchmark(clf):
     if (True):
         print("confusion matrix:")
         print(metrics.confusion_matrix(y_test, pred))
-        #print(pd.DataFrame({'Predicted': pred, 'Expected': y_test}))
+        print(pd.DataFrame({'Predicted': pred, 'Expected': y_test}))
 
     print()
     clf_descr = str(clf).split('(')[0]
-    return clf_descr, score, train_time, test_time
+    return clf_descr, trainScore, score, precision, recall, f1, mse
 
 
+results = []
 
+'''
+for clf, name in (
+        #(RidgeClassifier(tol=1e-2, solver="lsqr"), "Ridge Classifier"),
+        #(Perceptron(n_iter=50), "Perceptron"),
+        #(PassiveAggressiveClassifier(n_iter=50), "Passive-Aggressive"),
+        #(KNeighborsClassifier(n_neighbors=10), "kNN"),
+        (RandomForestClassifier(n_estimators=100), "Random forest")):
+    print('=' * 80)
+    print(name)
+    results.append(benchmark(clf))
+'''
 
+for penalty in ["l2"]:  # , "l1"]:
+    print('=' * 80)
+    print("%s penalty" % penalty.upper())
+    # Train Liblinear model
+    results.append(benchmark(LinearSVC(penalty=penalty, dual=False,
+                                       tol=1e-3)))
 
-
-
-## USE LIAR DATA FOR TRAINING A MODEL AND TEST DATA BOTH FROM LIAR AND BUZZFEED
-#texts_train, labels_train = load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#
-##texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
-##texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
-#texts_test1, labels_test1 = load_data_rubin()#load_data_combined("../data/buzzfeed-debunk-combined/rumor-v01.txt")#load_data_liar("../data/liar_dataset/test.tsv")
-
-texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/rumor-v01.txt")
-texts, labels, rem_texts, rem_labels = balance_data(texts, labels, 86, [6,7])
-#texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 25, [6,7])
-
-
-
-
-from sklearn.model_selection import KFold
-
-#texts_test2, labels_test2 = load_data_combined()
-
-
-
-kf = KFold(n_splits=2)
-for train, test in kf.split(range(len(labels))):
-
-    print("Cross validation fold lengths %s %s" % (len(train), len(test)))
-    y_train = labels[train]
-    y_test = labels[test]
-    target_names, counts = np.unique(y_train, return_counts=True)
-    print(np.asarray((target_names, counts)).T)
-
-    print("Extracting features from the training data using a sparse vectorizer")
-    t0 = time()
-    vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
-                                     stop_words='english')
-    X_train = vectorizer.fit_transform(texts[train])
-    print("n_samples: %d, n_features: %d" % X_train.shape)
-
-    print("Extracting features from the test data using the same vectorizer")
-    X_test = vectorizer.transform(texts[test])
-    print("n_samples: %d, n_features: %d" % X_test.shape)
-
-
-    # mapping from integer feature name to original token string
-    if opts.use_hashing:
-        feature_names = None
-    else:
-        feature_names = vectorizer.get_feature_names()
-
-    if opts.select_chi2:
-        print("Extracting %d best features by a chi-squared test" %
-              opts.select_chi2)
-        t0 = time()
-        ch2 = SelectKBest(chi2, k=opts.select_chi2)
-        X_train = ch2.fit_transform(X_train, y_train)
-        X_test = ch2.transform(X_test)
-        if feature_names:
-            # keep selected feature names
-            feature_names = [feature_names[i] for i
-                             in ch2.get_support(indices=True)]
-        print("done in %fs" % (time() - t0))
-        print()
-
-    if feature_names:
-        feature_names = np.asarray(feature_names)
-
-    results = []
-    '''
-    for clf, name in (
-            (RidgeClassifier(tol=1e-2, solver="lsqr"), "Ridge Classifier"),
-            (Perceptron(n_iter=50), "Perceptron"),
-            (PassiveAggressiveClassifier(n_iter=50), "Passive-Aggressive"),
-            (KNeighborsClassifier(n_neighbors=10), "kNN"),
-            (RandomForestClassifier(n_estimators=100), "Random forest")):
-        print('=' * 80)
-        print(name)
-        results.append(benchmark(clf))
-    '''
-    for penalty in ["l2"]:#, "l1"]:
-        print('=' * 80)
-        print("%s penalty" % penalty.upper())
-        # Train Liblinear model
-        #results.append(benchmark(LinearSVC(penalty=penalty, dual=False,
-        #                                   tol=1e-3)))
-        # Train SGD model
-        results.append(benchmark(SGDClassifier(alpha=.0001, n_iter=50,
-                                               penalty=penalty)))
-
-
-
+    # Train SGD model
+    results.append(benchmark(SGDClassifier(alpha=.0001, n_iter=50,
+                                           penalty=penalty)))
 
 '''
 # Train SGD with Elastic Net penalty
@@ -409,12 +448,15 @@ print('=' * 80)
 print("NearestCentroid (aka Rocchio classifier)")
 results.append(benchmark(NearestCentroid()))
 
+'''
+
 # Train sparse Naive Bayes classifiers
 print('=' * 80)
 print("Naive Bayes")
 results.append(benchmark(MultinomialNB(alpha=.01)))
-results.append(benchmark(BernoulliNB(alpha=.01)))
+# results.append(benchmark(BernoulliNB(alpha=.01)))
 
+'''
 print('=' * 80)
 print("LinearSVC with L1-based feature selection")
 # The smaller C, the stronger the regularization.
@@ -423,6 +465,13 @@ results.append(benchmark(Pipeline([
   ('feature_selection', SelectFromModel(LinearSVC(penalty="l1", dual=False,
                                                   tol=1e-3))),
   ('classification', LinearSVC(penalty="l2"))])))
+
+'''
+
+print("=" * 100)
+print(results)
+
+'''
 
 # make some plots
 
