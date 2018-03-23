@@ -55,7 +55,7 @@ from keras import initializers, regularizers
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.utils import shuffle
 import pickle
-
+from sklearn import metrics
 
 
 
@@ -77,8 +77,8 @@ CLASSES = 2
 EPOCS = 20
 BATCHSIZE = 64
 USEKERAS = True
-LOAD_DATA_FROM_DISK = True
-RUNS = 5
+LOAD_DATA_FROM_DISK = False#True
+RUNS = 1
 
 
 
@@ -149,7 +149,7 @@ def clean_str(string):
     string = re.sub(r"\\", "", string.decode("utf-8"))
     string = re.sub(r"\'", "", string.decode("utf-8"))
     string = re.sub(r"\"", "", string.decode("utf-8"))
-    string = ''.join(e for e in string if (e.isspace() or e.isalnum()))
+    string = ''.join(e for e in string if (e.isspace() or e.isalnum() )) #comment the if part for Mehvish parser
     return string.strip().lower()
 
 def load_data_imdb():
@@ -203,7 +203,8 @@ def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/all-v02.txt
     labels = []
     for idx in range(data_train.data.shape[0]):
         text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
+        text = clean_str(text.get_text().encode('ascii', 'ignore'))
+        texts.append(text)
         labels.append(data_train.label[idx])
     if( CLASSES == 2):
         transdict = {
@@ -502,16 +503,21 @@ if LOAD_DATA_FROM_DISK:
     labels_train = np.load("../dump/trainl")
     labels_valid = np.load("../dump/validl")
     labels_test1 = np.load("../dump/testl")
+    labels_test1_point = np.load("../dump/testlRaw")
     file = open("../dump/wordIndex", "rb")
+
     word_index = pickle.load(file)
+
 
     print("Data loaded from disk!")
 
+
+
 else:
     texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
-    print("Maximum string length:")
-    mylen = np.vectorize(len)
-    print (mylen(texts))
+    #print("Maximum string length:")
+    #mylen = np.vectorize(len)
+    #print (mylen(texts))
 
     if( CLASSES == 2 ):
         texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 400, [2,3,4,5,6])
@@ -529,6 +535,12 @@ else:
     labels_train.dump("../dump/trainlRaw")
     labels_valid.dump("../dump/validlRaw")
     labels_test1.dump("../dump/testlRaw")
+    labels_test1.dump("../dump/testlRaw")
+    np.savetxt("../dump/trainTable.csv", texts_train, delimiter=",", fmt="%s")
+    np.savetxt("../dump/validTable.csv", texts_valid, delimiter=",", fmt="%s")
+    np.savetxt("../dump/testTable.csv", texts_test1, delimiter=",", fmt="%s")
+
+
 
     labels_test1 = to_cat(np.asarray(labels_test1))
     labels_valid = to_cat(np.asarray(labels_valid))
@@ -556,6 +568,12 @@ else:
     labels_test1.dump("../dump/testl")
     file = open("../dump/wordIndex", "wb")
     pickle.dump(word_index, file)
+    
+    keys = word_index.keys()
+    thefile = open("../dump/vocab.txt","w")
+    for item in keys: 
+        thefile.write("%s\n" % item)
+    
 
     print("Data dumped to disk!")
 
@@ -572,7 +590,7 @@ print('Shape of label tensor:', labels_test1.shape)
 #print('Shape of data tensor:', texts_test2.shape)
 #print('Shape of label tensor:', labels_test2.shape)
 
-
+'''
 
 embedding_matrix = load_embeddings(word_index)
 
@@ -599,7 +617,7 @@ print (y_test1.sum(axis=0)/(1.0*len(y_test1)))
 #print (y_test2.sum(axis=0)/(1.0*len(y_test2)))
 
 results1 = ""
-'''
+
 for r in range(0, RUNS):
     run_results = ""
     best_accuracy = 0
@@ -633,9 +651,17 @@ for r in range(0, RUNS):
             run_results = "Best accuracy found at epoch " + str(i) + " : " + str(p1) + "\t" + str(p2) + "\t" + str(p3) + "\n"
             best_accuracy = accuracy
 
+            print("*"*30)
+            pred = model.predict(x_test1)
+            print("confusion matrix:")
+            #print(pd.DataFrame({'Predicted': pred, 'Expected': labels_test1_point}))
+            print(np.amax(pred, axis = 1))
+            print(metrics.confusion_matrix(y_test1, pred))
+            print("*" * 30)
+
     results1 = results1 + run_results
     print(results1)
-'''
+
 results2 = ""
 for r in range(0, RUNS):
     K.clear_session()
@@ -684,6 +710,7 @@ results_file = open("results" , 'w')
 results_file.write(results1 + results2)
 results_file.close()
 
+'''
 
 
 ### SCRATCH CODE:
