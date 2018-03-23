@@ -73,11 +73,11 @@ MAX_SEQUENCE_LENGTH = 1000
 MAX_NB_WORDS = 20000
 
 
-CLASSES = 5
+CLASSES = 2
 EPOCS = 20
 BATCHSIZE = 64
 USEKERAS = True
-LOAD_DATA_FROM_DISK = True
+LOAD_DATA_FROM_DISK = False#True
 RUNS = 1
 
 
@@ -149,7 +149,7 @@ def clean_str(string):
     string = re.sub(r"\\", "", string.decode("utf-8"))
     string = re.sub(r"\'", "", string.decode("utf-8"))
     string = re.sub(r"\"", "", string.decode("utf-8"))
-    string = ''.join(e for e in string if (e.isspace() or e.isalnum()))
+    string = ''.join(e for e in string if (e.isspace() or e.isalnum() )) #comment the if part for Mehvish parser
     return string.strip().lower()
 
 def load_data_imdb():
@@ -203,7 +203,8 @@ def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/all-v02.txt
     labels = []
     for idx in range(data_train.data.shape[0]):
         text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
+        text = clean_str(text.get_text().encode('ascii', 'ignore'))
+        texts.append(text)
         labels.append(data_train.label[idx])
     if( CLASSES == 2):
         transdict = {
@@ -510,13 +511,13 @@ if LOAD_DATA_FROM_DISK:
 
     print("Data loaded from disk!")
 
-'''
+
 
 else:
     texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
-    print("Maximum string length:")
-    mylen = np.vectorize(len)
-    print (mylen(texts))
+    #print("Maximum string length:")
+    #mylen = np.vectorize(len)
+    #print (mylen(texts))
 
     if( CLASSES == 2 ):
         texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 400, [2,3,4,5,6])
@@ -589,7 +590,7 @@ print('Shape of label tensor:', labels_test1.shape)
 #print('Shape of data tensor:', texts_test2.shape)
 #print('Shape of label tensor:', labels_test2.shape)
 
-
+'''
 
 embedding_matrix = load_embeddings(word_index)
 

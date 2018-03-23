@@ -33,6 +33,12 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 from sklearn.utils import resample
 from collections import Counter
 
+from sklearn.datasets import load_iris
+from sklearn.feature_selection import SelectKBest,  SelectFromModel, chi2
+from sklearn import datasets, svm, metrics
+from sklearn.feature_selection import SelectPercentile, f_classif, f_regression
+from sklearn.svm import LinearSVC
+import matplotlib.pyplot as plt
 
 
 
@@ -75,12 +81,17 @@ def train(feature_models, trainSet, devSet, extra_features, nclass ):
     index = [i for i, j in enumerate(trainF) if j ==  errorFlag]
     trainF = np.asarray([x for i, x in enumerate(trainF) if i not in index])
     trainY = np.asarray([x for i, x in enumerate(trainY) if i not in index])
+    trainS = np.asarray([x for i, x in enumerate(trainSet[1]) if i not in index])
     print trainF.shape
     print np.asarray(trainSet[2]).shape
     if (extra_features):
         trainExF = np.asarray([x for i, x in enumerate(trainSet[2]) if i not in index])
         trainF = np.column_stack((trainF, trainExF))
     print trainF.shape
+
+    X, y = np.array(trainF), np.array(trainS)
+    feature_analysis(X, y, range(0,trainF.shape[1]))
+
 
     devF = np.asarray(get_features (feature_models, process(devSet[0])))
     devY = encode_labels(devSet[1],nclass)
@@ -152,8 +163,6 @@ def test(models, classifier, testSet, extra_features , nclass):
     b = pd.DataFrame(a, columns = ['text','score','prediction','error'])
     #print(b.sort(['error', 'score']))
     return b
-    
-
 
 
 def train_nn_model(lrmodel, X, Y, devX, devY, devscores, nclass):
@@ -172,13 +181,13 @@ def train_nn_model(lrmodel, X, Y, devX, devY, devscores, nclass):
         yhat = decode_labels(p, nclass)
         print(pd.DataFrame({'Predicted': yhat, 'Expected': devscores}))
 
-        #print(f1_score(devscores, yhat, average="micro"))
-        #print(precision_score(devscores, yhat, average="micro"))
-        #print(recall_score(devscores, yhat, average="micro")))
-        #score = f1_score(devscores, yhat, average="micro")
-        #print(p)
+        # print(f1_score(devscores, yhat, average="micro"))
+        # print(precision_score(devscores, yhat, average="micro"))
+        # print(recall_score(devscores, yhat, average="micro")))
+        # score = f1_score(devscores, yhat, average="micro")
+        # print(p)
         score = accuracy_score(devscores, yhat)
-        #score = pearsonr(yhat, devscores)[0]
+        # score = pearsonr(yhat, devscores)[0]
         print 'Dev score: = ' + str(score)  # print 'Dev Pearson: = ' + str(score)
         print 'Dev F1-score: = ' + str(f1_score(devscores, yhat, average=None))  # print 'Dev Pearson: = ' + str(score)
         print 'Dev Precision score: = ' + str(
@@ -186,35 +195,36 @@ def train_nn_model(lrmodel, X, Y, devX, devY, devscores, nclass):
         print 'Dev Recall score: = ' + str(
             recall_score(devscores, yhat, average=None))  # print 'Dev Pearson: = ' + str(score)
 
-        if (score > best and epoch < maxepoch): ## with early stopping based on number of epochs
+        if (score > best and epoch < maxepoch):  ## with early stopping based on number of epochs
             best = score
             ## FA: commented out the following line because of the new keras version problem with deepcopy
             ## FA: not the model scored right after the best model will be returned (not too bad though, usually the difference is so small)
-            #bestlrmodel = copy.deepcopy(lrmodel)
+            # bestlrmodel = copy.deepcopy(lrmodel)
         else:
             done = True
     return lrmodel
-    
 
 
 def prepare_nn_model(dim, nclass):
     lrmodel = Sequential()
-    lrmodel.add(Dense(100, input_dim=dim))#, activity_regularizer=regs.l1(0.01))) #set this to twice the size of sentence vector or equal to the final feature vector size
-    #lrmodel.add(BatchNormalization())
-    #lrmodel.add(Dense(100))
+    lrmodel.add(Dense(100,
+                      input_dim=dim))  # , activity_regularizer=regs.l1(0.01))) #set this to twice the size of sentence vector or equal to the final feature vector size
+    # lrmodel.add(BatchNormalization())
+    # lrmodel.add(Dense(100))
     lrmodel.add(Activation('relu'))
     lrmodel.add(Dropout(0.2))
-    #lrmodel.add(Conv1D(filter_length= 10, nb_filter= 10))
+    # lrmodel.add(Conv1D(filter_length= 10, nb_filter= 10))
     lrmodel.add(Dense(100))
     lrmodel.add(Activation('relu'))
     lrmodel.add(Dropout(0.2))
     lrmodel.add(Dense(nclass))
     lrmodel.add(Activation('softmax'))
     adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-    lrmodel.compile(loss='categorical_crossentropy', optimizer= adam, metrics=['accuracy'])
-    #opt = SGD(lr=0.0001)
-    #lrmodel.compile(loss="categorical_crossentropy", optimizer=opt)
+    lrmodel.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+    # opt = SGD(lr=0.0001)
+    # lrmodel.compile(loss="categorical_crossentropy", optimizer=opt)
     return lrmodel
+
 
 '''
     lrmodel = Sequential()
@@ -338,6 +348,77 @@ def load_data_rubin(datafile = "/Users/fa/workspace/temp/rubin/data.xlsx", resam
     print len(trainA), len(devA), len(testA)
     return [trainA, trainS,[]], [devA, devS,[]], [testA, testS,[]], nclass
 
+def load_data_combined(datafolder = "/Users/ftorabia/workspace/shared/sfu/fake_news/dump/"):
+    #feature_list = [ "Analytic","Clout","Tone","WPS"]
+
+    feature_list = ["Analytic","Clout","Authentic","Tone","WPS","Sixltr","Dic","function",
+                  "pronoun","ppron","i","we","you","shehe","they","ipron","article","prep","auxverb",
+                  "adverb","conj","negate","verb","adj","compare","interrog","number","quant","affect",
+                  "posemo","negemo","anx","anger","sad","social","family","friend","female","male",
+                  "cogproc","insight","cause","discrep","tentat","certain","differ","percept","see","hear",
+                  "feel","bio","body","health","sexual","ingest","drives","affiliation","achieve","power",
+                  "reward","risk","focuspast","focuspresent","focusfuture","relativ","motion","space","time",
+                  "work","leisure","home","money","relig","death","informal","swear","netspeak","assent",
+                  "nonflu","filler","AllPunc","Period","Comma","Colon","SemiC","QMark","Exclam","Dash",
+                  "Quote","Apostro","Parenth","OtherP"]
+
+    #for i in [12, 41, 44]:print feature_list[i]
+    df = pd.read_csv(datafolder+"trainLwic.csv")
+    trainA = df["Source (A)"].tolist()
+    trainF = ((df[feature_list].values)* 0.01).tolist()
+    trainS = np.load(datafolder + "trainlRaw").tolist()
+    nclass = len(Counter(trainS).keys())
+    print(nclass)
+    print len(trainA)
+    print len(trainS)
+    print len(trainF)
+
+
+    #X, y = np.array(trainF), np.array(trainS)
+    #feature_analysis(X, y, feature_list)
+
+
+    ## scale the data
+    trainS = [(float(s) + 1) for s in trainS]
+    ## shuffle the data
+    trainS, trainA, trainF = shuffle(trainS, trainA, trainF, random_state=54321)
+    print(pd.DataFrame({'Label': trainA[:10], 'Score': trainS[:10], 'Other_features': trainF[:10]}))
+
+    df = pd.read_csv(datafolder + "testLwic.csv")
+    testA = df["Source (A)"].tolist()
+    testF = df[feature_list].values.tolist()
+    testS = np.load(datafolder + "testlRaw").tolist()
+    nclass = len(Counter(testS).keys())
+    print(nclass)
+    print len(testA)
+    print len(testS)
+    print len(testF)
+    ## scale the data
+    testS = [(float(s) + 1) for s in testS]
+    ## shuffle the data
+    testS, testA, testF = shuffle(testS, testA, testF, random_state=54321)
+    print(pd.DataFrame({'Label': testA[:10], 'Score': testS[:10], 'Other_features': testF[:10]}))
+
+
+    df = pd.read_csv(datafolder + "validLwic.csv")
+    devA = df["Source (A)"].tolist()
+    devF = df[feature_list].values.tolist()
+    devS = np.load(datafolder + "validlRaw").tolist()
+    nclass = len(Counter(devS).keys())
+    print(nclass)
+    print len(devA)
+    print len(devS)
+    print len(devF)
+    ## scale the data
+    devS = [(float(s) + 1) for s in devS]
+    ## shuffle the data
+    devS, devA, devF = shuffle(devS, devA, devF, random_state=54321)
+    print(pd.DataFrame({'Label': devA[:10], 'Score': devS[:10], 'Other_features': devF[:10]}))
+
+    return [trainA, trainS, trainF], [devA, devS, devF], [testA, testS,testF], nclass
+    #return [trainA[0:10000], trainS[0:10000], trainF[0:10000]], [devA, devS, devF], [testA, testS, testF], nclass
+
+
 
 def load_data_constructiveness(datafolder = "/Users/ftorabia/workspace/shared/sfu/fake_news/data/varada_constructiveness/"):
     xl = pd.ExcelFile(datafolder+"train.xlsx")
@@ -457,24 +538,98 @@ def load_data_liar():
     return [trainA, trainS, []], [devA, devS, []], [testA, testS, []], nclass
 
 
+def feature_analysis(X, y, feature_list ):
+
+    print("Shape of original data:")
+    print(X.shape)
+    X_new = SelectKBest(chi2, k=2).fit_transform(X, y)
+    print("Shape of reduced data:")
+    print(X_new.shape)
+    print(X_new[0])
+
+    lsvc = LinearSVC(C=0.05, penalty="l1", dual=False)
+    clf = lsvc.fit(X, y)
+    model = SelectFromModel(clf, prefit=True)
+    X_new = model.transform(X)
+    print("Shape of reduced data:")
+    print(X_new.shape)
+    print(model.get_support())
+    print(np.asarray(feature_list)[model.get_support()])
+
+    df = pd.DataFrame(data=np.column_stack((y, X)), columns=['key'] + feature_list )
+    for f in feature_list:
+        print(df.groupby('key')[f].mean())#, df.groupby('key')[f].std() )
+
+
+
+
+
+
+    plt.figure(1)
+    plt.clf()
+
+    X_indices = np.arange(X.shape[-1])
+    print(X_indices)
+
+    # #############################################################################
+    # Univariate feature selection with F-test for feature scoring
+    # We use the default selection function: the 10% most significant features
+    selector = SelectPercentile(f_regression, percentile=10)
+    selector.fit(X, y)
+    scores = selector.pvalues_ #-np.log10(selector.pvalues_)
+    #scores /= scores.max()
+    print(scores)
+    plt.bar(X_indices - .45, scores, width=.2,
+            label=r'Univariate score ($-Log(p_{value})$)', color='darkorange',
+            edgecolor='black')
+
+    # #############################################################################
+    # Compare to the weights of an SVM
+    clf = svm.SVC(kernel='linear')
+    clf.fit(X, y)
+
+    svm_weights = (clf.coef_ ** 2).sum(axis=0)
+    svm_weights /= svm_weights.max()
+
+    plt.bar(X_indices - .25, svm_weights, width=.2, label='SVM weight',
+            color='navy', edgecolor='black')
+
+    clf_selected = svm.SVC(kernel='linear')
+    clf_selected.fit(selector.transform(X), y)
+
+    svm_weights_selected = (clf_selected.coef_ ** 2).sum(axis=0)
+    svm_weights_selected /= svm_weights_selected.max()
+
+    plt.bar(X_indices[selector.get_support()] - .05, svm_weights_selected,
+            width=.2, label='SVM weights after selection', color='c',
+            edgecolor='black')
+
+    plt.title("Comparing feature selection")
+    plt.xlabel('Feature number')
+    plt.yticks(())
+    plt.axis('tight')
+    plt.legend(loc='upper right')
+    plt.show()
+
+
 if __name__ == '__main__':
     ensemble = list()
 
     import os
     print(os.getcwd())
 
-    word2vec_model = w2vF.Word2vecFeatures("/Users/ftorabia/workspace/temp/EMBEDDINGS/GoogleNews-vectors-negative300.bin")
-    #lexicon_model = lexF.LexiconFeatures("/Users/ftorabia/workspace/shared/sfu/fake_news/data/bias_related_lexicons")
+    #word2vec_model = w2vF.Word2vecFeatures("/Users/ftorabia/workspace/temp/EMBEDDINGS/GoogleNews-vectors-negative300.bin")
+    lexicon_model = lexF.LexiconFeatures("/Users/ftorabia/workspace/shared/sfu/fake_news/data/bias_related_lexicons")
 
 
 
     ## Add specific models to ensemble
-    #ensemble.append(lexicon_model)
-    ensemble.append(word2vec_model)
+    ensemble.append(lexicon_model)
+    #ensemble.append(word2vec_model)
 
     ## Load some data for training (standard SICK dataset)
     #trainSet, devSet, testSet = load_data_SICK('../data/SICK/')
-    trainSet, devSet, testSet , nclass = load_data_constructiveness()
+    trainSet, devSet, testSet , nclass = load_data_combined()
 
     # Uncomment till the build_vocab method if using feedback model
     """
@@ -494,12 +649,12 @@ if __name__ == '__main__':
 
 
     ## Train a classifier using train and development subsets
-    classifier = train(ensemble, trainSet, devSet, extra_features = False, nclass = nclass)
+    classifier = train(ensemble, trainSet, devSet, extra_features = True, nclass = nclass)
 
     #classifier = pickle.load(open('../pretrained/classifiers/feed+fb+sts1214.file', 'rb'))
 
     ## Test the classifier on test data of the same type (coming from SICK
-    test(ensemble, classifier, testSet, extra_features = False , nclass = nclass).to_csv('../data/temp.csv')
+    test(ensemble, classifier, testSet, extra_features = True , nclass = nclass).to_csv('../data/temp.csv')
 
     ## FileName to save the trained classifier for later use
     #fileName = '../data/local/SICK-Classifier.h5'
