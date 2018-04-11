@@ -13,7 +13,8 @@ from sklearn.preprocessing import normalize
 import nltk
 
 
-
+def generalfunc():
+    print(x)
 
 
     
