@@ -56,10 +56,10 @@ class LexiconFeatures():
                 lexicon_words = [i for i in tokens if i in lexicon]
                 count = len(lexicon_words)
                 #print ("Count: " + str(count))
-                #count = count * 1.0 / len(tokens)  #Continous treatment
-                count = 1 if (count > 0) else 0     #Binary treatment
+                count = count * 1.0 / len(tokens)  #Continous treatment
+                #count = 1 if (count > 0) else 0     #Binary treatment
                 textvec.append(count)
-            print(textvec)
+            #print(textvec)
             textvecs.append(textvec)
         return np.array(textvecs)
 
