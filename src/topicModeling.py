@@ -9,6 +9,8 @@ import io
 import gensim
 from gensim import corpora
 from textutils import DataLoading
+from wordcloud import WordCloud
+
 
 
 reload(sys)
@@ -45,6 +47,7 @@ def show_topics(doc_raw, ldamodel): # Working on new corpora or sub-corpora of d
     print(ldamodel.get_document_topics(bow, minimum_probability=0.1))
 
 
+
 # compile documents
 buzzfeed_texts, buzzfeed_labels =  DataLoading.load_data_combined("../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")
 rumor_texts, rumor_labels =  DataLoading.load_data_combined("../data/buzzfeed-debunk-combined/rumor-v02.txt")
@@ -78,7 +81,7 @@ Lda = gensim.models.ldamodel.LdaModel
 
 # Running and Trainign LDA model on the document term matrix.
 print("Building model...")
-ldamodel = Lda(doc_term_matrix, num_topics=100, id2word = dictionary, passes=5, random_state=1)
+ldamodel = Lda(doc_term_matrix, num_topics=20, id2word = dictionary, passes=5, random_state=1)
 
 # Show topics with some most important words
 print(ldamodel.print_topics(num_topics=10, num_words=3))
@@ -93,19 +96,18 @@ show_topics(doc_rumor, ldamodel)
 
 
 
-
 #visulalize topics by wordcloud
-from wordcloud import WordCloud
+
 from pylab import *
 plt.figure(figsize=(30, ldamodel.num_topics))
 subplots_adjust(hspace=0.1, wspace=0.1)
 plt.axis("off")
 for t in range(ldamodel.num_topics):
-    ldamodel.show_topic(t, 10)
+    print(ldamodel.show_topic(t, 10))
 
-    #ax1 = subplot((ldamodel.num_topics/5 +1), 5, t+1)
-    #ax1.imshow(WordCloud(background_color="white").fit_words(ldamodel.show_topic(t, 10)))
-    #ax1.set_title("Topic #" + str(t))
+    ax1 = subplot((ldamodel.num_topics/5 +1), 5, t+1)
+    ax1.imshow(WordCloud(background_color="white").fit_words(dict(ldamodel.show_topic(t, 10))))
+    ax1.set_title("Topic #" + str(t))
 
 plt.savefig('test_all.pdf', format='pdf')
 
