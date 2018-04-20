@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Freelancer - Start Bootstrap Theme</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom fonts for this template -->
+    <link href="static/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+    <!-- Plugin CSS -->
+    <link href="static/vendor/magnific-popup/magnific-popup.css" rel="stylesheet" type="text/css">
+
+    <!-- Custom styles for this template -->
+    <link href="static/css/freelancer.min.css" rel="stylesheet">
+
+    <!-- AJAX -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+
+  </head>
+
+  <body id="page-top">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg bg-secondary fixed-top text-uppercase" id="mainNav">
+      <div class="container">
+        <a class="navbar-brand js-scroll-trigger" href="#page-top">Discourse Processing Lab</a>
+        <button class="navbar-toggler navbar-toggler-right text-uppercase bg-primary text-white rounded" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          Menu
+          <i class="fa fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item mx-0 mx-lg-1">
+              <div class="btn-group">
+                  <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Information <span class="caret"></span></button>
+                  <ul class="dropdown-menu" style="text-align: center; vertical-align: middle;">
+                      <li><a href="#portfolio">Description</a></li>
+                      <li><a href="#footer">About Us</a></li>
+                  </ul>
+              </div>
+
+            </li>
+
+            <li class="nav-item mx-0 mx-lg-1">
+              <div class="btn-group">
+                  <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Comment Moderaration <span class="caret"></span></button>
+                  <ul class="dropdown-menu" style="text-align: center; vertical-align: middle;">
+                      <li><a href="#about">Interface</a></li>
+                      <li><a href="#const_examples">Examples</a></li>
+                  </ul>
+              </div>
+
+            </li>
+            <li class="nav-item mx-0 mx-lg-1">
+              <div class="btn-group">
+                  <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Fake News<span class="caret"></span></button>
+                  <ul class="dropdown-menu" style="text-align: center; vertical-align: middle;">
+                      <li><a href="#contact">Interface</a></li>
+                      <li><a href="#contact">Examples</a></li>
+                  </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="masthead bg-primary text-white text-center">
+      <div class="container">
+        <img class="img-fluid mb-5 d-block mx-auto" src="static/img/profile.png" alt="" width="200" height="200">
+        <h1 class="text-uppercase mb-0" style="font-size: 3em">Discourse Processing Lab</h1>
+        <hr class="star-light">
+        <h2 class="font-weight-light mb-0">Comment Moderation and Fake News</h2>
+      </div>
+    </header>
+
+    <!-- Portfolio Grid Section -->
+    <section class="portfolio" id="portfolio">
+      <div class="container">
+        <div style="text-align: left; vertical-align: middle;">
+          <h1 class="text-uppercase mb-0" style="color: #18bc9c">What if technology could help with moderating online content?</h1>
+
+        At the Discourse Processing Lab, we have two focused projects on organizing and moderating online content: the fake news project and the news comment moderation project. In these projects, we apply general methods of text classification ranging from classic machine learning algorithms (e.g., Naive Bayes, Decision Trees, SVMs) to deep learning architectures (e.g., feed-forward, recurrent and convolutional neural networks). The aim of the fake news project is to help news readers to identify bias and misinformation in news articles in a quick and reliable fashion. We have collected a large corpus of news articles from online publishers with different levels of veracity and built classification models based on linguistic cues of deception. Through systematic generalizations across genre and publishers that happen during training of the model, the system can be used to score the likelihood of an unseen article to be deceptive. The news comment moderation project aims to encourage constructive discussion online. This can be  done, for example, by promoting the most informative reader comments. As part of this project, we have collected and curated a corpus of about 10,000 opinion articles, together with their more than one million reader comments, from the national newspaper in Canada, The Globe and Mail. We have annotated subsets of this corpus for constructiveness and toxicity. We have also developed computational methods to identify constructive comments, which exploit linguistic features for constructiveness. Our methods can assist in moderation tasks, typically performed by humans, such as organizing and summarizing reader comments.
+        <br>
+        <br>
+      </div>
+
+    <!-- Fake News Section -->
+    <section class="bg-primary text-white mb-0" id="about">
+      <div class="container">
+        <h2 class="text-center text-uppercase text-white">Fake News Detection</h2>
+        <hr class="star-light mb-5">
+        <div class="row" style="display: flex; justify-content: space-around;">
+          <div>
+            <p class="lead">
+            <p>
+              Please select a function:
+            </p>
+
+            <form>
+              <input type="radio" name="model" value="svm"> Fact Checking <br>
+              <input type="radio" name="model" value="lstm"> Genre Classification <br><br>
+              <a id="select_model"><button type="submit" class="btn btn-secondary btn-sm" id="sendMessageButton">Select</button></a>
+            </form>
+
+            <script type=text/javascript>
+                $(function() {
+                  $('a#select_model').bind('click', function() {
+                    $.getJSON("/select_model", {
+                      result: $('input[name="model"]:checked').val(),
+                    }, function(data) {
+                      $("#temp").text(data.resp);
+                    });
+                    return false;
+                  });
+                });
+            </script>
+
+            <div id="temp" style="color: red"></div>
+
+          </div>
+          <div>
+            <p class="lead">
+
+              <form>
+                <b><label>Please enter your comment: </label></b>&nbsp;&nbsp;
+                </br>
+                <!--input name=comment style="width: 600px; height:300px; border-radius: 5px"-->
+                <textarea name="comment" style="width:600px;height:250px;border-radius: 5px"></textarea>
+                </br>
+                <a id="submit_button"><button type="submit" class="btn btn-secondary btn-sm" id="sendMessageButton" href="#want_feedback">Submit</button></a>&nbsp;&nbsp;
+              </form>
+              <div id="prediction" style="color: white"></div>
+
+              <br><a id="want_feedback" style="display: none"><button type="submit" class="btn btn-secondary btn-sm" id="sendMessageButton" href="#feedback_box">Seem wrong?</button></a><br>
+
+              <div id="feedback_box" style="display: none">
+                <p> How will you classify the text? </p>
+                <form>
+                    <input type="radio" name="answer" value="constructive"> Fake<br>
+                    <input type="radio" name="answer" value="nonconstructive"> Suspicious<br>
+                    <input type="radio" name="answer" value="notsure"> Trusted<br><br>
+                    <p>Do you have any comments?</p>
+                    <b><label>Comments: </label></b>&nbsp;&nbsp;
+
+                    <input name=comments style="width: 400px; border-radius: 5px">
+                    <a id="submit_response"><button type="submit" class="btn btn-secondary btn-sm" id="sendMessageButton">Submit Response</button></a>
+                </form>
+              </div>
+
+              <script type=text/javascript>
+                $(function() {
+                  $('a#submit_response').bind('click', function() {
+                    $.getJSON("/get_feedback", {
+                      result: $('textarea[name="comment"]').val(),
+                      label: $('input[name="answer"]').val(),
+                      comments: $('input[name="comments"]').val(),
+
+                    }, function(data) {
+                      $("#feedback").text(data.feedback);
+                    });
+                    return false;
+                  });
+                });
+              </script>
+
+              <script type=text/javascript>
+                $(function() {
+                  $('a#submit_button').bind('click', function() {
+                    $.getJSON("/get_prediction", {
+                      result: $('textarea[name="comment"]').val(),
+                      model: $('input[name="model"]:checked').val(),
+                    }, function(data) {
+                      $("#prediction").text(data.predicted_label);
+                    });
+                    return false;
+                  });
+                });
+              </script>
+
+              <div id="feedback" style="color: red">
+              </div>
+
+            </p>
+          </div>
+
+
+        </div>
+
+      </div>
+    </section>
+
+    <section id="const_examples">
+      <div class="container">
+        <h2 class="text-center text-uppercase text-secondary mb-0">Examples</h2>
+        <hr class="star-dark mb-5">
+        <div class="row" style="display: flex; justify-content: space-around;">
+        <div>
+            <p class="lead">
+              <div class="btn-secondary" style="width: 900px; border-radius: 5px">
+                <div class="bg-secondary d-flex justify-content-around">
+                      <a class="article_1_link" href="#article1" >Missing Aoriginal Girl</a>
+
+                      <a class="article_2_link" href="#article2">National Daycare Plan</a>
+
+                      <a class="article_3_link" href="#article3" >US Election</a>
+                    </div>
+
+                  <div class="container-fluid" id="article1" style="display: none;">
+                    <div style="float: left; width: 50%; background-color: white; color: black">
+                      <ul>
+                        <li> Harper promised 15% discount of 1000 dollars spent on children's sports activities. Mulcair promises 15 dollar a day child care. I will go with Mulcair. </li>
+                        <li> I know First Nations people who survived the residential schools and have parented just fine. Their kids grew up in loving stable homes. </li>
+                        <li> Don't need an inquiry, the problems are self evident as are the solutions. The current system has been tested for decades with increasingly disastrous results, perhaps the whole system is flawed and should be replaced. </li>
+                        <li> If it happens once in a while to everyone, it's a crime. If it happens disproportionately to a particular demographic, it's more than just a crime. Harper is way out to lunch on this one. This is not an issue the police can solve. It's going to take a society, a country, to do that, and that takes leadership and information.</li>
+                        <li> A reasonably good article. Barbra McDougal of all people should be in a position to kick start some meaningful solutions to this problem.</li>
+                      </ul>
+                    </div>
+
+                    <div style="float: right; width: 50%; background-color: white; color: red">
+                      <ul>
+                        <li> It will collect dust on a shelf somewhere. </li>
+                        <li> When you say 'we' don't have a strategy you mean all concerned not just the non FNs, right? </li>
+                        <li> What if it turns out most of the missing and murdered women met their fate because of aboriginal males? Just sayn. </li>
+                        <li> Yet some First Nations thrive! </li>
+                        <li> Harper will be recorded in the still short history of our nation as our worst and most destructive prime minister. </li>
+                      </ul>
+                    </div>
+
+                  </div>
+
+                  <div id="article2" style="display: none;">
+                    <div style="float: left; width: 50%; background-color: #2c3e50">
+                      <ul>
+                        <li> good</li>
+                        <li> good </li>
+                        <li> good </li>
+                        <li> good</li>
+                        <li> good </li>
+                      </ul>
+                    </div>
+
+                    <div style="float: right; width: 50%; background-color: #2c3e50">
+                      <ul>
+                        <li> bad </li>
+                        <li> bad </li>
+                        <li> bad </li>
+                        <li> bad </li>
+                        <li> bad </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div id="article3" style="display: none">
+                    <div style="float: left; width: 50%; background-color: #2c3e50">
+                      <ul>
+                        <li> good</li>
+                        <li> good </li>
+                        <li> good </li>
+                        <li> good</li>
+                        <li> good </li>
+                      </ul>
+                    </div>
+
+                    <div style="float: right; width: 50%; background-color: #2c3e50"">
+                      <ul>
+                        <li> bad </li>
+                        <li> bad </li>
+                        <li> bad </li>
+                        <li> bad </li>
+                        <li> bad </li>
+                      </ul>
+                    </div>
+                  </div>
+              </div>
+
+            </p>
+          </div>
+
+      </div>
+    </div>
+    </section>
+
+
+
+    <!-- Footer -->
+    <footer class="footer text-center" id="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4">
+            <b><p class="lead mb-0">Maite Taboada</p></b>
+            <p>Professor - Department of Linguistics<p>
+            <a href="https://www.sfu.ca/~mtaboada/">https://www.sfu.ca/~mtaboada/</a>
+            <p>E-mail: mtaboada@sfu.ca</p>
+          </div>
+
+          <div class="col-md-4">
+<!--             <h4 class="text-uppercase mb-4">About Us</h4>
+ -->        <b><p class="lead mb-0">Varada Kolhatkar</p></b>
+            <p>Postdoctoral Fellow - Department of Linguistics<p>
+            <a href="https://www.sfu.ca/~vkolhatk/">https://www.sfu.ca/~vkolhatk/</a>
+            <p>E-mail: vkolhatk@sfu.ca</p>
+          </div>
+
+          <div class="col-md-4">
+            <b><p class="lead mb-0">Fatemeh Torabi Asr</p></b>
+            <p>Postdoctoral Fellow - Department of Linguistics<p>
+            <a href="https://ftasr.github.io">https://ftasr.github.io</a>
+            <p>E-mail: ftorabia@sfu.ca</p>
+          </div>
+
+        </div>
+      </div>
+    </footer>
+
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="static/vendor/jquery/jquery.min.js"></script>
+    <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Plugin JavaScript -->
+    <script src="static/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="static/vendor/magnific-popup/jquery.magnific-popup.min.js"></script>
+
+    <!-- Contact Form JavaScript -->
+    <script src="static/js/jqBootstrapValidation.js"></script>
+    <script src="static/js/contact_me.js"></script>
+
+    <!-- Custom scripts for this template -->
+    <script src="static/js/freelancer.min.js"></script>
+
+    <!-- For hiding and showing articles -->
+    <script src="static/js/hiding_articles.js"></script>
+    <script src="static/js/hiding_feedback.js"></script>
+    <script src="static/js/showing_feedback_button.js"></script>
+
+
+
+
+
+  </body>
+
+</html>
