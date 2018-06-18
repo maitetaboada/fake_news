@@ -1,8 +1,11 @@
 Text,Label,Comments
-hello,constructive,nope
-what is this,constructive,nope
-hey ,constructive,werner
-hey ,constructive,werner
-h,constructive,no
-k,constructive,no
-no,constructive,nope
+"                  Clinton won the 2016 US election!
+                ",suspicious,I don't know
+"                  Clinton won the 2016 US election!
+                ",trusted,who knows
+"                  Clinton won the 2016 US election!
+                ",suspicious,
+" Hilary Clinton won the 2016 US election.
+                ",fake,aaaa
+" Hillary Clinton won the 2016 US election.
+                ",fake,none

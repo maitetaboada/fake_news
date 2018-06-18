@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Freelancer - Start Bootstrap Theme</title>
+    <title>Fake News Detection</title>
 
     <!-- Bootstrap core CSS -->
     <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -50,25 +50,13 @@
                       <li><a href="#footer">About Us</a></li>
                   </ul>
               </div>
-
-            </li>
-
-            <li class="nav-item mx-0 mx-lg-1">
-              <div class="btn-group">
-                  <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Comment Moderaration <span class="caret"></span></button>
-                  <ul class="dropdown-menu" style="text-align: center; vertical-align: middle;">
-                      <li><a href="#about">Interface</a></li>
-                      <li><a href="#const_examples">Examples</a></li>
-                  </ul>
-              </div>
-
             </li>
             <li class="nav-item mx-0 mx-lg-1">
               <div class="btn-group">
                   <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Fake News<span class="caret"></span></button>
                   <ul class="dropdown-menu" style="text-align: center; vertical-align: middle;">
-                      <li><a href="#contact">Interface</a></li>
-                      <li><a href="#contact">Examples</a></li>
+                      <li><a href="#systemDemo">Interface</a></li>
+                      <li><a href="#examples">Examples</a></li>
                   </ul>
               </div>
             </li>
@@ -77,43 +65,53 @@
       </div>
     </nav>
 
-    <!-- Header -->
-    <header class="masthead bg-primary text-white text-center">
+     <!-- Header -->
+    <!--header class="masthead bg-primary text-white text-center">
       <div class="container">
-        <img class="img-fluid mb-5 d-block mx-auto" src="static/img/profile.png" alt="" width="200" height="200">
-        <h1 class="text-uppercase mb-0" style="font-size: 3em">Discourse Processing Lab</h1>
-        <hr class="star-light">
-        <h2 class="font-weight-light mb-0">Comment Moderation and Fake News</h2>
-      </div>
-    </header>
+        <img class="img-fluid mb-5 d-block mx-auto" src="static/img/SFU_logo_both.png" alt="" width="400" height="400">
+        <!--img class="img-fluid mb-5 d-block mx-auto" src="static/img/SFU_StdTag-Horz_Pos_RGB.jpg" alt="" width="200" height="200"-->
+        <!--h1 class="text-uppercase mb-0" style="font-size: 3em">Comment Moderation</--h1-->
+        <!--hr class="star-light"-->
+        <!--h2 class="font-weight-light mb-0">Comment Moderation</h2-->
+      <!--/div-->
+    <!--/header-->
 
     <!-- Portfolio Grid Section -->
     <section class="portfolio" id="portfolio">
       <div class="container">
         <div style="text-align: left; vertical-align: middle;">
-          <h1 class="text-uppercase mb-0" style="color: #18bc9c">What if technology could help with moderating online content?</h1>
+          <br>
+          <br>
+          <img class="img-fluid mb-5 d-block mx-auto" src="static/img/SFU_logo_both.png" alt="" width="400" height="400" align="center">
+          <br>
+          <br>
+          <h1 class="text-uppercase mb-0" style="color: #18bc9c">Our Battle against Fake News</h1>
 
-        At the Discourse Processing Lab, we have two focused projects on organizing and moderating online content: the fake news project and the news comment moderation project. In these projects, we apply general methods of text classification ranging from classic machine learning algorithms (e.g., Naive Bayes, Decision Trees, SVMs) to deep learning architectures (e.g., feed-forward, recurrent and convolutional neural networks). The aim of the fake news project is to help news readers to identify bias and misinformation in news articles in a quick and reliable fashion. We have collected a large corpus of news articles from online publishers with different levels of veracity and built classification models based on linguistic cues of deception. Through systematic generalizations across genre and publishers that happen during training of the model, the system can be used to score the likelihood of an unseen article to be deceptive. The news comment moderation project aims to encourage constructive discussion online. This can be  done, for example, by promoting the most informative reader comments. As part of this project, we have collected and curated a corpus of about 10,000 opinion articles, together with their more than one million reader comments, from the national newspaper in Canada, The Globe and Mail. We have annotated subsets of this corpus for constructiveness and toxicity. We have also developed computational methods to identify constructive comments, which exploit linguistic features for constructiveness. Our methods can assist in moderation tasks, typically performed by humans, such as organizing and summarizing reader comments.
+          The aim of the fake news project is to help news readers to identify bias and misinformation in news articles in a quick and reliable fashion.
+          We have collected about 10,000 news articles from web and labeled them at different levels of <b>veracity</b> (from true to false) based on extensively explained annotations of online fact-checkers.
+          This data is used to train the fact-checking system demoed here.
+          In addition, we obtained another collection of news articles from previous work <a href ="https://aclanthology.coli.uni-saarland.de/papers/D17-1317/d17-1317" target="_blank">(Rashkin et al., 2017)</a> with labels indicating the <b>genera</b> of news (satire, propaganda, hoax and trusted styles).
+          Our second demo system is trained on this data set and can score your text based on its similarity to these four genera of news. Enjoy testing!
         <br>
         <br>
       </div>
 
     <!-- Fake News Section -->
-    <section class="bg-primary text-white mb-0" id="about">
+    <section class="bg-primary text-white mb-0" id="systemDemo">
       <div class="container">
-        <h2 class="text-center text-uppercase text-white">Fake News Detection</h2>
+        <h3 class="text-center text-uppercase text-white">Fake News Detection</h3>
         <hr class="star-light mb-5">
         <div class="row" style="display: flex; justify-content: space-around;">
           <div>
             <p class="lead">
             <p>
-              Please select a function:
+              <b><label>Please select a method: </label></b>&nbsp;&nbsp;
             </p>
 
             <form>
-              <input type="radio" name="model" value="fact"> Fact Checking <br>
+              <input type="radio" name="model" value="fact" checked> Fact Checking <br>
               <input type="radio" name="model" value="genera"> Genre Classification <br><br>
-              <a id="select_model"><button type="submit" class="btn btn-secondary btn-sm" id="sendMessageButton">Select</button></a>
+              <!-- <a id="select_model"><button type="submit" class="btn btn-secondary btn-sm" id="sendMessageButton">Select</button></a> -->
             </form>
 
             <script type=text/javascript>
@@ -132,27 +130,41 @@
             <div id="temp" style="color: red"></div>
 
           </div>
+
+
+
           <div>
             <p class="lead">
 
               <form>
-                <b><label>Please enter your comment: </label></b>&nbsp;&nbsp;
-                </br>
+                <b><label>Please enter your text: </label></b>&nbsp;&nbsp;
+                <br>
                 <!--input name=comment style="width: 600px; height:300px; border-radius: 5px"-->
-                <textarea name="comment" style="width:600px;height:250px;border-radius: 5px"></textarea>
-                </br>
-                <a id="submit_button"><button type="submit" class="btn btn-secondary btn-sm" id="sendMessageButton" href="#want_feedback">Submit</button></a>&nbsp;&nbsp;
+                <textarea name="text" style="width:600px;height:250px;border-radius: 5px"> Hillary Clinton won the 2016 US election.
+                </textarea>
+                <br>
+                <a id="submit_button"><button type="submit" class="btn btn-secondary btn-sm" id="submitButton" >Submit</button></a>&nbsp;
+                <!-- <a id="clear_button"><button type="reset" class="btn btn-secondary btn-sm" id="clearButton" >Clear</button></a>&nbsp;&nbsp; -->
+                <input class="btn btn-secondary btn-sm" type="button" value="Refresh" onClick="window.location.reload()">&nbsp;
+                <!-- <input class="btn btn-secondary btn-sm" type="button" value="Refresh" onClick="refreshdemo()"> -->
               </form>
-              <div id="prediction" style="color: white"></div>
+              <br>
+              <div id="prediction" style="color: red; background-color: white; text-align:center"></div>
+              <br>
 
-              <br><a id="want_feedback" style="display: none"><button type="submit" class="btn btn-secondary btn-sm" id="sendMessageButton" href="#feedback_box">Seem wrong?</button></a><br>
+              <div>
+              <!-- bar chart canvas element <h3>Visualization</h3> -->
+                <canvas id="chart" width="600" height="400"></canvas>
+              </div>
+
+              <br><a id="want_feedback" style="display: none"><button type="submit" class="btn btn-secondary btn-sm" id="feedbackButton" href="#feedback_box">Seem wrong?</button></a><br>
 
               <div id="feedback_box" style="display: none">
-                <p> How will you classify the text? </p>
+                <p> How would you classify the text? </p>
                 <form>
-                    <input type="radio" name="answer" value="constructive"> Fake<br>
-                    <input type="radio" name="answer" value="nonconstructive"> Suspicious<br>
-                    <input type="radio" name="answer" value="notsure"> Trusted<br><br>
+                    <input type="radio" name="answer" value="fake"> Fake<br>
+                    <input type="radio" name="answer" value="suspicious"> Suspicious<br>
+                    <input type="radio" name="answer" value="trusted"> Trusted<br><br>
                     <p>Do you have any comments?</p>
                     <b><label>Comments: </label></b>&nbsp;&nbsp;
 
@@ -161,15 +173,20 @@
                 </form>
               </div>
 
+              <script>
+              function refreshdemo() {
+                  $('#systemDemo').load(document.URL +  ' #systemDemo');
+              }
+              </script>
               <script type=text/javascript>
                 $(function() {
                   $('a#submit_response').bind('click', function() {
                     $.getJSON("/get_feedback", {
-                      result: $('textarea[name="comment"]').val(),
-                      label: $('input[name="answer"]').val(),
+                      text: $('textarea[name="text"]').val(),
+                      answer: $('input[name="answer"]:checked').val(),
                       comments: $('input[name="comments"]').val(),
-
                     }, function(data) {
+                      $("#feedback_box").toggle();
                       $("#feedback").text(data.feedback);
                     });
                     return false;
@@ -181,29 +198,65 @@
                 $(function() {
                   $('a#submit_button').bind('click', function() {
                     $.getJSON("/get_prediction", {
-                      result: $('textarea[name="comment"]').val(),
+                      text: $('textarea[name="text"]').val(),
                       model: $('input[name="model"]:checked').val(),
                     }, function(data) {
                       $("#prediction").text(data.predicted_label);
+                      var chart_labels = data.chart_labels;
+                      var chart_values = data.chart_values;
+                      // bar chart data
+                       var barData = {
+                       labels : chart_labels,
+                       datasets : [
+                          {
+                                fillColor: "rgba(255,255,255,0.6)",
+                                strokeColor: "rgba(100,100,255,1)",
+                                pointColor: "rgba(100,100,255,1)",
+                             data : chart_values
+                          }
+                          ]
+                       }
+
+                     // get bar chart canvas
+                     var mychart = document.getElementById("chart").getContext("2d");
+
+                     steps = 4
+                     max = 2
+                     // draw bar chart
+                     new Chart(mychart).Bar(barData, {
+                          scaleOverride: true,
+                          scaleSteps: steps,
+                          scaleStepWidth: Math.ceil(max / steps),
+                          scaleStartValue: -2,
+                          scaleShowVerticalLines: true,
+                          scaleShowGridLines : true,
+                          barShowStroke : true,
+                          scaleShowLabels: true
+                     });
+
+
+
                     });
                     return false;
                   });
                 });
               </script>
 
-              <div id="feedback" style="color: red">
+              <script src='static/js/Chart.min.js'></script>
+
+              <br>
+              <div id="feedback" style="color: white ; ">
+              <br>
               </div>
 
-            </p>
           </div>
-
-
         </div>
+
 
       </div>
     </section>
 
-    <section id="const_examples">
+    <section id="examples">
       <div class="container">
         <h2 class="text-center text-uppercase text-secondary mb-0">Examples</h2>
         <hr class="star-dark mb-5">
@@ -212,81 +265,49 @@
             <p class="lead">
               <div class="btn-secondary" style="width: 900px; border-radius: 5px">
                 <div class="bg-secondary d-flex justify-content-around">
-                      <a class="article_1_link" href="#article1" >Humanoid figure in sky</a>
+                      <a class="article_1_link" href="#article1" >Dementor figure in sky</a>
 
-                      <a class="article_2_link" href="#article2">Moroccan King's Funeral</a>
+                      <a class="article_2_link" href="#article2">Clintons and Arafat</a>
 
-                      <a class="article_3_link" href="#article3" >Trump's sexual abuse</a>
+                      <a class="article_3_link" href="#article3" >Trump's scandal</a>
                     </div>
 
-                  <div class="container-fluid" id="article1" style="display: none;">
-                    <div style="float: left; width: 50%; background-color: white; color: black">
-                        Source: http://www.dailymail.co.uk/news/article-4281314/Human-shaped-cloud-appears-Zambian-shopping-centre.html
+                  <div id="article1" style="display: none;">
+                    <div style="float: left; width: 100%; background-color: #2c3e50 ">
                         <br>
-                        Fact-checked by Snopes: False
-                        <br>
+                        <p><b>Zambian shoppers run in terror when strange 'Harry Potter Dementor' figure appears in clouds</b></p>
+                        <p> Source: <a href = "http://www.dailymail.co.uk/news/article-4281314/Human-shaped-cloud-appears-Zambian-shopping-centre.html" target="_blank">www.dailymail.co.uk</a> </p>
+                        <p> Fact-checked by Snopes: <a href="http://www.snopes.com/dementor-figure-in-sky" target="_blank"> False </a> </p>
+                        <p>
                         Zambian locals ran away in terror when they saw a strange human-like figure appear in the clouds above a shopping centre. The alleged apparition, which looked like a Dementor from the Harry Potter movies, was spotted above the Mukuba Mall in Kitwe. Photographs show a large humanoid head and torso, tailing into the sky and it is thought to have measured more than 100 metres (330ft) long. A strange human-like figure appeared above Mukuba Mall in Kitwe, Zambia. Some started worshipping it and others ran away in terror Photographs show a large humanoid head and torso, tailing into the sky and it is thought to have measured more than 100 metres (330ft) long The dense black shape looked like it was made from a different material from the clouds. From the angle of the photograph, it looks like the apparition was looking down on the shopping centre. The figure hung in the sky for about half an hour and some thought it was a manifestation of God. A witness said:  We were shocked to see images that looked like a human in the clouds for close to 30 minutes.  Some started worshipping but others ran away. It was so strange.
-
+                        </p>
                     </div>
-
-                    <div style="float: right; width: 50%; background-color: white; color: red">
-                        Source: http://news.bbc.co.uk/2/hi/africa/404280.stm
-                        <br>
-                        Fact-checked by Snopes: True
-                        <br>
-                        World leaders who attended the king s funeral on Sunday used the occasion for an intensive round of meetings centred on pushing forward the Middle East peace process. President Clinton, the Israeli Prime Minister Ehud Barak and the Palestinian leader Yasser Arafat met for three-way discussions that American officials said were brief but animated. Palestinian officials said Mr Arafat and Mr Barak will meet again on Tuesday to discuss Israeli implementation of existing peace accords. UK Foreign Secretary Robin Cook had meetings with the Israeli, Palestinian and Egyptian leaders. The new Israeli Prime Minister was building diplomatic bridges Contrary to Israeli predictions, there was no encounter between Mr Barak and the Syrian President, Hafez al-Assad, because Mr Assad stayed at home. Landmark meetings There were other diplomatic landmarks. The new President of Algeria, Abdelaziz Bouteflika, shook hands with Mr Barak - a first for a country officially still at war with Israel. President Mubarak: A key player in the peace process Another key player in the Middle East peace process, the Egyptian President Hosni Mubarak, had a series of meetings at the funeral, including one with Mr Barak. President Bouteflika, for his part, took the opportunity to hold talks with Morocco s new King Muhammad after the funeral - moving swiftly to improve relations between the two countries, officials said. The Algerian leader was accompanied by a high-level delegation, including his Prime Minister Smail Hamdani, underlining the importance he attached to the occasion. US President Clinton stayed in Rabat well after nightfall, to meet various leaders from the Middle East, Africa and Europe. But by Monday, most of the presidents, prime ministers and kings had left Morocco, leaving behind pledges of support for the new king. Frenzied scenes King Hassan died of a heart attack on Friday. He was the Arab world s longest-serving head of state. In all, representatives of more than 50 countries came to pay their final respects to the king. There were frenzied scenes of mourning by some of the 2m people estimated to have come to catch a glimpse of the king s coffin. The Muslim tradition, which says that burial should take place within 24 hours of death, was waived to allow so many foreign guests to attend. Government sources said on Sunday that King Muhammad VI, as he will be styled, got married in a quiet ceremony on the day his father died.  According to Moroccan tradition, the crown prince must be married so that he can ascend the throne,  a source told the Reuters news agency. Other reports said the Palace denied the wedding took place.
-                    </div>
-
                   </div>
 
                   <div id="article2" style="display: none;">
-                    <div style="float: left; width: 50%; background-color: #2c3e50">
-                        Source: http://www.newyorker.com/magazine/2016/10/24/documenting-trumps-abuse-of-women
+                    <div style="float: left; width: 100%; background-color: #2c3e50 ">
                         <br>
-                        Fact-checked by Snopes: Mixture of true and false
-                        <br>
-                        When the news broke that Donald Trump had been caught on video in 2005 boasting that, as a celebrity, he feels free to grab women by the pussy, Harry Hurt III experienced a sense of vindication. In 1993, Hurt published Lost Tycoon: The Many Lives of Donald J. Trump, an unauthorized biography that has long been out of print. The day the tape surfaced, he was hitting golf balls at a driving range in Sagaponack, New York, when a text message arrived from a friend: Donald is done! After Hurt watched the tape, he said, I thought, Finally, this behavior is coming out. But he doubted that the revelation would do any real damage to Trumps campaign. Researching his book, in the early nineties, Hurt discovered and documented more serious instances of Trumps mistreatment of women, yet most news outlets had declined to report on them. Even during the current campaign, Hurt said, Ive been a voice in the wilderness. When Lost Tycoon was published, Kirkus Reviews credited Hurt, a former contributing editor at Texas Monthly , with having written a slick, informed account. The Times ignored it. Trump denounced it, and last year, in a tweet, he called Hurt a dummy dope who wrote a failed book. The part of the book that caused the most controversy concerns Trumps divorce from his first wife, Ivana. Hurt obtained a copy of her sworn divorce deposition, from 1990, in which she stated that, the previous year, her husband had raped her in a fit of rage. In Hurts account, Trump was furious that a scalp reduction operation hed undergone to eliminate a bald spot had been unexpectedly painful. Ivana had recommended the plastic surgeon. In retaliation, Hurt wrote, Trump yanked out a handful of his wifes hair, and then forced himself on her sexually. Afterward, according to the book, she spent the night locked in a bedroom, crying; in the morning, Trump asked her, with menacing casualness, Does it hurt?  Trump has denied both the rape allegation and the suggestion that he had a scalp-reduction procedure. Hurt said that the incident, which is detailed in Ivanas deposition, was confirmed by two of her friends. Hurt held on to his copy of Ivanas sealed deposition for years. It was sworn testimony, he said. But eventually, when he was cleaning house during his own divorce, he said, I threw it all out. He went on, The larger tragedy is that Trump might be elected President of the United States. I never imagined in my wildest nightmares that it would come to this. Before Hurts book came out, Trumps lawyers pressured the publisher, W. W. Norton, to paste a clarifying statement from Ivana into the flyleaf of every copy. In it, she confirmed that she had said in a deposition that her husband had raped her, but added that she did not want those words to be interpreted in a literal or criminal sense. She also said, As a woman, I felt violated. Hurt said that he considers the note a non-denial denial, and believes that Ivana agreed to amend her words in order to secure the divorce settlement, in which she reportedly received fourteen million dollars in cash. When the rape story resurfaced last summer, Ivana issued a statement saying that it was without merit. She and Donald have raised three kids together. Theyre picking their bedrooms in the White House, Hurt said. But shes not saying its untrue, or that she didnt swear to it under oath. Trump was deposed during the divorce, too. According to a report by the New Jersey Division of Gaming Enforcement, which examined the divorce records, Trump invoked his Fifth Amendment right against self-incrimination approximately a hundred times when Ivanas lawyers asked him about adulterous relations with other women. Lost Tycoon didnt sell well. It came out at a time when Trumps businesses were faltering, and interest in him had waned. But this spring, when Trump was one of three Republican Presidential candidates still in the race, Hurt asked Norton to reissue the book. Word came back that the publishers lawyers had deemed the book too dangerous to publish. (Norton said it had made a business decision.) Hurt decided to scan the book and reissue it himself online. When a reporter for the Daily Beast began making calls about the rape allegation, Michael Cohen, a Trump lawyer, told him, You write a story that has Mr. Trumps name in it and the word rape, and Im going to mess your life up . . . for as long as youre on this frickin planet. After that, Hurt said, CNN booked him four times, but kept cancelling. The only TV host to have him on the air to talk about the rape allegation was Megyn Kelly, at Fox News. Hurt finally made it onto CNN last week, after ten more women had come forward to accuse Trump of violating them. I applaud their courage, he said, and thank them for telling the truth under what must be painful and embarrassing circumstances. Recalling the second debate, in which Trump insisted that his locker-room talk was only talk and not action, Hurt said, He was lying. I know full well he has done that. His own wife said so, under oath.
-                    </div>
-
-                    <div style="float: right; width: 50%; background-color: #2c3e50">
-                      <ul>
-                        <li> bad </li>
-                        <li> bad </li>
-                        <li> bad </li>
-                        <li> bad </li>
-                        <li> bad </li>
-                      </ul>
+                        <p><b>Clintons and Arafat</b></p>
+                        <p> Source: <a href = "http://news.bbc.co.uk/2/hi/africa/404280.stm" target="_blank">news.bbc.co.uk</a> </p>
+                        <p> Fact-checked by Snopes: <a href="http://www.snopes.com/clintons-arafat" target="_blank"> True </a> </p>
+                        <p>
+                        World leaders who attended the king s funeral on Sunday used the occasion for an intensive round of meetings centred on pushing forward the Middle East peace process. President Clinton, the Israeli Prime Minister Ehud Barak and the Palestinian leader Yasser Arafat met for three-way discussions that American officials said were brief but animated. Palestinian officials said Mr Arafat and Mr Barak will meet again on Tuesday to discuss Israeli implementation of existing peace accords. UK Foreign Secretary Robin Cook had meetings with the Israeli, Palestinian and Egyptian leaders. The new Israeli Prime Minister was building diplomatic bridges Contrary to Israeli predictions, there was no encounter between Mr Barak and the Syrian President, Hafez al-Assad, because Mr Assad stayed at home. Landmark meetings There were other diplomatic landmarks. The new President of Algeria, Abdelaziz Bouteflika, shook hands with Mr Barak - a first for a country officially still at war with Israel. President Mubarak: A key player in the peace process Another key player in the Middle East peace process, the Egyptian President Hosni Mubarak, had a series of meetings at the funeral, including one with Mr Barak. President Bouteflika, for his part, took the opportunity to hold talks with Morocco s new King Muhammad after the funeral - moving swiftly to improve relations between the two countries, officials said. The Algerian leader was accompanied by a high-level delegation, including his Prime Minister Smail Hamdani, underlining the importance he attached to the occasion. US President Clinton stayed in Rabat well after nightfall, to meet various leaders from the Middle East, Africa and Europe. But by Monday, most of the presidents, prime ministers and kings had left Morocco, leaving behind pledges of support for the new king. Frenzied scenes King Hassan died of a heart attack on Friday. He was the Arab world s longest-serving head of state. In all, representatives of more than 50 countries came to pay their final respects to the king. There were frenzied scenes of mourning by some of the 2m people estimated to have come to catch a glimpse of the king s coffin. The Muslim tradition, which says that burial should take place within 24 hours of death, was waived to allow so many foreign guests to attend. Government sources said on Sunday that King Muhammad VI, as he will be styled, got married in a quiet ceremony on the day his father died.  According to Moroccan tradition, the crown prince must be married so that he can ascend the throne,  a source told the Reuters news agency. Other reports said the Palace denied the wedding took place.
+                        </p>
                     </div>
                   </div>
 
                   <div id="article3" style="display: none">
-                    <div style="float: left; width: 50%; background-color: #2c3e50">
-                      <ul>
-                        <li> good</li>
-                        <li> good </li>
-                        <li> good </li>
-                        <li> good</li>
-                        <li> good </li>
-                      </ul>
-                    </div>
-
-                    <div style="float: right; width: 50%; background-color: #2c3e50"">
-                      <ul>
-                        <li> bad </li>
-                        <li> bad </li>
-                        <li> bad </li>
-                        <li> bad </li>
-                        <li> bad </li>
-                      </ul>
+                    <div style="float: left; width: 100%; background-color: #2c3e50 ">
+                        <br>
+                        <p><b>Documenting Trump’s Abuse of Women</b></p>
+                        <p> Source: <a href = "http://www.newyorker.com/magazine/2016/10/24/documenting-trumps-abuse-of-women" target="_blank">www.newyorker.com</a> </p>
+                        <p> Fact-checked by Snopes: <a href="https://www.snopes.com/fact-check/are-we-not-going-to-talk-about-trump" target="_blank"> Mixture of true and false</a> </p>
+                        <p>
+                        When the news broke that Donald Trump had been caught on video in 2005 boasting that, as a celebrity, he feels free to grab women by the pussy, Harry Hurt III experienced a sense of vindication. In 1993, Hurt published Lost Tycoon: The Many Lives of Donald J. Trump, an unauthorized biography that has long been out of print. The day the tape surfaced, he was hitting golf balls at a driving range in Sagaponack, New York, when a text message arrived from a friend: Donald is done! After Hurt watched the tape, he said, I thought, Finally, this behavior is coming out. But he doubted that the revelation would do any real damage to Trumps campaign. Researching his book, in the early nineties, Hurt discovered and documented more serious instances of Trumps mistreatment of women, yet most news outlets had declined to report on them. Even during the current campaign, Hurt said, Ive been a voice in the wilderness. When Lost Tycoon was published, Kirkus Reviews credited Hurt, a former contributing editor at Texas Monthly , with having written a slick, informed account. The Times ignored it. Trump denounced it, and last year, in a tweet, he called Hurt a dummy dope who wrote a failed book. The part of the book that caused the most controversy concerns Trumps divorce from his first wife, Ivana. Hurt obtained a copy of her sworn divorce deposition, from 1990, in which she stated that, the previous year, her husband had raped her in a fit of rage. In Hurts account, Trump was furious that a scalp reduction operation hed undergone to eliminate a bald spot had been unexpectedly painful. Ivana had recommended the plastic surgeon. In retaliation, Hurt wrote, Trump yanked out a handful of his wifes hair, and then forced himself on her sexually. Afterward, according to the book, she spent the night locked in a bedroom, crying; in the morning, Trump asked her, with menacing casualness, Does it hurt?  Trump has denied both the rape allegation and the suggestion that he had a scalp-reduction procedure. Hurt said that the incident, which is detailed in Ivanas deposition, was confirmed by two of her friends. Hurt held on to his copy of Ivanas sealed deposition for years. It was sworn testimony, he said. But eventually, when he was cleaning house during his own divorce, he said, I threw it all out. He went on, The larger tragedy is that Trump might be elected President of the United States. I never imagined in my wildest nightmares that it would come to this. Before Hurts book came out, Trumps lawyers pressured the publisher, W. W. Norton, to paste a clarifying statement from Ivana into the flyleaf of every copy. In it, she confirmed that she had said in a deposition that her husband had raped her, but added that she did not want those words to be interpreted in a literal or criminal sense. She also said, As a woman, I felt violated. Hurt said that he considers the note a non-denial denial, and believes that Ivana agreed to amend her words in order to secure the divorce settlement, in which she reportedly received fourteen million dollars in cash. When the rape story resurfaced last summer, Ivana issued a statement saying that it was without merit. She and Donald have raised three kids together. Theyre picking their bedrooms in the White House, Hurt said. But shes not saying its untrue, or that she didnt swear to it under oath. Trump was deposed during the divorce, too. According to a report by the New Jersey Division of Gaming Enforcement, which examined the divorce records, Trump invoked his Fifth Amendment right against self-incrimination approximately a hundred times when Ivanas lawyers asked him about adulterous relations with other women. Lost Tycoon didnt sell well. It came out at a time when Trumps businesses were faltering, and interest in him had waned. But this spring, when Trump was one of three Republican Presidential candidates still in the race, Hurt asked Norton to reissue the book. Word came back that the publishers lawyers had deemed the book too dangerous to publish. (Norton said it had made a business decision.) Hurt decided to scan the book and reissue it himself online. When a reporter for the Daily Beast began making calls about the rape allegation, Michael Cohen, a Trump lawyer, told him, You write a story that has Mr. Trumps name in it and the word rape, and Im going to mess your life up . . . for as long as youre on this frickin planet. After that, Hurt said, CNN booked him four times, but kept cancelling. The only TV host to have him on the air to talk about the rape allegation was Megyn Kelly, at Fox News. Hurt finally made it onto CNN last week, after ten more women had come forward to accuse Trump of violating them. I applaud their courage, he said, and thank them for telling the truth under what must be painful and embarrassing circumstances. Recalling the second debate, in which Trump insisted that his locker-room talk was only talk and not action, Hurt said, He was lying. I know full well he has done that. His own wife said so, under oath.
+                        </p>
                     </div>
                   </div>
               </div>
-
-            </p>
-          </div>
-
-      </div>
-    </div>
     </section>
 
 
@@ -294,7 +315,14 @@
     <!-- Footer -->
     <footer class="footer text-center" id="footer">
       <div class="container">
-        <div class="row">
+        <div class="row" style="display: flex; justify-content: space-around;">
+          <div class="col-md-4">
+            <b><p class="lead mb-0">Fatemeh Torabi Asr</p></b>
+            <p>Postdoctoral Fellow - Department of Linguistics<p>
+            <a href="https://ftasr.github.io">https://ftasr.github.io</a>
+            <p>E-mail: ftorabia@sfu.ca</p>
+          </div>
+
           <div class="col-md-4">
             <b><p class="lead mb-0">Maite Taboada</p></b>
             <p>Professor - Department of Linguistics<p>
@@ -302,20 +330,9 @@
             <p>E-mail: mtaboada@sfu.ca</p>
           </div>
 
-          <div class="col-md-4">
-<!--             <h4 class="text-uppercase mb-4">About Us</h4>
- -->        <b><p class="lead mb-0">Varada Kolhatkar</p></b>
-            <p>Postdoctoral Fellow - Department of Linguistics<p>
-            <a href="https://www.sfu.ca/~vkolhatk/">https://www.sfu.ca/~vkolhatk/</a>
-            <p>E-mail: vkolhatk@sfu.ca</p>
-          </div>
 
-          <div class="col-md-4">
-            <b><p class="lead mb-0">Fatemeh Torabi Asr</p></b>
-            <p>Postdoctoral Fellow - Department of Linguistics<p>
-            <a href="https://ftasr.github.io">https://ftasr.github.io</a>
-            <p>E-mail: ftorabia@sfu.ca</p>
-          </div>
+
+
 
         </div>
       </div>
@@ -341,8 +358,7 @@
     <script src="static/js/hiding_articles.js"></script>
     <script src="static/js/hiding_feedback.js"></script>
     <script src="static/js/showing_feedback_button.js"></script>
-
-
+      </div>
 
 
 
