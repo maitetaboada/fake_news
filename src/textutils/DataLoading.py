@@ -38,7 +38,7 @@ def clean_str(string):
     string = re.sub(r"\'", "", string.decode("utf-8"))
     string = re.sub(r"\"", "", string.decode("utf-8"))
     string = ''.join(e for e in string if (e.isspace() or e.isalnum()))  # comment the if part for Mehvish parser
-    return string.strip().lower()
+    return string.strip()#.lower()
 
 def load_data_liar(file_name):
     print("Loading data...")
