@@ -35,12 +35,15 @@ def anonymize(data_file):
         i = i + 1
         doc = nlp(str(s))
         offset = 0
+        print(s)
         for ent in doc.ents:
+            print("[" + ent.text  + "]")
             s = s[:ent.start_char + offset] + ent.label_ + s[ent.end_char + offset:]
             offset = offset - len(ent.text) + len(ent.label_)
-            result.append(s)
-        #print(s)
-    print(texts[0:10])
+        result.append(s)
+        print(s)
+    #print(result[0:10])
+    return np.asarray(result)
 
 
 
