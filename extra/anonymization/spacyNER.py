@@ -30,19 +30,20 @@ def anonymize(data_file):
     result = []
     i = 0
     for s in texts:
-        if i > 10:
-            break
-        i = i + 1
-        doc = nlp(str(s))
+        #if i > 10:
+        #    break
+        #i = i + 1
+        s = str(s)
+        doc = nlp(s)
         offset = 0
-        print(s)
+        #print(s)
         for ent in doc.ents:
-            print("[" + ent.text  + "]")
+            #print("[" + ent.text  + "]")
             s = s[:ent.start_char + offset] + ent.label_ + s[ent.end_char + offset:]
             offset = offset - len(ent.text) + len(ent.label_)
         result.append(s)
-        print(s)
-    #print(result[0:10])
+        #print(s)
+    print(result[0:10])
     return np.asarray(result)
 
 
@@ -50,8 +51,16 @@ def anonymize(data_file):
 
 def data_anonymization():
     #anonymize test/train/validation files currently in the dump folder
-    texts_train = anonymize("../../dump/trainRaw")
-    texts_train.dump("../../dump/trainAnon")
+    texts = anonymize("../../dump/testRaw")
+    texts.dump("../../dump/testAnon")
+
+    texts = anonymize("../../dump/trainRaw")
+    texts.dump("../../dump/trainAnon")
+
+    texts = anonymize("../../dump/validRaw")
+    texts.dump("../../dump/validAnon")
+
+
     '''
     print("1 Done")
     anonymize("../dump/valid")

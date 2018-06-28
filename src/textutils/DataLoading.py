@@ -34,11 +34,19 @@ def clean_str(string):
     Tokenization/string cleaning for dataset
     Every dataset is lower cased except
     """
+    '''
     string = re.sub(r"\\", "", string.decode("utf-8"))
     string = re.sub(r"\'", "", string.decode("utf-8"))
     string = re.sub(r"\"", "", string.decode("utf-8"))
-    string = ''.join(e for e in string)# if (e.isspace() or e.isalnum()))  # comment the if part for Mehvish parser
-    return string.strip()#.lower()
+    string = ''.join(e for e in string) if (e.isspace() or e.isalnum()))  # comment the if part for Mehvish parser
+    return string.strip().lower()
+    '''
+
+    ## using this version for NE recognition and anonymization
+    string = re.sub(r"\\", " ", string.decode("utf-8"))
+    string = re.sub(r"\'", " ", string.decode("utf-8"))
+    #string = re.sub(r"\"", " ", string.decode("utf-8"))
+    return string
 
 def load_data_liar(file_name):
     print("Loading data...")

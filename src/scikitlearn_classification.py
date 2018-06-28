@@ -42,7 +42,7 @@ from textutils import DataLoading
 
 
 
-LOAD_DATA_FROM_DISK = False
+LOAD_DATA_FROM_DISK = True
 CLASSES = 2
 
 
@@ -105,17 +105,17 @@ print()
 
 
 
-texts, labels =  DataLoading.load_data_combined(classes = CLASSES, file_name = "../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")
-texts_test1, labels_test1 = np.asarray(texts), np.asarray(labels)
+#texts, labels =  DataLoading.load_data_combined(classes = CLASSES, file_name = "../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")
+#texts_test1, labels_test1 = np.asarray(texts), np.asarray(labels)
 
 
 
 
 
 if LOAD_DATA_FROM_DISK:
-    texts_train = np.load("../dump/trainRaw")
-    texts_valid = np.load("../dump/validRaw")
-    texts_test1 = np.load("../dump/testRaw")
+    texts_train = np.load("../dump/trainAnon")#np.load("../dump/trainRaw")
+    texts_valid = np.load("../dump/validAnon")#np.load("../dump/validRaw")
+    texts_test1 = np.load("../dump/testAnon")#np.load("../dump/testRaw")
     labels_train = np.load("../dump/trainlRaw")
     labels_valid = np.load("../dump/validlRaw")
     labels_test1 = np.load("../dump/testlRaw")
@@ -152,7 +152,7 @@ else:
 
 
 y_train = labels_train
-y_test = labels_test1
+y_test = labels_valid
 target_names, counts = np.unique(y_train, return_counts= True)
 print(np.asarray((target_names, counts)).T)
 
@@ -164,14 +164,14 @@ if (False): #opts.use_hashing:
     X_train = vectorizer.transform(texts_train)
 else:
     vectorizer = TfidfVectorizer(sublinear_tf=False, max_df=0.5,
-                                 stop_words='english',ngram_range=(1,3))
+                                 stop_words='english',ngram_range=(1,2), lowercase = False, max_features = 10000)
     X_train = vectorizer.fit_transform(texts_train)
     features = vectorizer.get_feature_names()
     print(features[300000:300200])
 print("n_samples: %d, n_features: %d" % X_train.shape)
 
 print("Extracting features from the test data using the same vectorizer")
-X_test = vectorizer.transform(texts_test1)
+X_test = vectorizer.transform(texts_valid)
 print("n_samples: %d, n_features: %d" % X_test.shape)
 
 
@@ -260,7 +260,6 @@ def plot_tfidf_classfeats_h(dfs):
         plt.subplots_adjust(bottom=0.09, right=0.97, left=0.15, top=0.95, wspace=0.52)
     plt.show()
 
-'''
 features = vectorizer.get_feature_names()
 
 indices = np.argsort(vectorizer.idf_)[::-1]
@@ -270,9 +269,9 @@ print(top_features)
 
 dfs = top_feats_by_class(X_train, y_train, features, min_tfidf=0.2, top_n=40)
 print(dfs)
-plot_tfidf_classfeats_h(dfs)
+#plot_tfidf_classfeats_h(dfs)
 
-'''
+
 
 
 
