@@ -12,20 +12,15 @@
 
 #### Usage
 1. For all the file with suffix "Phase1", we tried to parse the information from different webpage.
-{% blockquote %}
-python3 snopes_phase1.py output_file_name
-python3 emergent_phase1.py output_file_name
-python3 politifact_phase1.py output_file_name
-{% endblockquote %}
+	- python3 snopes_phase1.py output_file_name
+	- python3 emergent_phase1.py output_file_name
+	- python3 politifact_phase1.py output_file_name
+
 
 2. For all the file with suffix "Phase2", we tried to parse the original article from different webpages parsed from phase1.
-{% blockquote %}
-python3 snopes_phase2.py input_file_name.csv output_file_name.csv
-python3 emergent_phase2.py input_file_name.csv output_file_name.csv
-python3 politifact_phase@.py input_file_name.csv output_file_name.csv
-{% endblockquote %}
+	- python3 snopes_phase2.py input_file_name.csv output_file_name.csv
+	- python3 emergent_phase2.py input_file_name.csv output_file_name.csv
+	- python3 politifact_phase@.py input_file_name.csv output_file_name.csv
 
 3. For all the parsed original article, we can clean it by using data_cleaner.py.
-{% blockquote %}
-python3 data_cleaner.py input_file_name.csv output_file_name.py
-{% endblockquote %}
+	- python3 data_cleaner.py input_file_name.csv output_file_name.py
