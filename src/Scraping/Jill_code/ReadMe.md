@@ -20,7 +20,7 @@
 2. For all the file with suffix "Phase2", we tried to parse the original article from different webpages parsed from phase1.
 	- python3 snopes_phase2.py input_file_name.csv output_file_name.csv
 	- python3 emergent_phase2.py input_file_name.csv output_file_name.csv
-	- python3 politifact_phase@.py input_file_name.csv output_file_name.csv
+	- python3 politifact_phase2.py input_file_name.csv output_file_name.csv
 
 3. For all the parsed original article, we can clean it by using data_cleaner.py.
 	- python3 data_cleaner.py input_file_name.csv output_file_name.py
