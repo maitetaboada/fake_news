@@ -66,13 +66,13 @@ def main(input_file, output_file):
 
     df['page_domain'] = df['page_url'].apply(lambda x: urlparse(x).netloc)
 
-    df_filter_short = df[df['text'].apply(lambda x: len(x.split()) > 40)]
-    df_filter_long = df_filter_short[df_filter_short['text'].apply(lambda x: len(x) < 30000)]
+    df_filter_short = df[df['original_article_text_phase2'].apply(lambda x: len(x.split()) > 40)]
+    df_filter_long = df_filter_short[df_filter_short['original_article_text_phase2'].apply(lambda x: len(x) < 30000)]
 
     short_len_text = len(df) - len(df_filter_short)
     long_len_text = len(df_filter_short) - len(df_filter_long)
 
-    df_cleaned = df_filter_long[~df_filter_long['text'].apply(lambda x: any(t in x for t in unwanted_text))]
+    df_cleaned = df_filter_long[~df_filter_long['original_article_text_phase2'].apply(lambda x: any(t in x for t in unwanted_text))]
     unwanted_text_len = len(df_filter_long) - len(df_cleaned)
     df_cleaned['text'] = df_cleaned['text'].apply(lambda x: replace_bracket_text(x))
 
