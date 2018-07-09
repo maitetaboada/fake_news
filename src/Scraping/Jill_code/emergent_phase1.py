@@ -134,7 +134,10 @@ def write_url_info(article_info, url, category, file):
 	Return:
 		None
 	"""
-	line = [url, category] + article_info
+	fact_tag, claim, claim_description, article_tags, article_date,\
+	article_tracking_body, original_url = article_info
+	line = [url, fact_tag, category, claim_description, article_tags, \
+	article_date, claim, article_tracking_body, original_url]
 	with open(file, 'a', newline='', encoding='utf-8') as f:
 		csv_writer = csv.writer(f)
 		#line = [l.encode('utf-8') for l in line]
@@ -146,9 +149,9 @@ def write_url_info(article_info, url, category, file):
 def main(output_file):
 	result_file_name = os.getcwd() + "/" + output_file #snopes_parsed_info_phase1.csv"
 	header_names = \
-	"emergent_url_phase1,category_phase1,fact_tag_phase1,claim_phase1," +\
-	"claim_description_phase1,article_tags_phase1,article_date_phase1,"+\
-	"article_tracking_body_phase1,original_url_phase1\n"
+	"emergent_url_phase1,fact_tag_phase1,claim_category_phase1,claim_description_phase1," +\
+	"claim_tags_phase1,article_date_phase1,claim_title_phase1,"+\
+	"claim_body_phase1,original_url_phase1\n"
 
 	# initial a dbm, simple database, in order to cache all the already fetched page
 	# don't have to open that page again for geting information
