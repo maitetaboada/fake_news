@@ -3,6 +3,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import re
 import random
+from urllib.parse import urlparse
 
 
 
@@ -79,6 +80,30 @@ def news_data_summary(file_name = "../data/buzzfeed-debunk-combined/all-v02.txt"
     #print(df.agg([]))
     print pd.crosstab(df.domain, df.label)
 
+def news_data_summary_2():
+    file_name = "politifact_phase2_clean.csv"
+    #file_name = "snopes_phase2_clean_first_paragraph.csv"
+
+
+    df = pd.read_csv(file_name, encoding="utf-8")
+    df.describe()
+    df = df[df.error_phase2 == 'No Error']
+
+    df['label'] = df['fact_tag_phase1']
+    #df['label'] = df['fact_rating_phase1']
+
+
+    df['label'].value_counts()
+    df.sort_values('label')
+    df['category'] = df.article_categories_phase1.apply(lambda x: x[:7])
+    pd.crosstab(df.category, df.label)
+    fn = df[df.category == 'Fake ne']
+    pd.crosstab(fn.category, fn.label)
+    pd.crosstab(fn.article_researched_by_phase1, fn.label)
+    df['domain'] = df['original_url_phase1'].apply(lambda x: urlparse(x).netloc)
+    counts = df['domain'].value_counts()
+    topdomains = df[df['domain'].isin(counts[counts > 20].index)]
+    pd.crosstab(topdomains.category, topdomains.label)
 
 def news_data_sampler(texts, labels,  train_size, dev_size, test_size, seed = 123):
     print("Sampling data for seed " + str(seed))
@@ -90,11 +115,12 @@ def news_data_sampler(texts, labels,  train_size, dev_size, test_size, seed = 12
 
 
 
-news_data_summary()
-texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
-news_data_sampler(texts, labels,  train_size = 700, dev_size = 200, test_size = 200)
+#news_data_summary()
+#texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+#news_data_sampler(texts, labels,  train_size = 700, dev_size = 200, test_size = 200)
 
 
+news_data_summary_2()
 
 
 
