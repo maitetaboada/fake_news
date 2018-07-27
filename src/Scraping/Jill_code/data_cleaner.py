@@ -99,6 +99,13 @@ def reserve_correct_ascii(line):
     """
     return line.encode("ascii", errors='ignore').decode()
 
+def keep_no_error(errors):
+    """Only kept the data which labeled as "no error"
+    """
+
+def clean_other_text(line):
+    """clean all the text files
+    """
 
 def main(input_file, output_file):
     TEXT_INDEX = -4
@@ -113,8 +120,8 @@ def main(input_file, output_file):
             new_line = keep_suitable_length_article(new_line)
             if new_line and not is_unwanted_text(new_line):
                 # data clean
-                new_line = reserve_correct_ascii(new_line)
                 new_line = replace_unusual_characters(new_line)
+                new_line = reserve_correct_ascii(new_line)
                 new_line = replace_email_address(new_line)
                 new_line = replace_http_address(new_line)
                 new_line = replace_question_marks(new_line)

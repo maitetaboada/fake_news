@@ -20,35 +20,33 @@ def get_origin_article_info(url):
 	author = ''
 	title = ''
 	try:
-		if len(url) > 0:
-			url = url[0]
-			time.sleep(1)
-			print(url)
-			article = Article(url=url)
-			article.download()
-			article.parse()
-			text = " ".join(article.text.split())
-			
-			if not article.text:
-				error = "Resource moved"
-				text = '--'
+		time.sleep(1)
+		print(url)
+		article = Article(url=url)
+		article.download()
+		article.parse()
+		text = " ".join(article.text.split())
+		
+		if not article.text:
+			error = "Resource moved"
+			text = '--'
 
-			elif len(text) > 32000:
-				error = "Article too long"
+		elif len(text) > 32000:
+			error = "Article too long"
 
-			elif any(x in url for x in ["twitter", "facebook", "youtu.be", "youtube", "reddit", "flickr", "wikisource"]):
-				error = "Not a news article"
+		elif any(x in url for x in ["twitter", "facebook", "youtu.be", "youtube", "reddit", "flickr", "wikisource"]):
+			error = "Not a news article"
 
-			else:
-				error = "No Error"
-				if article.publish_date:
-					publish_date = article.publish_date.strftime('%Y-%m-%d')
+		else:
+			error = "No Error"
+			if article.publish_date:
+				publish_date = article.publish_date.strftime('%Y-%m-%d')
 
-				if article.authors:
-					author = article.authors[0] # ONLY kept the first author
+			if article.authors:
+				author = article.authors[0] # ONLY kept the first author
 
-				if article.title:
-					title = article.title
+			if article.title:
+				title = article.title
 
 	except Exception as e:
 		error = article.download_exception_msg or "Website down"
@@ -59,6 +57,7 @@ def get_origin_article_info(url):
 	return [error, text, title, publish_date, author]
 
 def main(input_file, output_file):
+	ORIGIN_URL_IDX = -3
 	with open(input_file) as f:
 		reader = csv.reader(f)
 		title = next(reader)
@@ -67,8 +66,9 @@ def main(input_file, output_file):
 		title = ','.join(title) + '\n'
 		with open(output_file, 'w', encoding="utf8") as o:
 			o.write(title)
+			
 		for line in reader:
-			url = line[-2]
+			url = line[ORIGIN_URL_IDX]
 			url = ast.literal_eval(url) # convert to url list
 			original_article_info = get_origin_article_info(url) #pick the first url as the one
 			#original_article_info = [str(l) for l in original_article_info] #"ISO-8859-1"?
