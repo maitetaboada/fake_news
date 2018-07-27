@@ -2,7 +2,7 @@ import re
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
-from keras.utils.np_utils import to_categorical as to_cat
+#from keras.utils.np_utils import to_categorical as to_cat
 import random
 
 
@@ -25,7 +25,7 @@ def load_data_imdb():
         text = BeautifulSoup(data_train.review[idx])
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.sentiment[idx])
-    labels = to_cat(np.asarray(labels))
+    #labels = to_cat(np.asarray(labels))
 
     return texts, labels
 
@@ -34,11 +34,11 @@ def clean_str(string):
     Tokenization/string cleaning for dataset
     Every dataset is lower cased except
     """
-    '''
-    string = re.sub(r"\\", "", string.decode("utf-8"))
-    string = re.sub(r"\'", "", string.decode("utf-8"))
-    string = re.sub(r"\"", "", string.decode("utf-8"))
-    string = ''.join(e for e in string) if (e.isspace() or e.isalnum()))  # comment the if part for Mehvish parser
+    string = str(string)
+    #string = re.sub(r"\\", "", string.decode("utf-8"))
+    #string = re.sub(r"\'", "", string.decode("utf-8"))
+    #string = re.sub(r"\"", "", string.decode("utf-8"))
+    string = ''.join(e for e in string if (e.isspace() or e.isalnum()))  # comment the if part for Mehvish parser
     return string.strip().lower()
     '''
 
@@ -47,6 +47,7 @@ def clean_str(string):
     string = re.sub(r"\'", " ", string.decode("utf-8"))
     #string = re.sub(r"\"", " ", string.decode("utf-8"))
     return string
+    '''
 
 def load_data_liar(file_name):
     print("Loading data...")
@@ -67,7 +68,7 @@ def load_data_liar(file_name):
         'pants-fire': 1
     }
     labels = [transdict[i] for i in labels]
-    labels = to_cat(np.asarray(labels))
+    #labels = to_cat(np.asarray(labels))
     print(texts[0:6])
     print(labels[0:6])
     return texts, labels
@@ -135,7 +136,7 @@ def load_data_rashkin(file_name="../data/rashkin/train.txt"):
         '4': 0  # Truested
     }
     labels = [transdict[i] for i in labels]
-    labels = to_cat(np.asarray(labels))
+    #labels = to_cat(np.asarray(labels))
     print(texts[0:6])
     print(labels[0:6])
     return texts, labels
@@ -158,7 +159,7 @@ def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/bf_fb.txt"):
         'mostly false': 3
     }
     labels = [transdict[i] for i in labels]
-    labels = to_cat(np.asarray(labels))
+    #labels = to_cat(np.asarray(labels))
     print(texts[0:6])
     print(labels[0:6])
     return texts, labels
@@ -194,5 +195,37 @@ def balance_data(texts, labels, sample_size, discard_labels=[]):
     print (np.asarray((unique, counts)).T)
     return bal_texts, bal_labels, rem_texts, rem_labels
 
+
+def load_data_snopes(file_name="../data/snopes/snopes_checked_v00.csv", classes = 2 ):
+    print("Loading data...")
+    data_train = pd.read_csv(file_name)
+    print(data_train.shape)
+    print(data_train.label[0:10])
+    print(data_train.label.unique())
+    # print(data_train[data_train["label"].isnull()])
+    texts = data_train.data
+    labels = data_train.label
+
+    if (classes == 2):
+        transdict = {
+            'ftrue': 0,
+            'mtrue': 0,
+            'mfalse': 1,
+            'ffalse': 1,
+
+            'mixture': 5,
+        }
+    else:
+        transdict = {
+            'ftrue': 0,
+            'mtrue': 1,
+            'mixture': 2,
+            'mfalse': 3,
+            'ffalse': 4,
+        }
+    labels = [transdict[i] for i in labels]
+    # labels = to_cat(np.asarray(labels))
+    print(labels[0:10])
+    return texts, labels
 
 

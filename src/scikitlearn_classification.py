@@ -42,7 +42,7 @@ from textutils import DataLoading
 
 
 
-LOAD_DATA_FROM_DISK = True
+LOAD_DATA_FROM_DISK = False
 CLASSES = 2
 
 
@@ -123,17 +123,26 @@ if LOAD_DATA_FROM_DISK:
     print("Data loaded from disk!")
 
 else:
-    texts, labels =  DataLoading.load_data_combined("../data/buzzfeed-debunk-combined/rumor-v02.txt") #load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+    texts, labels =  DataLoading.load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt") #load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+    #texts, labels = DataLoading.load_data_snopes(file_name="../data/snopes/snopes_leftover_v00_ready.csv", classes=2)
     print("Maximum string length:")
     mylen = np.vectorize(len)
     print (mylen(texts))
+
+    checked_texts, checked_labels = DataLoading.load_data_snopes(file_name="../data/snopes/snopes_checked_v00_ready.csv", classes=2)
+    print("Maximum string length:")
+    mylen = np.vectorize(len)
+    print(mylen(checked_texts))
+
 
     if( CLASSES == 2 ):
         #texts_test1, labels_test1, texts, labels = DataLoading.balance_data(texts, labels, 400, [2,3,4,5,6])
         #texts_valid, labels_valid, texts, labels = DataLoading.balance_data(texts, labels, 400, [2,3,4,5,6])
         #texts_train, labels_train, texts, labels = DataLoading.balance_data(texts, labels, 100, [2,3,4,5,6])
-        texts_valid, labels_valid, texts, labels = DataLoading.balance_data(texts, labels, 50, [2, 3, 4, 5, 6])
-        texts_train, labels_train, texts, labels = DataLoading.balance_data(texts, labels, 1200, [2, 3, 4, 5, 6])
+        texts_test1, labels_test1, texts, labels = DataLoading.balance_data(texts, labels, 400, [2, 3, 4, 5, 6])
+        texts_valid, labels_valid, texts, labels = DataLoading.balance_data(texts, labels, 400, [2, 3, 4, 5, 6])
+        texts_train, labels_train, texts, labels = DataLoading.balance_data(texts, labels, 1400, [2, 3, 4, 5, 6])
+        texts_test, labels_test, texts, labels = DataLoading.balance_data(checked_texts, checked_labels, 40, [2, 3, 4, 5, 6])
 
     else:
         texts_test1, labels_test1, texts, labels = DataLoading.balance_data(texts, labels, 200, [6,5])
@@ -142,17 +151,17 @@ else:
 
     texts_train.dump("../dump/trainRaw")
     texts_valid.dump("../dump/validRaw")
-    texts_test1.dump("../dump/testRaw")
+    texts_test.dump("../dump/testRaw")
     labels_train.dump("../dump/trainlRaw")
     labels_valid.dump("../dump/validlRaw")
-    labels_test1.dump("../dump/testlRaw")
+    labels_test.dump("../dump/testlRaw")
 
     print("Data dumped to disk!")
 
 
 
 y_train = labels_train
-y_test = labels_valid
+y_test = labels_test
 target_names, counts = np.unique(y_train, return_counts= True)
 print(np.asarray((target_names, counts)).T)
 
@@ -164,14 +173,14 @@ if (False): #opts.use_hashing:
     X_train = vectorizer.transform(texts_train)
 else:
     vectorizer = TfidfVectorizer(sublinear_tf=False, max_df=0.5,
-                                 stop_words='english',ngram_range=(1,2), lowercase = False, max_features = 10000)
+                                 stop_words='english',ngram_range=(1,2), lowercase = True)
     X_train = vectorizer.fit_transform(texts_train)
     features = vectorizer.get_feature_names()
-    print(features[300000:300200])
+    print(features[100:110])
 print("n_samples: %d, n_features: %d" % X_train.shape)
 
 print("Extracting features from the test data using the same vectorizer")
-X_test = vectorizer.transform(texts_valid)
+X_test = vectorizer.transform(texts_test)
 print("n_samples: %d, n_features: %d" % X_test.shape)
 
 
