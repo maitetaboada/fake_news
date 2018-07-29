@@ -154,7 +154,7 @@ def main(input_file, output_file, website_name):
         with open(output_file, 'w', encoding="utf8") as o:
             o.write(",".join(header) + "\n")
         for l in reader:
-            if l[ERROR_INDEX] == "No Error" and int(l[]):
+            if l[ERROR_INDEX] == "No Error":
                 new_line = ""
                 new_line = l[TEXT_INDEX]
                 new_line = keep_suitable_length_article(new_line)
