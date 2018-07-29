@@ -154,7 +154,7 @@ def main(input_file, output_file, website_name):
         with open(output_file, 'w', encoding="utf8") as o:
             o.write(",".join(header) + "\n")
         for l in reader:
-            if l[ERROR_INDEX] == "No Error":
+            if l[ERROR_INDEX] == "No Error" and int(l[]):
                 new_line = ""
                 new_line = l[TEXT_INDEX]
                 new_line = keep_suitable_length_article(new_line)
@@ -171,7 +171,7 @@ def main(input_file, output_file, website_name):
     # remove duplicate
     df = pd.read_csv(output_file)
     df.drop_duplicates(keep='first', \
-        subset=['original_article_text_phase2']).to_csv(output_file)
+        subset=['original_article_text_phase2']).to_csv(output_file, index=False)
 
 
 if __name__ == "__main__":
