@@ -1,14 +1,32 @@
 # -*- coding: utf-8 -*-
 import re
 import csv
+import pandas as pd
 from urllib.parse import urlparse
+from more_itertools import unique_everseen
+
+def _clean_word(word):
+    """
+    Filter out the charater in words which is not alphabetic
+    """
+    return ''.join(letter for letter in word.lower() if 'a' <= letter <= 'z')
+
+def _count_words(line):
+    """
+    count the number of real words in a line
+    """
+    count = 0
+    for i in line.split():
+        if _clean_word(i):
+            count += 1
+    return count
 
 def keep_suitable_length_article(line):
     """ 
     keep the article with length more than 50 words
      and less than 30000 characters
     """
-    if len(line.split()) >= 50 and len(line) < 30000:
+    if _count_words(line) >= 100 and _count_words(line) < 30000:
         return line
     else:
         return ''
@@ -99,44 +117,68 @@ def reserve_correct_ascii(line):
     """
     return line.encode("ascii", errors='ignore').decode()
 
-def keep_no_error(errors):
-    """Only kept the data which labeled as "no error"
-    """
+def clean_text(text):
+    # data clean
+    new_line = reserve_correct_ascii(text)
+    new_line = replace_unusual_characters(new_line)
+    new_line = replace_email_address(new_line)
+    new_line = replace_http_address(new_line)
+    new_line = replace_question_marks(new_line)
+    new_line = replace_bracket_text(new_line)
+    return new_line
 
-def clean_other_text(line):
-    """clean all the text files
-    """
 
-def main(input_file, output_file):
-    TEXT_INDEX = -4
+def main(input_file, output_file, website_name):
+    if website_name == "Snopes":
+        SNOPES_TITLE_INDEX = 2
+        CLAIM_INDEX = 5
+        ARTICLE_TITLE_INDEX = -3
+        TEXT_INDEX = -4
+        ERROR_INDEX = -5
+    elif website_name == "politifact":
+        SNOPES_TITLE_INDEX = 2
+        CLAIM_INDEX = 3
+        ARTICLE_TITLE_INDEX = -3
+        TEXT_INDEX = -4
+        ERROR_INDEX = -5
+    else:
+        SNOPES_TITLE_INDEX = 2
+        CLAIM_INDEX = 5
+        ARTICLE_TITLE_INDEX = -3
+        TEXT_INDEX = -4
+        ERROR_INDEX = -5
+
     with open(input_file) as f:
         reader = csv.reader(f)
         header = next(reader)
         with open(output_file, 'w', encoding="utf8") as o:
             o.write(",".join(header) + "\n")
         for l in reader:
-            new_line = ""
-            new_line = l[TEXT_INDEX]
-            new_line = keep_suitable_length_article(new_line)
-            if new_line and not is_unwanted_text(new_line):
-                # data clean
-                new_line = replace_unusual_characters(new_line)
-                new_line = reserve_correct_ascii(new_line)
-                new_line = replace_email_address(new_line)
-                new_line = replace_http_address(new_line)
-                new_line = replace_question_marks(new_line)
-                new_line = replace_bracket_text(new_line)
-                l[TEXT_INDEX] = new_line
-                with open(output_file, 'a', newline='', encoding='utf-8') as o:
-                    csv_writer = csv.writer(o)
-                    csv_writer.writerow(l)
+            if l[ERROR_INDEX] == "No Error":
+                new_line = ""
+                new_line = l[TEXT_INDEX]
+                new_line = keep_suitable_length_article(new_line)
+                if new_line and not is_unwanted_text(new_line):
+                    l[SNOPES_TITLE_INDEX] = clean_text(l[SNOPES_TITLE_INDEX])
+                    l[CLAIM_INDEX] = clean_text(l[CLAIM_INDEX])
+                    l[ARTICLE_TITLE_INDEX] = clean_text(l[ARTICLE_TITLE_INDEX])
+                    l[TEXT_INDEX] = clean_text(new_line)
 
+                    with open(output_file, 'a', newline='', encoding='utf-8') as o:
+                        csv_writer = csv.writer(o)
+                        csv_writer.writerow(l)
+
+    # remove duplicate
+    df = pd.read_csv(output_file)
+    df.drop_duplicates(keep='first', \
+        subset=['original_article_text_phase2']).to_csv(output_file)
 
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='clean the data')
-    parser.add_argument('input_file', type=str, help='name of output file')
+    parser.add_argument('input_file', type=str, help='name of input file')
     parser.add_argument('output_file', type=str, help='name of output file')
+    parser.add_argument('website_name', type=str, help='name of website')
     args = parser.parse_args()
-    main(args.input_file, args.output_file)
+    main(args.input_file, args.output_file, args.website_name)
