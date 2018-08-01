@@ -117,6 +117,16 @@ def reserve_correct_ascii(line):
     """
     return line.encode("ascii", errors='ignore').decode()
 
+def is_debunking_websites(origin_web):
+    DEBUNKING_WEBSITE = ["snope", "politifact"]
+    for w in DEBUNKING_WEBSITE:
+        if w in origin_web:
+            return True
+    return False
+
+def clean_claim_example(line):
+    return re.sub(r"SeeExample\( s \)", "", line).strip()
+
 def clean_text(text):
     # data clean
     new_line = reserve_correct_ascii(text)
@@ -135,18 +145,21 @@ def main(input_file, output_file, website_name):
         ARTICLE_TITLE_INDEX = -3
         TEXT_INDEX = -4
         ERROR_INDEX = -5
+        ORI_URL_IDX = 6
     elif website_name == "politifact":
         SNOPES_TITLE_INDEX = 2
         CLAIM_INDEX = 3
         ARTICLE_TITLE_INDEX = -3
         TEXT_INDEX = -4
         ERROR_INDEX = -5
+        ORI_URL_IDX = 9
     else:
         SNOPES_TITLE_INDEX = 2
         CLAIM_INDEX = 5
         ARTICLE_TITLE_INDEX = -3
         TEXT_INDEX = -4
         ERROR_INDEX = -5
+        ORI_URL_IDX = 6
 
     with open(input_file) as f:
         reader = csv.reader(f)
@@ -154,13 +167,14 @@ def main(input_file, output_file, website_name):
         with open(output_file, 'w', encoding="utf8") as o:
             o.write(",".join(header) + "\n")
         for l in reader:
-            if l[ERROR_INDEX] == "No Error":
+            if l[ERROR_INDEX] == "No Error" and not is_debunking_websites(l[ORI_URL_IDX]):
                 new_line = ""
                 new_line = l[TEXT_INDEX]
                 new_line = keep_suitable_length_article(new_line)
                 if new_line and not is_unwanted_text(new_line):
                     l[SNOPES_TITLE_INDEX] = clean_text(l[SNOPES_TITLE_INDEX])
                     l[CLAIM_INDEX] = clean_text(l[CLAIM_INDEX])
+                    l[CLAIM_INDEX] = clean_claim_example(l[CLAIM_INDEX])
                     l[ARTICLE_TITLE_INDEX] = clean_text(l[ARTICLE_TITLE_INDEX])
                     l[TEXT_INDEX] = clean_text(new_line)
 
