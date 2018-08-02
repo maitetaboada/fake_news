@@ -114,16 +114,128 @@ def news_data_sampler(texts, labels,  train_size, dev_size, test_size, seed = 12
     texts_train, labels_train, texts, labels = balance_data(texts, labels, train_size, [6, 7], seed )
 
 
-def news_data_integration():
-file_name = "../data/snopes/snopes_leftover_v00.csv"
+def news_data_integration_afterJillAssessment():
+    # Prepare a new train/test set for experiments: train set is unchecked and test set is checked by Jill for claim-text alignment
+    file_name = "../data/snopes/snopes_leftover_v01.csv"
+    df_leftover = pd.read_csv(file_name, encoding="ISO-8859-1")
+    df_leftover["checked"] = 0
+
+    file_name = "../data/snopes/snopes_checked_v01.csv"
+    df_checked = pd.read_csv(file_name, encoding="ISO-8859-1")
+    df_checked["checked"] = 1
+    df_checked = df_checked.rename(index=str, columns={"label": "assessment"})
+    df_checked = df_checked[df_checked.assessment == "right link"]
+    df_checked.fact_rating_phase1.value_counts()
+
+    df = pd.concat([df_leftover, df_checked])
+    df = df.sort_values(by=['checked'])
+
+    ## remove duplicate collected links from snope articles (because they can appear in several places withing the snope article)
+    df = df.drop_duplicates(
+        df.columns.difference(['index_paragraph_phase1', 'page_is_first_citation_phase1', 'article_origin_url_phase1']),
+        keep="last")
+    df['id'] = df.snopes_url_phase1 + df.article_origin_url_phase1
+    df.id.describe()
+
+    ## remove duplicate texts
+    df.article_title_phase2.describe()
+    df = df.drop_duplicates(subset='original_article_text_phase2', keep="last")
+
+    ## sanity check
+    df.checked.value_counts()
+    df.fact_rating_phase1.value_counts()
+    df.fact_rating_phase1 = df.fact_rating_phase1.str.lower()
+    df.fact_rating_phase1.value_counts()
+
+    df = df.loc[df['fact_rating_phase1'].str.lower().isin({'false','true','mixture','mostly false','mostly true'})]
+    df['fact_rating_phase1'] = df['fact_rating_phase1'].map({'false': 'ffalse',
+                                                             'true': 'ftrue',
+                                                             'mostly false': 'mfalse',
+                                                             'mixture': 'mixture',
+                                                             'mostly true': 'mtrue'})
+
+    df[df.checked == 1].fact_rating_phase1.value_counts()
+    df.fact_rating_phase1.value_counts()
+
+    df_checked = df[df.checked == 1]
+    df_checked.fact_rating_phase1.value_counts()
+    d = {'link': df_checked.article_origin_url_phase1, 'label': df_checked.fact_rating_phase1, 'data': df_checked.original_article_text_phase2}
+    df_checked = pd.DataFrame(data=d)
+    df_checked.label.value_counts()
+    df_checked.to_csv("../data/snopes/snopes_checked_Jill_forClassificatio.csv")
+
+    df_unchecked = df[df.checked == 0]
+    df_unchecked.fact_rating_phase1.value_counts()
+    d = {'link': df_unchecked.article_origin_url_phase1 ,'label': df_unchecked.fact_rating_phase1, 'data': df_unchecked.original_article_text_phase2}
+    df_unchecked = pd.DataFrame(data=d)
+    df_unchecked.label.value_counts()
+    df_unchecked.to_csv("../data/snopes/snopes_leftover_Jill_forClassificatio.csv")
+
+
+    file_name = "../data/snopes/snopes_allOld.csv"
+    df_old = pd.read_csv(file_name, encoding="ISO-8859-1", sep = "\t")
+
+    df_old["tag"] = "old"
+    df_checked["tag"] = "checked"
+    df_unchecked["tag"] = "unchecked"
+
+    df_old.label.describe()
+    df_checked.label.describe()
+    df_unchecked.describe()
+
+    #some extra play with data
+    df = pd.concat([df_checked, df_unchecked, df_old])
+    df.label.describe()
+    df_old.subtract(df)
+
+
+    #see the domains & topics where the checked right data comes from
+    df_checked['domain'] = df_checked['article_origin_url_phase1'].apply(lambda x: urlparse(x).netloc)
+    pd.crosstab(df_checked.domain, df_checked.fact_rating_phase1).to_csv("../data/snopes/snopes_checked_Jill_domains.csv")
+    df_checked['topic'] = df_checked['article_category_phase1'].apply(lambda x: x[0:7])
+    pd.crosstab(df_checked.topic, df_checked.fact_rating_phase1).to_csv("../data/snopes/snopes_checked_Jill_domains.csv")
+
+
+
+
+
+
+def replace_unusual_characters(line):
+    """replace unusual characters in the word
+        1. replace wired "’" apostrophe
+        2. replace unusual quotation.
+        3. ...
+
+    """
+    l = re.sub("’", "'", line)
+    l = re.sub("‘", "'", l)
+    l = re.sub("“", "\"", l)
+    l = re.sub("”", "\"", l)
+    l = re.sub("，", ",", l)
+    return l
+
+
+def replace_newlines(text):
+    t = re.sub("(?m)(^\\s+|[\\t\\f ](?=[\\t\\f ])|[\\t\\f ]$|\\s+\\z)", "", text)
+    t = re.sub("\n", "</p><p>", t)
+    t = "<p>" + t + "</p>"
+    return t
+
+def news_data_integration_forCrowdSourceAssessment():
+# Prepare a new balanced set of data for crowd-source annotation.
+# It should not overlap with Jill's data (because we use Jill's as test questions.
+file_name = "../data/snopes/snopes_leftover_v01.csv"
 df_leftover = pd.read_csv(file_name, encoding="ISO-8859-1")
 df_leftover["checked"] = 0
+df_leftover.fact_rating_phase1 = df_leftover.fact_rating_phase1.str.lower()
+df_leftover.fact_rating_phase1.value_counts()
 
-file_name = "../data/snopes/snopes_checked_v00.csv"
+file_name = "../data/snopes/snopes_checked_v01.csv"
 df_checked = pd.read_csv(file_name, encoding="ISO-8859-1")
 df_checked["checked"] = 1
 df_checked = df_checked.rename(index=str, columns={"label": "assessment"})
-df_checked = df_checked[df_checked.assessment == "right link"]
+#df_checked = df_checked[df_checked.assessment == "right link"]
+df_checked.fact_rating_phase1 = df_checked.fact_rating_phase1.str.lower()
 df_checked.fact_rating_phase1.value_counts()
 
 df = pd.concat([df_leftover, df_checked])
@@ -146,48 +258,23 @@ df.fact_rating_phase1.value_counts()
 df.fact_rating_phase1 = df.fact_rating_phase1.str.lower()
 df.fact_rating_phase1.value_counts()
 
+# remove unwanted ratings
 df = df.loc[df['fact_rating_phase1'].str.lower().isin({'false','true','mixture','mostly false','mostly true'})]
-df['fact_rating_phase1'] = df['fact_rating_phase1'].map({'false': 'ffalse',
-                                                         'true': 'ftrue',
-                                                         'mostly false': 'mfalse',
-                                                         'mixture': 'mixture',
-                                                         'mostly true': 'mtrue'})
+df.id.describe()
 
-df[df.checked == 1].fact_rating_phase1.value_counts()
-df.fact_rating_phase1.value_counts()
+df = df.sort_values(by=['snopes_url_phase1'])
+df['article_claim_phase1'] = df['article_claim_phase1'].apply(lambda x: replace_unusual_characters(x))
 
-df_checked = df[df.checked == 1]
-df_checked.fact_rating_phase1.value_counts()
-d = {'link': df_checked.article_origin_url_phase1, 'label': df_checked.fact_rating_phase1, 'data': df_checked.original_article_text_phase2}
-df_checked = pd.DataFrame(data=d)
-df_checked.label.value_counts()
-df_checked.to_csv("../data/snopes/snopes_checked_v00_ready.csv")
-
-df_unchecked = df[df.checked == 0]
-df_unchecked.fact_rating_phase1.value_counts()
-d = {'link': df_unchecked.article_origin_url_phase1 ,'label': df_unchecked.fact_rating_phase1, 'data': df_unchecked.original_article_text_phase2}
-df_unchecked = pd.DataFrame(data=d)
-df_unchecked.label.value_counts()
-df_unchecked.to_csv("../data/snopes/snopes_leftover_v00_ready.csv")
+#final preprocessing for figure8 platform
+df['original_article_text_phase2'] = df['original_article_text_phase2'].apply(lambda x: replace_newlines(x))
 
 
-file_name = "../data/snopes/snopes_allOld.csv"
-df_old = pd.read_csv(file_name, encoding="ISO-8859-1", sep = "\t")
+# split into checked and uncheked
+df_ch = df.loc[df['checked'] == 1]
+df_un = df.loc[df['checked'] == 0]
 
-df_old["tag"] = "old"
-df_checked["tag"] = "checked"
-df_unchecked["tag"] = "unchecked"
-
-df_old.label.describe()
-df_checked.label.describe()
-df_unchecked.describe()
-
-
-df = pd.concat([df_checked, df_unchecked, df_old])
-df.label.describe()
-
-df_old.subtract(df)
-
+df_ch.to_csv("../data/snopes/snopes_checked_v01_forCrowd.csv")
+df_un.to_csv("../data/snopes/snopes_leftover_v01_forCrowd.csv")
 
 #news_data_summary()
 #texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
