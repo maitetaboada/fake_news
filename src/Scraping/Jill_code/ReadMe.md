@@ -25,3 +25,4 @@
 3. For all the parsed original article, we can clean it by using data_cleaner.py.
 	- python3 data_cleaner.py input_file_name.csv output_file_name.py website_name
 (Notes: the website names are the domain name of websites. For example, for snopes.com, the website_name should be "snopes")
+Notes: now the code only support the snopes.com, politifact.com, and emergent.info, which is a blog.
