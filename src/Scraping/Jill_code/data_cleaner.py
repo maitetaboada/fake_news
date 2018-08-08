@@ -140,26 +140,27 @@ def clean_text(text):
 
 def main(input_file, output_file, website_name):
     if website_name == "Snopes":
-        SNOPES_TITLE_INDEX = 2
+        TITLE_INDEX = 2
         CLAIM_INDEX = 5
         ARTICLE_TITLE_INDEX = -3
         TEXT_INDEX = -4
         ERROR_INDEX = -5
         ORI_URL_IDX = 6
     elif website_name == "politifact":
-        SNOPES_TITLE_INDEX = 2
+        TITLE_INDEX = 2
         CLAIM_INDEX = 3
+        CLAIM_CITE_INDEX = 4
         ARTICLE_TITLE_INDEX = -3
         TEXT_INDEX = -4
         ERROR_INDEX = -5
         ORI_URL_IDX = 9
-    else:
-        SNOPES_TITLE_INDEX = 2
-        CLAIM_INDEX = 5
+    elif website_name == "emergent":
+        TITLE_INDEX = 3
+        CLAIM_INDEX = 4
         ARTICLE_TITLE_INDEX = -3
         TEXT_INDEX = -4
         ERROR_INDEX = -5
-        ORI_URL_IDX = 6
+        ORI_URL_IDX = -6
 
     with open(input_file) as f:
         reader = csv.reader(f)
@@ -172,9 +173,11 @@ def main(input_file, output_file, website_name):
                 new_line = l[TEXT_INDEX]
                 new_line = keep_suitable_length_article(new_line)
                 if new_line and not is_unwanted_text(new_line):
-                    l[SNOPES_TITLE_INDEX] = clean_text(l[SNOPES_TITLE_INDEX])
+                    l[TITLE_INDEX] = clean_text(l[TITLE_INDEX])
                     l[CLAIM_INDEX] = clean_text(l[CLAIM_INDEX])
                     l[CLAIM_INDEX] = clean_claim_example(l[CLAIM_INDEX])
+                    if website_name == "politifact":
+                        l[CLAIM_CITE_INDEX] = clean_text(l[CLAIM_INDEX])
                     l[ARTICLE_TITLE_INDEX] = clean_text(l[ARTICLE_TITLE_INDEX])
                     l[TEXT_INDEX] = clean_text(new_line)
 
@@ -183,9 +186,9 @@ def main(input_file, output_file, website_name):
                         csv_writer.writerow(l)
 
     # remove duplicate
-    df = pd.read_csv(output_file)
-    df.drop_duplicates(keep='first', \
-        subset=['original_article_text_phase2']).to_csv(output_file, index=False)
+    #df = pd.read_csv(output_file)
+    #df.drop_duplicates(keep='first', \
+     #   subset=['original_article_text_phase2']).to_csv(output_file, index=False)
 
 
 if __name__ == "__main__":
