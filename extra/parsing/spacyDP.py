@@ -32,6 +32,21 @@ def test_dependency(file_name = "~/workspace/temp/grim/posts_fatemeh.csv" ):
 
 
 
+def test_dependency_string(my_string):
+    doc = nlp(my_string)
+    for word in doc:
+        #print(word.dep_)
+        if word.dep_ in ('ccomp','nmod', 'attr'):
+            print("-------")
+            subtree_span = doc[word.left_edge.i : word.right_edge.i + 1]
+            print(word.dep_ , '|', subtree_span.text, '|', subtree_span.root.head.text)
+            for child in subtree_span.root.head.children:
+                if child.dep_ == 'nsubj':
+                    print(child.text)
+                    break
+            print("-------")
+
+
 #doc = nlp("The quick brown fox jumps over the lazy dog.")
 
 #doc = nlp("She said she would not consider this case anymore.")
