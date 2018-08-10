@@ -257,11 +257,48 @@ def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/bf_fb.txt"):
     return texts, labels
 
 
-# texts_test1, labels_test1 = load_data_combined("../data/buzzfeed-debunk-combined/rumor-v02.txt")#load_data_rubin()#load_data_liar("../data/liar_dataset/test.tsv")
+def load_data_snopes312(file_name="../data/snopes/snopes_checked_v02_forCrowd.csv"):
+    print("Loading data...")
+    df = pd.read_csv(file_name, encoding="ISO-8859-1")
+
+    print(df.shape)
+    print(df[0:3])
+    df = df[df["assessment"] == "right"]
+    print(pd.crosstab(df["assessment"], df["fact_rating_phase1"], margins=True))
+    labels = df.fact_rating_phase1
+    texts = df.original_article_text_phase2.apply(lambda x: clean_str(BeautifulSoup(x).encode('ascii', 'ignore')))
+    #
+    '''
+    texts = []
+    labels = []
+    print(df.original_article_text_phase2.shape[0])
+    print(df.original_article_text_phase2[2])
+
+    for idx in range(df.original_article_text_phase2.shape[0]):
+        text = BeautifulSoup(df.original_article_text_phase2[idx])
+        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
+        labels.append(df.fact_rating_phase1[idx])
+    '''
+    transdict = {
+        'true': 0,
+        'mostly true': 1,
+        'mixture': 2,
+        'mostly false': 3,
+        'false': 4
+    }
+
+    labels = [transdict[i] for i in labels]
+    # labels = to_cat(np.asarray(labels))
+    print(texts[0:6])
+    print(labels[0:6])
+    return texts, labels
+
+
+texts_test1, labels_test1 = load_data_snopes312()#load_data_combined("../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")#load_data_rubin()#load_data_combined("../data/buzzfeed-debunk-combined/rumor-v02.txt")#load_data_rubin()#load_data_liar("../data/liar_dataset/test.tsv")
 ## USE LIAR DATA FOR TRAINING A MODEL AND TEST DATA BOTH FROM LIAR AND BUZZFEED
-# texts_train, labels_train = load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#
+texts_train, labels_train = load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#
 ##texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
-# texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
+#texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
 
 
 
@@ -272,7 +309,7 @@ def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/bf_fb.txt"):
 # texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
 
 
-
+'''
 
 if LOAD_DATA_FROM_DISK:
     texts_train = np.load("../dump/trainRaw")
@@ -308,6 +345,9 @@ else:
     labels_test1.dump("../dump/testlRaw")
 
     print("Data dumped to disk!")
+    
+    
+'''
 
 y_train = labels_train
 y_test = labels_test1
@@ -321,8 +361,8 @@ if (False):  # opts.use_hashing:
                                    n_features=opts.n_features)
     X_train = vectorizer.transform(texts_train)
 else:
-    vectorizer = TfidfVectorizer(sublinear_tf=False, max_df=0.5,
-                                 stop_words='english', ngram_range=(1, 3))
+    vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
+                                 stop_words='english', ngram_range=(1,3))
     X_train = vectorizer.fit_transform(texts_train)
     features = vectorizer.get_feature_names()
     print(features[300000:300200])
