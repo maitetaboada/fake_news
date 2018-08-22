@@ -42,6 +42,7 @@ def load_data_combined(file_name = "../data/buzzfeed-debunk-combined/all-v02.txt
     print(labels[0:6])
     return texts, labels
 
+'''
 def balance_data(texts, labels, sample_size, discard_labels = [] , seed = 123):
     np.random.seed(seed)
     ## sample size is the number of items we want to have from EACH class
@@ -74,6 +75,7 @@ def balance_data(texts, labels, sample_size, discard_labels = [] , seed = 123):
     print np.asarray((unique, counts)).T
     return bal_texts, bal_labels, rem_texts, rem_labels
 
+
 def news_data_summary(file_name = "../data/buzzfeed-debunk-combined/all-v02.txt"):
     df= pd.read_table(file_name, sep='\t', header=None, names=["id",	"url",	"label", "data", "source", "domain"])
     print df.shape
@@ -105,6 +107,7 @@ def news_data_summary_2():
     topdomains = df[df['domain'].isin(counts[counts > 20].index)]
     pd.crosstab(topdomains.category, topdomains.label)
 
+
 def news_data_sampler(texts, labels,  train_size, dev_size, test_size, seed = 123):
     print("Sampling data for seed " + str(seed))
     texts_test, labels_test, texts, labels = balance_data(texts, labels, test_size, [6, 7], seed )
@@ -112,7 +115,7 @@ def news_data_sampler(texts, labels,  train_size, dev_size, test_size, seed = 12
     texts_dev, labels_dev, texts, labels = balance_data(texts, labels, dev_size, [6, 7], seed )
     pd.DataFrame(data=[texts_dev, labels_dev], columns=["text", "label"]).to_pickle("../pickle/dev", protocol=2)
     texts_train, labels_train, texts, labels = balance_data(texts, labels, train_size, [6, 7], seed )
-
+'''
 
 def news_data_integration_afterJillAssessment():
     # Prepare a new train/test set for experiments: train set is unchecked and test set is checked by Jill for claim-text alignment
@@ -214,12 +217,16 @@ def replace_unusual_characters(line):
     l = re.sub("，", ",", l)
     return l
 
-
 def replace_newlines(text):
     t = re.sub("(?m)(^\\s+|[\\t\\f ](?=[\\t\\f ])|[\\t\\f ]$|\\s+\\z)", "", text)
+    t = re.sub("&", "&amp;", t)
+    t = re.sub("<", "&lt;", t)
+    t = re.sub(">", "&gt;", t)
     t = re.sub("\n", "</p><p>", t)
+    t = re.sub("\r", "</p><p>", t)
     t = "<p>" + t + "</p>"
     return t
+
 
 def news_data_integration_forCrowdSourceAssessment():
     # Prepare a new balanced set of data for crowd-source annotation.
@@ -280,16 +287,45 @@ def news_data_integration_forCrowdSourceAssessment():
     df_ch = df.loc[df['checked'] == 1]
     df_un = df.loc[df['checked'] == 0]
 
+
+    # plot assessment results
     ct = pd.crosstab(df_ch.assessment, df_ch.fact_rating_phase1, margins=True)
     ct.to_latex()
 
+    # plot disagreement
     disagree = df_ch[df_ch["Jerry-label"] != df_ch["Jill-label"]]
     ct = pd.crosstab(disagree["Jerry-label"], disagree["Jill-label"], margins=True)
     ct.to_latex()
 
-    df_ch.to_csv("../data/snopes/snopes_checked_v02_forCrowd.csv")
-    df_un.to_csv("../data/snopes/snopes_leftover_v02_forCrowd.csv")
+    # mark the gold items (those Fatemeh and another annotator agreed on)
+    df_gold = df_ch[(df_ch["Jerry-label"] == df_ch["Fatemeh-label"]) | (df_ch["Jill-label"] == df_ch["Fatemeh-label"])]
+    df_gold["Does_the_text_support_(distribute/promote/contain)_the_claim_gold"] = df_gold["Fatemeh-label"]
+    df_gold["_golden"] = "TRUE"
+    pd.crosstab(df_gold["Does_the_text_support_(distribute/promote/contain)_the_claim_gold"], df_gold["Fatemeh-label"])
 
-    #news_data_summary()
-    #texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
-    #news_data_sampler(texts, labels,  train_size = 700, dev_size = 200, test_size = 200)
+    df_ch = df_ch[(df_ch["Jerry-label"] != df_ch["Fatemeh-label"])  & (df_ch["Jill-label"] != df_ch["Fatemeh-label"])]
+    df_ch["Does_the_text_support_(distribute/promote/contain)_the_claim_gold"] = ""
+    df_ch["_golden"] = "FALSE"
+    pd.crosstab(df_ch["Does_the_text_support_(distribute/promote/contain)_the_claim_gold"], df_ch["Fatemeh-label"])
+
+
+    df_ch = pd.concat([df_gold, df_ch])
+
+    pd.crosstab(df_ch["Does_the_text_support_(distribute/promote/contain)_the_claim_gold"], df_ch["assessment"])
+
+
+
+
+    df_ch.to_csv("../data/snopes/snopes_checked_v02_forCrowd.csv", index = False)
+    df_un.to_csv("../data/snopes/snopes_leftover_v02_forCrowd.csv", index = False)
+
+
+
+
+
+
+#news_data_summary()
+#texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
+#news_data_sampler(texts, labels,  train_size = 700, dev_size = 200, test_size = 200)
+
+news_data_integration_forCrowdSourceAssessment()
