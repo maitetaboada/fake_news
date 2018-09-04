@@ -1,0 +1,94 @@
+Dictionary preparation:
+141009
+140909
+30695
+Dictionary finalized.
+16000
+Creating Lda...
+Building model...
+(0, '0.009*"company" + 0.008*"technology" + 0.006*"phone" + 0.006*"information" + 0.006*"internet" + 0.005*"data" + 0.005*"network" + 0.004*"system" + 0.004*"computer" + 0.004*"site"')
+(1, '0.009*"taiwan" + 0.009*"school" + 0.008*"city" + 0.007*"nuclear" + 0.007*"student" + 0.006*"china" + 0.006*"minister" + 0.005*"area" + 0.005*"north" + 0.004*"county"')
+(2, '0.015*"percent" + 0.012*"bank" + 0.010*"dollar" + 0.009*"economic" + 0.008*"market" + 0.008*"money" + 0.007*"billion" + 0.007*"economy" + 0.007*"financial" + 0.007*"china"')
+(3, '0.007*"team" + 0.007*"game" + 0.004*"player" + 0.004*"season" + 0.003*"play" + 0.003*"second" + 0.003*"tuesday" + 0.002*"four" + 0.002*"city" + 0.002*"night"')
+(4, '0.012*"health" + 0.011*"vaccine" + 0.009*"study" + 0.007*"drug" + 0.007*"medical" + 0.006*"research" + 0.006*"cancer" + 0.006*"child" + 0.006*"disease" + 0.005*"human"')
+(5, '0.005*"man" + 0.005*"im" + 0.004*"video" + 0.004*"child" + 0.004*"woman" + 0.003*"something" + 0.003*"tell" + 0.003*"story" + 0.003*"thats" + 0.003*"friend"')
+(6, '0.010*"trump" + 0.010*"war" + 0.008*"syria" + 0.007*"military" + 0.007*"clinton" + 0.006*"attack" + 0.006*"terrorist" + 0.005*"isi" + 0.005*"force" + 0.005*"syrian"')
+(7, '0.011*"police" + 0.006*"gun" + 0.005*"control" + 0.005*"officer" + 0.004*"system" + 0.004*"power" + 0.003*"crime" + 0.003*"free" + 0.003*"order" + 0.003*"citizen"')
+(8, '0.006*"court" + 0.006*"bill" + 0.005*"federal" + 0.004*"congress" + 0.004*"policy" + 0.004*"program" + 0.004*"issue" + 0.004*"security" + 0.004*"political" + 0.004*"agency"')
+(9, '0.012*"food" + 0.007*"water" + 0.003*"oil" + 0.003*"small" + 0.002*"gas" + 0.002*"california" + 0.002*"earth" + 0.002*"farmer" + 0.002*"little" + 0.002*"change"')
+For buzzfeed data:
+For buzztop data:
+For snopes312 data:
+For buzzfeed per label:
+[[   0   59]
+ [   1 1237]
+ [   2  193]
+ [   3   77]]
+Label: 0
+Working on a test corpus of length 1
+****** Topics found in each document of the test corpus ******
+[(5, 0.29953328), (6, 0.30383152), (7, 0.10186718), (8, 0.1121026)]
+***************************************************************
+Label: 1
+Working on a test corpus of length 1
+****** Topics found in each document of the test corpus ******
+[(3, 0.1138922), (5, 0.21001579), (6, 0.32210898), (8, 0.15603666)]
+***************************************************************
+Label: 2
+Working on a test corpus of length 1
+****** Topics found in each document of the test corpus ******
+[(5, 0.26420745), (6, 0.28321725), (7, 0.14376567), (8, 0.12885042)]
+***************************************************************
+Label: 3
+Working on a test corpus of length 1
+****** Topics found in each document of the test corpus ******
+[(5, 0.24637531), (6, 0.27000225), (7, 0.13046035), (8, 0.16003749)]
+***************************************************************
+For buzztop per label:
+[[ 0 33]]
+Label: 0
+Working on a test corpus of length 1
+****** Topics found in each document of the test corpus ******
+[(3, 0.15209989), (5, 0.28080598), (6, 0.1161755), (7, 0.13373329), (9, 0.11952684)]
+***************************************************************
+For snopes312 per label:
+[[ 0 29]
+ [ 1 37]
+ [ 2 30]
+ [ 3 28]
+ [ 4 21]]
+Label: 0
+Working on a test corpus of length 1
+****** Topics found in each document of the test corpus ******
+[(3, 0.11571796), (5, 0.28063861), (6, 0.10271648), (8, 0.11491502), (9, 0.14177178)]
+***************************************************************
+Label: 1
+Working on a test corpus of length 1
+****** Topics found in each document of the test corpus ******
+[(3, 0.14193031), (4, 0.10341112), (5, 0.24483438), (8, 0.15649638)]
+***************************************************************
+Label: 2
+Working on a test corpus of length 1
+****** Topics found in each document of the test corpus ******
+[(5, 0.1792535), (7, 0.1033855), (8, 0.23416805)]
+***************************************************************
+Label: 3
+Working on a test corpus of length 1
+****** Topics found in each document of the test corpus ******
+[(4, 0.1365101), (5, 0.16348504), (7, 0.10596374), (8, 0.1433443), (9, 0.14749254)]
+***************************************************************
+Label: 4
+Working on a test corpus of length 1
+****** Topics found in each document of the test corpus ******
+[(5, 0.17915212), (7, 0.16730998), (8, 0.16498971), (9, 0.16028795)]
+***************************************************************
+[('company', 0.0091774529), ('technology', 0.0080269873), ('phone', 0.0056496742), ('information', 0.005626068), ('internet', 0.0055885427), ('data', 0.0051854928), ('network', 0.0048149), ('system', 0.0044071209), ('computer', 0.0040613338), ('site', 0.0038766644)]
+[('taiwan', 0.0094961757), ('school', 0.0087218741), ('city', 0.0080943331), ('nuclear', 0.0071074371), ('student', 0.0069428547), ('china', 0.0063053546), ('minister', 0.0060634278), ('area', 0.0049715606), ('north', 0.0046962053), ('county', 0.0040656785)]
+[('percent', 0.015305424), ('bank', 0.012011431), ('dollar', 0.0095849214), ('economic', 0.0087934183), ('market', 0.0083987964), ('money', 0.0081279175), ('billion', 0.0074150627), ('economy', 0.0073837596), ('financial', 0.0073067355), ('china', 0.0071488735)]
+[('team', 0.0074778004), ('game', 0.0069639622), ('player', 0.0041786628), ('season', 0.0038987456), ('play', 0.0033015616), ('second', 0.0027236289), ('tuesday', 0.0026296813), ('four', 0.0024717043), ('city', 0.0024382204), ('night', 0.0024362404)]
+[('health', 0.012223602), ('vaccine', 0.010942415), ('study', 0.0087670311), ('drug', 0.0069063054), ('medical', 0.006892954), ('research', 0.006000977), ('cancer', 0.0059847729), ('child', 0.0059604128), ('disease', 0.0058468785), ('human', 0.0048844912)]
+[('man', 0.0049623284), ('im', 0.0048374613), ('video', 0.0038826209), ('child', 0.0038062863), ('woman', 0.003579299), ('something', 0.0031012318), ('tell', 0.0030962613), ('story', 0.0030546556), ('thats', 0.0029861585), ('friend', 0.0028547361)]
+[('trump', 0.010220123), ('war', 0.009849539), ('syria', 0.008200244), ('military', 0.0070942398), ('clinton', 0.0070703258), ('attack', 0.0062288763), ('terrorist', 0.0058422238), ('isi', 0.0052857334), ('force', 0.0049556578), ('syrian', 0.004937401)]
+[('police', 0.011391676), ('gun', 0.0064941458), ('control', 0.0051435195), ('officer', 0.0049168542), ('system', 0.0044796467), ('power', 0.0038638986), ('crime', 0.0033821599), ('free', 0.0032940854), ('order', 0.0031661377), ('citizen', 0.0030332131)]
+[('court', 0.0064852731), ('bill', 0.006186503), ('federal', 0.0047539491), ('congress', 0.0044732494), ('policy', 0.0041701891), ('program', 0.0039316691), ('issue', 0.0038147809), ('security', 0.0036833119), ('political', 0.0036105302), ('agency', 0.0035513625)]
+[('food', 0.012295541), ('water', 0.0068284916), ('oil', 0.0027655938), ('small', 0.0025068885), ('gas', 0.0024527691), ('california', 0.0024377615), ('earth', 0.0024289722), ('farmer', 0.0023948115), ('little', 0.0022450762), ('change', 0.0022095023)]

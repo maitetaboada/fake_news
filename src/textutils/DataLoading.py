@@ -229,3 +229,51 @@ def load_data_snopes(file_name="../data/snopes/snopes_checked_v00.csv", classes 
     return texts, labels
 
 
+
+def load_data_snopes312(file_name="../data/snopes/snopes_checked_v02_forCrowd.csv"):
+    print("Loading data...")
+    df = pd.read_csv(file_name, encoding="ISO-8859-1")
+
+    print(df.shape)
+    print(df[0:3])
+    df = df[df["assessment"] == "right"]
+    print(pd.crosstab(df["assessment"], df["fact_rating_phase1"], margins=True))
+    labels = df.fact_rating_phase1
+    texts = df.original_article_text_phase2.apply(lambda x: clean_str(BeautifulSoup(x).encode('ascii', 'ignore')))
+    #
+    '''
+    texts = []
+    labels = []
+    print(df.original_article_text_phase2.shape[0])
+    print(df.original_article_text_phase2[2])
+
+    for idx in range(df.original_article_text_phase2.shape[0]):
+        text = BeautifulSoup(df.original_article_text_phase2[idx])
+        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
+        labels.append(df.fact_rating_phase1[idx])
+    '''
+    transdict = {
+        'true': 0,
+        'mostly true': 1,
+        'mixture': 2,
+        'mostly false': 3,
+        'false': 4
+    }
+
+    labels = [transdict[i] for i in labels]
+    # labels = to_cat(np.asarray(labels))
+    print(texts[0:6])
+    print(labels[0:6])
+    return texts, labels
+
+
+def load_data_buzzfeedtop(file_name="../data/buzzfeed-top/buzzfeed-top.csv"):
+    print("Loading data...")
+    df = pd.read_csv(file_name, encoding="ISO-8859-1")
+    print(df.shape)
+    print(df[0:3])
+    texts = df.original_article_text_phase2.apply(lambda x: clean_str(BeautifulSoup(x).encode('ascii', 'ignore')))
+    labels = [0] * len(df.original_article_text_phase2) # all are false news
+    print(texts[0:6])
+    print(labels[0:6])
+    return texts, labels
