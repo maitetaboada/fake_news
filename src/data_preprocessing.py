@@ -117,7 +117,7 @@ def news_data_sampler(texts, labels,  train_size, dev_size, test_size, seed = 12
     texts_train, labels_train, texts, labels = balance_data(texts, labels, train_size, [6, 7], seed )
 '''
 
-def news_data_integration_afterJillAssessment():
+def snopes_data_integration_afterJillAssessment():
     # Prepare a new train/test set for experiments: train set is unchecked and test set is checked by Jill for claim-text alignment
     file_name = "../data/snopes/snopes_leftover_v01.csv"
     df_leftover = pd.read_csv(file_name, encoding="ISO-8859-1")
@@ -228,7 +228,7 @@ def replace_newlines(text):
     return t
 
 
-def news_data_integration_forCrowdSourceAssessment():
+def snopes_data_integration_forCrowdSourceAssessment():
     # Prepare a new balanced set of data for crowd-source annotation.
     # It should not overlap with Jill's data (because we use Jill's as test questions.
     file_name = "../data/snopes/snopes_leftover_v02.csv"
@@ -320,8 +320,38 @@ def news_data_integration_forCrowdSourceAssessment():
     df_un.to_csv("../data/snopes/snopes_leftover_v02_forCrowd.csv", index = False)
 
 
+def snopes_data_figure8Results_analysis():
+file_name = "../data/snopes/figure8Results/f1294945.csv"
+df = pd.read_csv(file_name, encoding="ISO-8859-1")
+df["response"] = df["does_the_text_support_distributepromotecontain_the_claim"]
+df["gold_response"] = df["assessment"]
 
 
+
+# Looking into gold questions (compare expert annotation with crowd annotation)
+df_gold = df[df["orig__golden"] == True]
+pd.crosstab(df_gold["response"], df_gold["fact_rating_phase1"],margins = True)
+pd.crosstab(df_gold["gold_response"], df_gold["fact_rating_phase1"],margins = True)
+pd.crosstab(df_gold["response"], df_gold["gold_response"])
+df_gold_susp = df_gold[df_gold["response"] != df_gold["gold_response"]]
+df_gold_susp = df_gold_susp[df_gold_susp["gold_response"] == "right"]
+t = pd.crosstab(df_gold_susp["id"], df_gold_susp["response"])
+t["id"] = t.index
+file_name = "../data/snopes/snopes_checked_v02_forCrowd.csv"
+df_checked = pd.read_csv(file_name, encoding="ISO-8859-1")
+t = pd.merge(t, df_checked, how = "right", on = "id")
+t.to_csv("../data/snopes/figure8Results/snopes_checked_v02_forCrowd_susp_right.csv", index = True)
+
+
+df_left = df[df["orig__golden"] == False]
+t = pd.crosstab(df_left["id"], df_left["response"])
+t["maxVote"] = t[['context','debunking','right', 'irrelevant', 'ambiguous']].idxmax(axis=1)
+t["maxVoteCount"] = t[['context','debunking','right', 'irrelevant', 'ambiguous']].max(axis=1)
+#t["maxVoteAgg"] = t["maxVoteCount"]/t["All"]
+pd.crosstab(t.maxVote, t.maxVoteCount)
+good = t.loc[t["maxVoteAgg"]== 1 ]
+
+#goodRight = good.loc[good["maxVote"] == good["right"]]
 
 
 #news_data_summary()

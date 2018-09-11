@@ -253,11 +253,11 @@ def load_data_snopes312(file_name="../data/snopes/snopes_checked_v02_forCrowd.cs
         labels.append(df.fact_rating_phase1[idx])
     '''
     transdict = {
-        'true': 0,
-        'mostly true': 1,
-        'mixture': 2,
-        'mostly false': 3,
-        'false': 4
+        'true': 1,
+        'mostly true': 2,
+        'mixture': 3,
+        'mostly false': 4,
+        'false': 5
     }
 
     labels = [transdict[i] for i in labels]
@@ -274,6 +274,39 @@ def load_data_buzzfeedtop(file_name="../data/buzzfeed-top/buzzfeed-top.csv"):
     print(df[0:3])
     texts = df.original_article_text_phase2.apply(lambda x: clean_str(BeautifulSoup(x).encode('ascii', 'ignore')))
     labels = [0] * len(df.original_article_text_phase2) # all are false news
+    #labels = "false" * len(df.original_article_text_phase2)
+    print(texts[0:6])
+    print(labels[0:6])
+    return texts, labels
+
+
+
+
+def load_data_emergent(file_name="../data/emergent/url-versions-2015-06-14.csv"):
+    print("Loading data...")
+    df = pd.read_csv(file_name, encoding="ISO-8859-1")
+
+    print(df.shape)
+    print(df[0:3])
+    df = df.drop_duplicates(
+        df.columns.difference(['articleVersionId', 'articleVersion', 'articleUrl']),
+        keep="last")
+    df = df[df["articleBody"] != ""]
+    print(pd.crosstab(df["articleStance"], df["claimTruthiness"], margins=True))
+
+    df = df[df["articleStance"] == "for"]
+
+    labels = df.claimTruthiness
+    texts = df.articleBody.apply(lambda x: clean_str(BeautifulSoup(str(x)).encode('ascii', 'ignore')))
+
+    transdict = {
+        'true': 1,
+        'false': 2,
+        'unknown': 0
+    }
+
+    labels = [transdict[i] for i in labels]
+    # labels = to_cat(np.asarray(labels))
     print(texts[0:6])
     print(labels[0:6])
     return texts, labels
