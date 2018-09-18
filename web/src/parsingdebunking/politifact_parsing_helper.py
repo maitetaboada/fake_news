@@ -4,6 +4,7 @@ import os
 import re
 import time
 import csv
+import datetime
 
 def get_page(url):
 	print(url)
@@ -59,13 +60,14 @@ def convert_timestamp(timestamp):
 	Return:
 		[STR] formated timestamp: for example: "2 July 2018"
 	"""
+	print(timestamp)
 	formated_timestamp = re.sub("at.*", "", timestamp)
 	formated_timestamp = formated_timestamp.strip()
 	month = formated_timestamp.split(',')[1].split()[0]
 	day = formated_timestamp.split(',')[1].split()[1]
 	day = re.sub('[a-z].*', "", day.lower())
 	year = formated_timestamp.split(',')[-1].strip()
-	reutrn " ".join([day, month, year])
+	return " ".join([day, month, year])
 
 def get_page_info(url, time_label):
 	"""
@@ -103,7 +105,7 @@ def get_page_info(url, time_label):
 	published_date = " ".join(about_statement[0].get_text().strip().split(' ')[1:]).strip()
 	if time_label:
 		if (datetime.datetime.strptime(convert_timestamp(published_date), "%d %B %Y")\
-		 < datetime.datetime.strptime(timestamp, "%Y-%m-%d")):
+		 < datetime.datetime.strptime(time_label, "%Y-%m-%d")):
 			to_continue = False
 
 	researched_by = " ".join(about_statement[1].get_text().strip().split(' ')[2:]).strip()
@@ -120,7 +122,7 @@ def get_page_info(url, time_label):
 	return [url, fact_tag, article_title, claim, claim_citation, published_date, researched_by, edited_by,\
 	categories, original_urls], to_continue
 
-def write_url_info(article_info, file_path, is_first_row, to_parse_origin):
+def write_url_info(article_info, file_path, is_first_row, to_parse_origin, is_relative=True):
 	"""write the information to output file correctly
 	
 	Args:
@@ -149,7 +151,10 @@ def write_url_info(article_info, file_path, is_first_row, to_parse_origin):
 		url, _ = l
 		line = article_info[:-1] + [url]
 		if to_parse_origin:
-			from .parsing_original_web_helper import get_origin_article_info
+			if is_relative:
+				from .parsing_original_web_helper import get_origin_article_info
+			else:
+				from parsing_original_web_helper import get_origin_article_info
 			original_article_info = get_origin_article_info(url)
 			line += original_article_info
 		with open(file_path, 'a', newline='', encoding='utf-8') as f:
@@ -159,13 +164,15 @@ def write_url_info(article_info, file_path, is_first_row, to_parse_origin):
 			except Exception as e:
 				print(e)
 
-def parsing_whole_wepages(time_label):
+def parsing_whole_wepages(time_label, output_path):
 	import datetime
 	now = datetime.datetime.now()
-	timestamp = "-".join([str(x) for x in [now.year, now.month, now.day]])
+	timestamp = "_".join([str(x) for x in [now.year, now.month, now.day]])
 	
-	output_file = "politifact_phase1_raw_" + timestamp + ".csv"
-	file_path = os.getcwd() + "/" + output_file #put the result into a relative path
+	output_file1 = "politifact_phase1_raw_" + timestamp + ".csv"
+	output_file2 = "politifact_phase2_raw_" + timestamp + ".csv"
+	output_filename1 = output_path + "/" + output_file1 #put the result into a relative path
+	output_filename2 = output_path + "/" + output_file2 #put the result into a relative path
 
 	WEBSITE = "http://www.politifact.com/truth-o-meter/statements/"
 	POLITIFACT_ROOT = "http://www.politifact.com"
@@ -186,11 +193,12 @@ def parsing_whole_wepages(time_label):
 			#article_soup = BeautifulSoup(article_page.content.decode('utf-8'), 'html.parser')
 			page_info, to_continue = get_page_info(link, time_label)
 			if to_continue:
-				write_url_info(page_info, file_path, is_first_row, False)
+				write_url_info(page_info, output_filename1, is_first_row, False, False)
+				write_url_info(page_info, output_filename2, is_first_row, True, False)
 				is_first_row = False
 			else:
 				break
-	return output_file
+	return output_filename1, output_filename2
 """
 if __name__ == "__main__":
 	import argparse

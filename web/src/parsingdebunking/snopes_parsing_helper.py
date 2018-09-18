@@ -4,6 +4,8 @@ import os
 import re
 import time
 import csv
+import datetime
+
 
 def basic_clean(sentence):
 	return re.sub(u"\t", "", sentence)
@@ -186,7 +188,6 @@ def get_articles_info(soup, timestamp = ""):
 	articles_rating = []
 	articles_origin_url = []
 	continues = True
-
 	for t in soup.find_all('a', class_="article-link", href=True):
 		if t.find('h2'):
 			article_page = get_page(t['href'])
@@ -269,7 +270,7 @@ def write_url_info(article_info, file_path, is_first_row, to_parse_origin):
 				print(e)
 
 
-def write_urls_info(articles_info, file):
+def write_urls_info(articles_info, phase1_file, phase2_file):
 	"""write the article information on current page into file
 	Args:
 		articles_info: list of article informations
@@ -279,7 +280,7 @@ def write_urls_info(articles_info, file):
 	EMPTY_LENGTH = 0
 	articles_urls, articles_titles, articles_categories, \
 	articles_date, articles_claim, articles_origin_url, articles_rating = articles_info
-	for i in range(len(articles_urls)):
+	for i in range(len(articles_date)):
 		if articles_origin_url[i] is not None:
 			line = [articles_rating[i]]
 			line.append(articles_urls[i])
@@ -295,32 +296,49 @@ def write_urls_info(articles_info, file):
 				write_line.append(index_paragraph)
 				write_line.append(j==0) #check if this is the first link on this webpage
 				#line.append(str(len(articles_origin_url[i]) != EMPTY_LENGTH))
-				with open(file, 'a', newline='', encoding='utf-8') as f:
+				with open(phase1_file, 'a', newline='', encoding='utf-8') as f:
 					csv_writer = csv.writer(f)
 					#line = [l.encode('utf-8') for l in line]
 					try:
 						csv_writer.writerow(write_line)
 					except Exception as e:
 						print(e)
+				with open(phase2_file, 'a', newline='', encoding='utf-8') as f:
+					from parsing_original_web_helper import get_origin_article_info
+					original_article_info = get_origin_article_info(url)
+					write_line += original_article_info
+					csv_writer = csv.writer(f)
+					try:
+						csv_writer.writerow(write_line)
+					except Exception as e:
+						print(e)
 
-def parsing_whole_wepages(time_label):
+def parsing_whole_wepages(time_label, output_path):
 	#initial result
 	import datetime
 	now = datetime.datetime.now()
-	timestamp = "-".join([str(x) for x in [now.year, now.month, now.day]])
+	timestamp = "_".join([str(x) for x in [now.year, now.month, now.day]])
 	
-	output_file = "snopes_phase1_raw_" + timestamp + ".csv"
-	result_file_name = os.getcwd() + "/" + output_file #put the result into a relative path
-	header_names = \
+	output_file_file1 = "snopes_phase1_raw_" + timestamp + ".csv"
+	output_file_file2 = "snopes_phase2_raw_" + timestamp + ".csv"
+	phase1_file_name = output_path + "/" + output_file_file1 #put the result into a relative path
+	phase2_file_name = output_path + "/" + output_file_file2 #put the result into a relative path
+	header_names_file1 = \
 		"fact_rating_phase1,snopes_url_phase1,article_title_phase1,article_category_phase1," +\
 		"article_date_phase1,article_claim_phase1,article_origin_url_phase1," +\
 		"index_paragraph_phase1,page_is_first_citation_phase1\n"
+	header_names_file2 = \
+	header_names_file1.rstrip() + ',error_phase2,original_article_text_phase2,' +\
+			 'article_title_phase2,publish_date_phase2,author_phase2\n'
 
 	# initial a dbm, simple database, in order to cache all the already fetched page
 	# don't have to open that page again for geting information
 
-	with open(result_file_name, 'w') as f:
-		f.write(header_names)
+	with open(phase1_file_name, 'w') as f:
+		f.write(header_names_file1)
+
+	with open(phase2_file_name, "w") as f:
+		f.write(header_names_file2)
 
 	basic_url = "https://www.snopes.com/fact-check/rating/"
 	fact_tags = get_rating_tags()
@@ -332,9 +350,9 @@ def parsing_whole_wepages(time_label):
 			page = get_page(fact_url)
 			soup = BeautifulSoup(page.content, 'html.parser')
 			articles_info, continues = get_articles_info(soup, time_label)
-			write_urls_info(articles_info, result_file_name)
+			write_urls_info(articles_info, phase1_file_name, phase2_file_name)
 			fact_url = get_next_page(soup)
-	return result_file_name
+	return phase1_file_name, phase2_file_name
 
 if __name__ == "__main__":
 	import argparse

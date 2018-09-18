@@ -147,7 +147,7 @@ def clean_text(text):
     return new_line
 
 
-def data_clean(input_file, input_file_dir, website_name, has_originSites):
+def data_clean(input_file, input_file_dir, website_name, has_originSites, output_file_name=""):
     if website_name == "snopes":
         TITLE_INDEX = 2
         CLAIM_INDEX = 5
@@ -172,10 +172,19 @@ def data_clean(input_file, input_file_dir, website_name, has_originSites):
         ERROR_INDEX = -5
         ORI_URL_IDX = -6
 
-    with open(input_file_dir + input_file) as f:
+    if output_file_name:
+        input_file_path = input_file
+    else:
+        input_file_path = input_file_dir + input_file
+
+    with open(input_file_path) as f:
         reader = csv.reader(f)
         header = next(reader)
         output_file = input_file_dir + re.sub('.csv', "", input_file) + "_clean.csv"
+        if output_file_name:
+            output_file = input_file_dir + "/" + output_file_name
+            #print(output_file_name)
+
         with open(output_file, 'w', encoding="utf-8") as o:
             o.write(",".join(header) + "\n")
         if has_originSites:
@@ -203,7 +212,8 @@ def data_clean(input_file, input_file_dir, website_name, has_originSites):
                 with open(output_file, 'a', newline='', encoding='utf-8') as o:
                     csv_writer = csv.writer(o)
                     csv_writer.writerow(l)
-    
+    if output_file_name:
+        return output_file
     return re.sub('.csv', "", input_file) + "_clean.csv"
     # remove duplicate
     #df = pd.read_csv(output_file)
