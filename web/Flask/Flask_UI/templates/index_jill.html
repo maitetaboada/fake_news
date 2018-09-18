@@ -316,7 +316,7 @@
 
     <!-- Scrape Data from Fact Checkers section -->
     <section id="parseWebs">
-      <h2 class="text-center text-uppercase text-secondary mb-0">Scrape fact-checking websites</h2>
+      <h2 class="text-center text-uppercase text-secondary mb-0">Scrape Fact-checking Whenebsites</h2>
       <hr class="star-dark mb-5">
       <div class="container" style="border: 3px solid black;">
         <div class="row justify-content-center" style="display: flex; justify-content: space-around;">
@@ -372,15 +372,22 @@
         
         <hr>
         <div class="row justify-content-center" style="display: flex; justify-content: space-around;">
-          <div class = "col-8">
+          <div class = "col-4">
             <p>
-              <b><label>Other requirements: </label></b>&nbsp;&nbsp;
+              <b><label>Optional requirements: </label></b>&nbsp;&nbsp;
             </p>
 
             
-              <input type="checkbox" name="otherReqs" value= "originSites" > Scrape original website content <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="right" title="parsing the web context in the original webiste." style="font-size:16px"></i><br>
-              <input type="checkbox" name="otherReqs" value= "clean" > Apply data cleaning too <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="right" title="clean the text information in the parsing result." style="font-size:16px"></i> <br>
+              <input type="checkbox" name="otherReqs" value= "originSites" > Get texts of the mentioned articles <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="right" title="Get the text of news webpages (articles) mentioned on the fact-checking page." style="font-size:14px"></i><br>
+              <input type="checkbox" name="otherReqs" value= "clean" > Apply data cleaning <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="right" title="Clean the texts scraped from news webpages (articles)." style="font-size:14px"></i> <br>
               <!-- <a id="select_model"><button type="submit" class="btn btn-secondary btn-sm" id="sendMessageButton">Select</button></a> -->
+          </div>
+
+          <div class="col-4">
+            <p> By pressing the Download button you agree to use the scraped data only for research purposes.
+            </p>
+          </div>
+        </div>
           <div class="row justify-content-end">
           <div class="col-4" style="margin-bottom: 35px;">
             <a id="extra_button"><button type="submit" class="btn btn-secondary btn-sm" id="extraData" >Download</button></a>

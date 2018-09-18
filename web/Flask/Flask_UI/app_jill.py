@@ -244,5 +244,5 @@ def download_data():
                 filename=filename,as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=7070, debug=True)
+    app.run(host='localhost', port=7072, debug=True)
 
