@@ -1,8 +1,8 @@
 # Overall Explaination
 This parsing debunking file is used to support the "SCRAPE FACT-CHECKING WHENEBSITES" section.
 There are two main functions it achieved.
-	- it supports the user to parse only one webpage and clean those parsed data.
-	- it supports the server to update the file time by time, and parsed the file from now to last time we parsed the file.
+- it supports the user to parse only one webpage and clean those parsed data.
+- it supports the server to update the file time by time, and parsed the file from now to last time we parsed the file.
 
 # Prerequirement:
 - For parsing one webpage, it has to combined with the UI provided in the html file
