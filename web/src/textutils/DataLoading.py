@@ -34,9 +34,9 @@ def clean_str(string):
     Tokenization/string cleaning for dataset
     Every dataset is lower cased except
     """
-    string = re.sub(r"\\", "", string.decode("utf-8"))
-    string = re.sub(r"\'", "", string.decode("utf-8"))
-    string = re.sub(r"\"", "", string.decode("utf-8"))
+    string = re.sub(r"\\", "", str(string)) #.decode())
+    string = re.sub(r"\'", "", str(string)) #.decode())
+    string = re.sub(r"\"", "", str(string)) #.decode())
     string = ''.join(e for e in string if (e.isspace() or e.isalnum()))  # comment the if part for Mehvish parser
     return string.strip().lower()
 

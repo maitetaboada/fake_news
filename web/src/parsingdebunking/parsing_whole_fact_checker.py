@@ -40,18 +40,23 @@ def main(webname):
 	time_label = "-".join(old_phase1_file1.strip(".csv").split("_")[-3:])
 	#time_label = "2018-9-17" #[Test Purpose]
 	# phase1
+	print("Time label of the old files:" + str(time_label))
 	if webname == "snopes":
 		from snopes_parsing_helper import parsing_whole_wepages
+		print("Parsing Snopes")
 		new_phase1_file, new_phase2_file = parsing_whole_wepages(time_label, input_path)
 
 	elif webname == "politifact":
 		from politifact_parsing_helper import parsing_whole_wepages
+		print("Parsing Politifact")
 		new_phase1_file, new_phase2_file = parsing_whole_wepages(time_label, input_path)
-		
+
 	elif webname == "emergent":
 		from emergent_parsing_helper import parsing_whole_wepages
+		print("Parsing Emergent")
 		new_pahse1_file, new_phase2_file = parsing_whole_wepages(input_path)
-
+	
+	print("Preparing file names")
 	output_file_name1 = new_phase1_file.split("/")[-1]
 	output_file_name1 = re.sub('raw', "clean", output_file_name1)
 	output_cleanfile_name1 = data_clean(new_phase1_file, input_path, webname, False, output_file_name1) #phase1_clean
@@ -76,14 +81,16 @@ def main(webname):
 		except Exception as e:
 			print(e)
 
-    #remove old files:
-    if webname == "emergent": # if fail to parse complete new emergent webpages
-    	if _count_file_length(old_phase1_file1) > _count_file_length(new_phase1_file):
-    		old_phase1_file1 = new_phase1_file
-    		old_phase1_file2 = new_phase2_file
-    		old_phase1_cleanfile1 = output_cleanfile_name1
-    		old_phase1_cleanfile2 = output_cleanfile_name2
-    
+	#remove old files:
+
+	if webname == "emergent":
+		# if fail to parse complete new emergent webpages
+    		if _count_file_length(old_phase1_file1) > _count_file_length(new_phase1_file):
+    			old_phase1_file1 = new_phase1_file
+    			old_phase1_file2 = new_phase2_file
+    			old_phase1_cleanfile1 = output_cleanfile_name1
+    			old_phase1_cleanfile2 = output_cleanfile_name2
+
 	print("removing the old files")
 	for f in [old_phase1_file1, old_phase1_file2, old_phase1_cleanfile1, old_phase1_cleanfile2]:
 		try:

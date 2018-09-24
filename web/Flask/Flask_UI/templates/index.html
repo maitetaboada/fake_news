@@ -53,11 +53,16 @@
             </li>
             <li class="nav-item mx-0 mx-lg-1">
               <div class="btn-group">
-                  <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Fake News<span class="caret"></span></button>
+                  <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Fake News Detection<span class="caret"></span></button>
                   <ul class="dropdown-menu" style="text-align: center; vertical-align: middle;">
                       <li><a href="#systemDemo">Interface</a></li>
                       <li><a href="#examples">Examples</a></li>
                   </ul>
+              </div>
+            </li>
+            <li class="nav-item mx-0 mx-lg-1">
+              <div class="btn-group">
+                  <a href="#parseWebs"><button type="button" class="btn btn-primary"> Scrape fact-checking websites </button> </a>
               </div>
             </li>
           </ul>
@@ -178,6 +183,7 @@
                   $('#systemDemo').load(document.URL +  ' #systemDemo');
               }
               </script>
+
               <script type=text/javascript>
                 $(function() {
                   $('a#submit_response').bind('click', function() {
@@ -233,9 +239,6 @@
                           barShowStroke : true,
                           scaleShowLabels: true
                      });
-
-
-
                     });
                     return false;
                   });
@@ -256,6 +259,7 @@
       </div>
     </section>
 
+    <!-- Examples Section -->
     <section id="examples">
       <div class="container">
         <h2 class="text-center text-uppercase text-secondary mb-0">Examples</h2>
@@ -308,6 +312,97 @@
                     </div>
                   </div>
               </div>
+    </section>
+
+    <!-- Scrape Data from Fact Checkers section -->
+    <section id="parseWebs">
+      <h2 class="text-center text-uppercase text-secondary mb-0">Scrape Fact-checking Whenebsites</h2>
+      <hr class="star-dark mb-5">
+      <div class="container" style="border: 3px solid black;">
+        <div class="row justify-content-center" style="display: flex; justify-content: space-around;">
+          <div class= "col-4">
+            <p style="margin: 35px 0px 0px 0px;">
+              <b><label>How much data? </label></b>&nbsp;&nbsp;
+            </p>
+
+            <form action="/download_data" method="POST">
+              <input type="radio" name="is_whole_web" value= "True" onclick="closeText()" checked> Entire archive <br>
+              <input type="radio" name="is_whole_web" value= "False" onclick="showText()"> A specific fact-checking webpage <br><br>
+              <!-- <a id="select_model"><button type="submit" class="btn btn-secondary btn-sm" id="sendMessageButton">Select</button></a> -->
+          </div>
+          <script type="text/javascript">
+            function closeText() {
+              var i;
+              for (i = 0; i < document.getElementsByName('webname').length; i++) {
+                textboxName = document.getElementsByName('webname')[i].value;
+                document.querySelector('input[name=' + textboxName + "Addr" + ']').style.display='none';
+              }
+            }
+          </script>
+          <div class = "col-4">
+            <p style="margin: 35px 0px 0px 0px;">
+              <b><label> Which fact-checking website? </label></b>&nbsp;&nbsp;
+            </p>
+
+            
+              <input type="radio" name="webname" value= "snopes" onclick="showText()" checked> www.snopes.com 
+              <input style="display: none" type="text" name="snopesAddr" value=""><br>
+              <input type="radio" name="webname" value= "politifact" onclick="showText()"> www.politifact.com 
+              <input style="display: none" type="text" name="politifactAddr" value=""><br>
+              <input type="radio" name="webname" value= "emergent" onclick="showText()"> www.emergent.info 
+              <input style="display: none" type="text" name="emergentAddr" value=""><br>
+            
+          </div>
+        </div>
+        <script>
+            function showText() {
+              if ($('input[name="is_whole_web"]:checked').val() == "False"){
+                var i;
+                for (i = 0; i < document.getElementsByName('webname').length; i++) {
+                  textboxName = document.getElementsByName('webname')[i].value;
+                  if (document.getElementsByName('webname')[i].checked){
+                  document.querySelector('input[name=' + textboxName + "Addr" + ']').style.display='block';
+                } else {
+                  document.querySelector('input[name=' + textboxName + "Addr" + ']').style.display='none';
+                }
+              }
+            }
+          }
+        </script>
+        
+        <hr>
+        <div class="row justify-content-center" style="display: flex; justify-content: space-around;">
+          <div class = "col-4">
+            <p>
+              <b><label>Optional requirements: </label></b>&nbsp;&nbsp;
+            </p>
+
+            
+              <input type="checkbox" name="otherReqs" value= "originSites" > Get text of the mentioned articles <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="right" title="Get the text of news webpages (articles) mentioned on the fact-checking page." style="font-size:14px"></i><br>
+              <input type="checkbox" name="otherReqs" value= "clean" > Apply data cleaning <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="right" title="Clean the texts scraped from news webpages (articles)." style="font-size:14px"></i> <br>
+              <!-- <a id="select_model"><button type="submit" class="btn btn-secondary btn-sm" id="sendMessageButton">Select</button></a> -->
+          </div>
+
+          <div class="col-4">
+            <p> By pressing the Download button you agree to use the scraped data only for research purposes. Collecting data and downloading can take a few minutes.
+            </p>
+          </div>
+        </div>
+          <div class="row justify-content-end">
+          <div class="col-4" style="margin-bottom: 35px;">
+            <a id="extra_button"><button type="submit" class="btn btn-secondary btn-sm" id="extraData" >Download</button></a>
+          </div>
+        </div>
+        <script>
+          $(document).ready(function(){
+              $('[data-toggle="tooltip"]').tooltip();   
+          });
+        </script>
+        </form>
+          </div>
+        </div>
+        
+      </div>
     </section>
 
 

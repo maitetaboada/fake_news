@@ -8,46 +8,47 @@ import csv
 from bs4 import BeautifulSoup
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
-import datetime
-
-from flask import Flask
-from flask import render_template, request, jsonify, send_from_directory
 
 
-########### FOR RUNNING ON MY COMPUTER #############
 
-'''
+
 
 sys.path.append('../../../web/')
 from src.textutils import DataLoading
-from src.parsingdebunking.DebunkingParser import DebunkingParser
-from src.parsingdebunking.data_cleaner import data_clean
 
 #ROOT = '/Users/fa/workspace/temp/web_interface/web/'
-ROOT = '~/workspace/shared/sfu/fake_news/web/'
+ROOT = '/Users/ftorabia/workspace/shared/sfu/fake_news/web/'
+
+
+
+########## REPLACE THE ABOVE SNIPPET WITH THE FOLLOWING FOR RUNNING ON THE SERVER:
+'''
+
+sys.path.append('../../src/')
+from textutils import DataLoading
+
+ROOT = '/home/ling-discourse-lab/Fatemeh/web_interface/web/'
 
 '''
 
-########## REPLACE THE ABOVE SNIPPET WITH THE FOLLOWING FOR RUNNING ON THE SERVER:
 
 
-sys.path.append('../../../web/')
-from src.textutils import DataLoading
-from src.parsingdebunking.DebunkingParser import DebunkingParser
-from src.parsingdebunking.data_cleaner import data_clean
-
-ROOT = '/home/ftorabia/workspace/shared/sfu/fake_news/web/'
 
 
+
+
+
+from flask import Flask
+from flask import render_template, request, jsonify
 
 # Load models
 print("Loading models...")
-genera_model = pickle.load(open(ROOT + "models/tf-idf_SGD_genera_4-way.pkl", 'rb'), encoding='latin1')  #Py27 version: pickle.load(open(ROOT + "models/tf-idf_SGD_genera_4-way.pkl", 'rb'))
-genera_vectorizer = pickle.load(open(ROOT + "models/tf-idf_vectorizer_genera_4-way.pkl", 'rb'),  encoding='latin1')
+genera_model = pickle.load(open(ROOT + "models/tf-idf_SGD_genera_4-way.pkl", 'rb'))
+genera_vectorizer = pickle.load(open(ROOT + "models/tf-idf_vectorizer_genera_4-way.pkl", 'rb'))
 
 
-fact_model = pickle.load(open(ROOT + "models/tf-idf_SGD_misinformation_binary.pkl", 'rb'),  encoding='latin1')
-fact_vectorizer = pickle.load(open(ROOT + "models/tf-idf_vectorizer_misinformation_binary.pkl", 'rb'), encoding='latin1')
+fact_model = pickle.load(open(ROOT + "models/tf-idf_SGD_misinformation_binary.pkl", 'rb'))
+fact_vectorizer = pickle.load(open(ROOT + "models/tf-idf_vectorizer_misinformation_binary.pkl", 'rb'))
 
 
 
@@ -173,81 +174,6 @@ def get_feedback():
     return jsonify(feedback='Thank you for your feedback!')
 
 
-@app.route("/download_data", methods=["GET", "POST"])
-def download_data():
-    directory ='temporary_files/'
-    now = datetime.datetime.now()
-    time_label = "_".join([str(x) for x in \
-        [now.month, now.day, now.hour, now.minute, now.second]])
-    
-    #create log file
-    log_dir = "logs/"
-    log_name = "parsing_request_logs.csv"
-    time_stamp = "-".join([str(x) for x in [now.year, now.month, now.day]])
-    if not os.path.isfile(log_dir + log_name):
-        header = "webname,to_parse_whole_website,to_parse_orginsite,to_clean_data" \
-         + ",timestamp, debunking_address\n"
-        with open(log_dir + log_name, 'w') as f:
-            f.write(header)
-    if request.method == "POST":
-        # get the information from the front end
-        webname = request.values.get("webname")
-        is_whole_web = request.values.get("is_whole_web")
-        otherReqs = request.values.getlist("otherReqs")
-        to_parse_orginsite = ("originSites" in otherReqs)
-        to_clean_data = ("clean" in otherReqs)
-        Addr = ""
-        log_info = [webname, is_whole_web, str(to_parse_orginsite), \
-            str(to_clean_data), time_stamp, Addr]
-        
-        if is_whole_web == "False":
-            Addr = request.values.get(webname + "Addr")
-            log_info[-1] = Addr
-            if not Addr:
-                return "No debunking website address provided"
-            parser = DebunkingParser(webname)
-            parsed_file_name = parser.parsing_web(time_label, Addr, to_parse_orginsite, directory)
-            if parsed_file_name == "":
-                return send_from_directory(directory=directory, \
-                filename="empty.csv", \
-                as_attachment=True)
-            if to_clean_data:
-                parsed_file_name = data_clean(parsed_file_name, directory,\
-                 webname, to_parse_orginsite)
-            
-            with open(log_dir + log_name, 'a', newline='', encoding='utf-8') as f:
-                csv_writer = csv.writer(f)
-                try:
-                    csv_writer.writerow(log_info)
-                except Exception as e:
-                    print(e)
-            return send_from_directory(directory=directory, \
-                filename=parsed_file_name, \
-                as_attachment=True)
-        else:
-            #write the log information
-            with open(log_dir + log_name, 'a', newline='', encoding='utf-8') as f:
-                csv_writer = csv.writer(f)
-                try:
-                    csv_writer.writerow(log_info)
-                except Exception as e:
-                    print(e)
-
-            directory = "large_files"
-            phase = "phase1"
-            if to_parse_orginsite:
-                phase = "phase2"
-            clean = "raw"
-            if to_clean_data:
-                clean = "clean"
-            
-            import glob
-            partial_file_name = "_".join([webname, phase, clean]) + "*.zip"
-            filename = glob.glob("large_files/" + partial_file_name)[0].split("/")[-1]
-            #print(filename)
-            return send_from_directory(directory=directory, \
-                filename=filename,as_attachment=True)
-
 if __name__ == '__main__':
-    app.run(host='localhost', port=7071, debug=True)
+    app.run(host='localhost', port=7070)
 
