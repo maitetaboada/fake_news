@@ -151,6 +151,7 @@ def snopes_data_integration_afterJillAssessment():
     df.fact_rating_phase1.value_counts()
 
     df = df.loc[df['fact_rating_phase1'].str.lower().isin({'false','true','mixture','mostly false','mostly true'})]
+    df['fact_rating_phase1'] = df['fact_rating_phase1'].str.lower()
     df['fact_rating_phase1'] = df['fact_rating_phase1'].map({'false': 'ffalse',
                                                              'true': 'ftrue',
                                                              'mostly false': 'mfalse',
@@ -226,6 +227,13 @@ def replace_newlines(text):
     t = re.sub("\r", "</p><p>", t)
     t = "<p>" + t + "</p>"
     return t
+
+
+def replace_htmlcode(text):
+    t = re.sub("<p>", " ", text)
+    t = re.sub("</p>", " ", t)
+    return t
+
 
 
 def snopes_data_integration_forCrowdSourceAssessment():
@@ -343,15 +351,68 @@ t = pd.merge(t, df_checked, how = "right", on = "id")
 t.to_csv("../data/snopes/figure8Results/snopes_checked_v02_forCrowd_susp_right.csv", index = True)
 
 
+#Actual data items
 df_left = df[df["orig__golden"] == False]
-t = pd.crosstab(df_left["id"], df_left["response"])
+t = pd.crosstab(df_left["id"], df_left["response"], margins = False)
 t["maxVote"] = t[['context','debunking','right', 'irrelevant', 'ambiguous']].idxmax(axis=1)
 t["maxVoteCount"] = t[['context','debunking','right', 'irrelevant', 'ambiguous']].max(axis=1)
-#t["maxVoteAgg"] = t["maxVoteCount"]/t["All"]
-pd.crosstab(t.maxVote, t.maxVoteCount)
-good = t.loc[t["maxVoteAgg"]== 1 ]
+pd.crosstab(t.maxVote, t.maxVoteCount, margins = True )
 
-#goodRight = good.loc[good["maxVote"] == good["right"]]
+
+t = pd.crosstab(df_left["id"], df_left["response"], margins = True)
+t["maxVote"] = t[['context','debunking','right', 'irrelevant', 'ambiguous']].idxmax(axis=1)
+t["maxVoteCount"] = t[['context','debunking','right', 'irrelevant', 'ambiguous']].max(axis=1)
+t["maxVoteAgg"] = t["maxVoteCount"]/t["All"]
+good = t.loc[t["maxVoteAgg"]== 1 ]
+goodRight = good.loc[good["maxVote"] == "right"]
+
+
+
+
+# Using the aggregated answers for each question
+file_name = "../data/snopes/figure8Results/a1294945.csv"
+df = pd.read_csv(file_name, encoding="ISO-8859-1")
+df["response"] = df["does_the_text_support_distributepromotecontain_the_claim"]
+df["confidence"] = df["does_the_text_support_distributepromotecontain_the_claim:confidence"]
+df["gold_response"] = df["assessment"]
+
+# Extract good training data
+df_left = df[df["orig__golden"] == False]
+goodRight = df_left.loc[(df_left["response"] == "right") &  (df_left["confidence"] == 1)]
+train = goodRight[["id", "fact_rating_phase1", "original_article_text_phase2", 'article_claim_phase1']]
+train.rename(columns={'fact_rating_phase1': 'label', 'original_article_text_phase2' : 'data', 'article_claim_phase1': 'claim'}, inplace=True)
+train["data"] = train["data"].apply(lambda x: replace_htmlcode(x))
+
+# Extract good test data
+file_name = "../data/snopes/figure8Results/job_1294945_gold_report.csv"
+df_gold = pd.read_csv(file_name, encoding="ISO-8859-1")
+goodRight = df_gold.loc[(df_gold["does_the_text_support_distributepromotecontain_the_claim_gold"] == "right") &
+                        (df_gold["_pct_missed"] <= 0.2) & (df_gold["article_category_phase1"] != "Fauxtography")]
+test = goodRight[["id", "fact_rating_phase1", "original_article_text_phase2", 'article_claim_phase1']]
+test.rename(columns={'fact_rating_phase1': 'label', 'original_article_text_phase2' : 'data', 'article_claim_phase1': 'claim'}, inplace=True)
+test["data"] = test["data"].apply(lambda x: replace_htmlcode(x))
+
+# Normalize train and test data (make sure we don't have overlapping claims between the two sets -- drop in test if there exists)
+train["partition"] = "train"
+test["partition"] = "test"
+df = pd.concat([train, test])
+pd.value_counts(df.label)
+df = df.drop_duplicates(
+    df.columns.difference(['id', 'label', 'data']),
+    keep="last")
+
+df['label'] = df['label'].str.lower()
+df['label'] = df['label'].map({'false': 'ffalse',
+                                     'true': 'ftrue',
+                                     'mostly false': 'mfalse',
+                                     'mixture': 'mixture',
+                                     'mostly true': 'mtrue'})
+
+test = df[df["partition"] == "test"]
+train = df[df["partition"] == "train"]
+train.to_csv("../data/snopes/snopes_leftover_v02_right_forclassificationtrain.csv", index = False)
+test.to_csv("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv", index = False)
+
 
 
 #news_data_summary()

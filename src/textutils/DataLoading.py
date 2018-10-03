@@ -141,7 +141,7 @@ def load_data_rashkin(file_name="../data/rashkin/train.txt"):
     print(labels[0:6])
     return texts, labels
 
-def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/bf_fb.txt"):
+def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/bf_fb.txt", classes = 2):
     print("Loading data...")
     data_train = pd.read_table(file_name, sep='\t', header=None, names=["ID", "URL", "label", "data", "error"],
                                usecols=[2, 3])
@@ -152,12 +152,21 @@ def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/bf_fb.txt"):
         text = BeautifulSoup(data_train.data[idx])
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.label[idx])
-    transdict = {
-        'no factual content': 0,
-        'mostly true': 1,
-        'mixture of true and false': 2,
-        'mostly false': 3
-    }
+    if (classes == 2):
+        transdict = {
+            'mostly true': 0,
+            'mostly false': 1,
+
+            'mixture of true and false': 5,
+            'no factual content': 5,
+        }
+    else:
+        transdict = {
+            'no factual content': 0,
+            'mostly true': 1,
+            'mixture of true and false': 2,
+            'mostly false': 3
+        }
     labels = [transdict[i] for i in labels]
     #labels = to_cat(np.asarray(labels))
     print(texts[0:6])
@@ -196,7 +205,11 @@ def balance_data(texts, labels, sample_size, discard_labels=[]):
     return bal_texts, bal_labels, rem_texts, rem_labels
 
 
-def load_data_snopes(file_name="../data/snopes/snopes_checked_v00.csv", classes = 2 ):
+def load_data_snopes(file_name, classes = 2 ):
+    # Useful for reading from the following files:
+    # "../data/snopes/snopes_checked_v02_right_forclassificationtest.csv"
+    # "../data/snopes/snopes_leftover_v02_right_forclassificationtrain.csv"
+
     print("Loading data...")
     data_train = pd.read_csv(file_name)
     print(data_train.shape)
@@ -256,7 +269,7 @@ def load_data_snopes312(file_name="../data/snopes/snopes_checked_v02_forCrowd.cs
         'true': 1,
         'mostly true': 2,
         'mixture': 3,
-        'mostly false': 4,
+        'mostly false':4,
         'false': 5
     }
 
@@ -282,7 +295,7 @@ def load_data_buzzfeedtop(file_name="../data/buzzfeed-top/buzzfeed-top.csv"):
 
 
 
-def load_data_emergent(file_name="../data/emergent/url-versions-2015-06-14.csv"):
+def load_data_emergent(file_name="../data/emergent/url-versions-2015-06-14.csv", classes = 2):
     print("Loading data...")
     df = pd.read_csv(file_name, encoding="ISO-8859-1")
 
@@ -299,11 +312,18 @@ def load_data_emergent(file_name="../data/emergent/url-versions-2015-06-14.csv")
     labels = df.claimTruthiness
     texts = df.articleBody.apply(lambda x: clean_str(BeautifulSoup(str(x)).encode('ascii', 'ignore')))
 
-    transdict = {
-        'true': 1,
-        'false': 2,
-        'unknown': 0
-    }
+    if (classes == 2):
+        transdict = {
+            'true': 0,
+            'false': 1,
+            'unknown': 5
+        }
+    else:
+        transdict = {
+            'true': 1,
+            'false': 2,
+            'unknown': 0
+        }
 
     labels = [transdict[i] for i in labels]
     # labels = to_cat(np.asarray(labels))

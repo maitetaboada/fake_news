@@ -37,8 +37,10 @@ from bs4 import BeautifulSoup
 import re
 import pandas as pd
 
+from textutils import DataLoading
+
 LOAD_DATA_FROM_DISK = True
-CLASSES = 5
+CLASSES = 2
 
 # Display progress logs on stdout
 logging.basicConfig(level=logging.INFO,
@@ -90,224 +92,28 @@ op.print_help()
 print()
 
 
-def clean_str(string):
-    """
-    Tokenization/string cleaning for dataset
-    Every dataset is lower cased except
-    """
-    string = re.sub(r"\\", "", string.decode("utf-8"))
-    string = re.sub(r"\'", "", string.decode("utf-8"))
-    string = re.sub(r"\"", "", string.decode("utf-8"))
-    return string.strip().lower()
 
+texts_snopesCheked, labels_snopesCheked = DataLoading.load_data_snopes("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv", CLASSES)#load_data_combined("../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")#load_data_rubin()#load_data_combined("../data/buzzfeed-debunk-combined/rumor-v02.txt")#load_data_rubin()#load_data_liar("../data/liar_dataset/test.tsv")
+texts_emergent, labels_emergent = DataLoading.load_data_emergent()
+texts_buzzfeedTop, labels_buzzfeedTop = DataLoading.load_data_buzzfeedtop()
 
-def load_data_liar(file_name):
-    print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header=None, names=["id", "label", "data"], usecols=[0, 1, 2])
-    print(data_train.shape)
-    texts = []
-    labels = []
-    for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(data_train.label[idx])
-    transdict = {
-        'true': 1,
-        'mostly-true': 2,
-        'half-true': 3,
-        'barely-true': 4,
-        'false': 5,
-        'pants-fire': 6
-    }
-    labels = [transdict[i] for i in labels]
-    # labels = to_cat(np.asarray(labels))  #uncomment this for vectorized one-hot representation
-    print(texts[0:6])
-    print(labels[0:6])
-    return texts, labels
-
-
-def load_data_rubin(file_name="../data/rubin/data.txt"):
-    print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header=None, names=["label", "data"], usecols=[0, 1])
-    print(data_train.shape)
-    texts = []
-    labels = []
-    for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(data_train.label[idx])
-    # labels = to_cat(np.asarray(labels))
-    print(labels[0:6])
-    return texts, labels
-
-
-def load_data_combined(file_name="../data/buzzfeed-debunk-combined/all-v02.txt"):
-    print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header=None,
-                               names=["id", "url", "label", "data", "domain", "source"], usecols=[2, 3])
-    print(data_train.shape)
-    print(data_train.label[0:10])
-    print(data_train.label.unique())
-    # print(data_train[data_train["label"].isnull()])
-    texts = []
-    labels = []
-    for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(data_train.label[idx])
-    transdict = {
-        'ftrue': 0,
-        'mtrue': 1,
-        'mixture': 2,
-        'mfalse': 3,
-        'ffalse': 4,
-        'pantsfire': 5,
-        'nofact': 6
-    }
-    labels = [transdict[i] for i in labels]
-    # labels = to_cat(np.asarray(labels))
-    print(labels[0:6])
-    return texts, labels
-
-
-import random
-
-
-def balance_data(texts, labels, sample_size, discard_labels=[], seed=123):
-    np.random.seed(seed)
-    ## sample size is the number of items we want to have from EACH class
-    unique, counts = np.unique(labels, return_counts=True)
-    print(np.asarray((unique, counts)).T)
-    all_index = np.empty([0], dtype=int)
-    for l, f in zip(unique, counts):
-        if (l in discard_labels):
-            print("Discarding items for label " + str(l))
-            continue
-        l_index = (np.where(labels == l)[0]).tolist()  ## index of input data with current label
-        if (sample_size - f > 0):
-            # print "Upsampling ", sample_size - f, " items for class ", l
-            x = np.random.choice(f, sample_size - f).tolist()
-            l_index = np.append(np.asarray(l_index), np.asarray(l_index)[x])
-        else:
-            # print "Downsampling ", sample_size , " items for class ", l
-            l_index = random.sample(l_index, sample_size)
-        all_index = np.append(all_index, l_index)
-    bal_labels = np.asarray(labels)[all_index.tolist()]
-    bal_texts = np.asarray(texts)[all_index.tolist()]
-    remaining = [i for i in range(0, np.sum(counts)) if i not in all_index.tolist()]
-    rem_texts = np.asarray(texts)[remaining]
-    rem_labels = np.asarray(labels)[remaining]
-    print("Final size of dataset:")
-    unique, counts = np.unique(bal_labels, return_counts=True)
-    print(np.asarray((unique, counts)).T)
-    print("Final size of remaining dataset:")
-    unique, counts = np.unique(rem_labels, return_counts=True)
-    print(np.asarray((unique, counts)).T)
-    return bal_texts, bal_labels, rem_texts, rem_labels
-
-
-def load_data_rashkin(file_name="../data/rashkin/train.txt"):
-    print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header=None, names=["label", "data"], usecols=[0, 1],
-                               dtype={"label": np.str, "data": np.str})
-    print(data_train.shape)
-    print(data_train[0:6])
-    texts = []
-    labels = []
-    # for i in range(data_train.data.shape[0]):
-    #    print(i, type(data_train.data[i]))
-    for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(str(data_train.label[idx]))
-    transdict = {
-        '1': 3,  # Satire
-        '2': 4,  # Hoax
-        '3': 2,  # Propaganda
-        '4': 1  # Truested
-    }
-    labels = [transdict[i] for i in labels]
-    # labels = to_cat(np.asarray(labels))
-    print(texts[0:6])
-    print(labels[0:6])
-    return texts, labels
-
-
-def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/bf_fb.txt"):
-    print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header=None, names=["ID", "URL", "label", "data", "error"],
-                               usecols=[2, 3])
-    print(data_train.shape)
-    texts = []
-    labels = []
-    for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(data_train.label[idx])
-    transdict = {
-        'no factual content': 0,
-        'mostly true': 1,
-        'mixture of true and false': 2,
-        'mostly false': 3
-    }
-    labels = [transdict[i] for i in labels]
-    # labels = to_cat(np.asarray(labels))
-    print(texts[0:6])
-    print(labels[0:6])
-    return texts, labels
-
-
-def load_data_snopes312(file_name="../data/snopes/snopes_checked_v02_forCrowd.csv"):
-    print("Loading data...")
-    df = pd.read_csv(file_name, encoding="ISO-8859-1")
-
-    print(df.shape)
-    print(df[0:3])
-    df = df[df["assessment"] == "right"]
-    print(pd.crosstab(df["assessment"], df["fact_rating_phase1"], margins=True))
-    labels = df.fact_rating_phase1
-    texts = df.original_article_text_phase2.apply(lambda x: clean_str(BeautifulSoup(x).encode('ascii', 'ignore')))
-    #
-    '''
-    texts = []
-    labels = []
-    print(df.original_article_text_phase2.shape[0])
-    print(df.original_article_text_phase2[2])
-
-    for idx in range(df.original_article_text_phase2.shape[0]):
-        text = BeautifulSoup(df.original_article_text_phase2[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(df.fact_rating_phase1[idx])
-    '''
-    transdict = {
-        'true': 0,
-        'mostly true': 1,
-        'mixture': 2,
-        'mostly false': 3,
-        'false': 4
-    }
-
-    labels = [transdict[i] for i in labels]
-    # labels = to_cat(np.asarray(labels))
-    print(texts[0:6])
-    print(labels[0:6])
-    return texts, labels
-
-
-texts_test1, labels_test1 = load_data_snopes312()#load_data_combined("../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")#load_data_rubin()#load_data_combined("../data/buzzfeed-debunk-combined/rumor-v02.txt")#load_data_rubin()#load_data_liar("../data/liar_dataset/test.tsv")
 ## USE LIAR DATA FOR TRAINING A MODEL AND TEST DATA BOTH FROM LIAR AND BUZZFEED
-texts_train, labels_train = load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#
-##texts_valid, labels_valid = load_data_liar("../data/liar_dataset/valid.tsv")
-#texts_test1, labels_test1 = load_data_rashkin("../data/rashkin/balancedtest.txt")
+texts_train_snopes, labels_train_snopes = DataLoading.load_data_snopes("../data/snopes/snopes_leftover_v02_right_forclassificationtrain.csv", CLASSES )#load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#
+texts_train_buzzfeed, labels_train_buzzfeed = DataLoading.load_data_buzzfeed("../data/buzzfeed-facebook/bf_fb.txt", CLASSES)
+
+len(texts_train_snopes)
+len(texts_train_buzzfeed)
+
+texts_train = (pd.concat([pd.Series(texts_train_snopes) ,  pd.Series(texts_train_buzzfeed)]))
+labels_train = (pd.concat([pd.Series(labels_train_snopes) ,  pd.Series(labels_train_buzzfeed)]))
 
 
+texts_train, labels_train, texts, labels = DataLoading.balance_data(texts_train, labels_train, 1400, [2,5])
+texts_test1, labels_test1, texts, labels =  DataLoading.balance_data(texts, labels, 40, [2,5])
 
-# texts, labels =  load_data_combined("../data/buzzfeed-debunk-combined/all-v02.txt")
-
-# texts_test1, labels_test1, texts, labels = balance_data(texts, labels, 200, [6,5])
-# texts_valid, labels_valid, texts, labels = balance_data(texts, labels, 200, [6,5])
-# texts_train, labels_train, texts, labels = balance_data(texts, labels, 700, [6,5])
-
+#texts_test1, labels_test1, texts, labels = DataLoading.balance_data(texts_snopesCheked, labels_snopesCheked , 40, [2,5])
+#texts_test1, labels_test1, texts, labels = DataLoading.balance_data(texts_emergent, labels_emergent , 300, [2,5])
+#texts_test1, labels_test1, texts, labels = DataLoading.balance_data(texts_buzzfeedTop, labels_buzzfeedTop , 30)
 
 '''
 

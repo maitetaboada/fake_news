@@ -1,0 +1,77 @@
+[[   0 1496]
+ [   1 1662]
+ [   5  483]]
+Discarding items for label 5
+Final size of dataset:
+[[   0 1400]
+ [   1 1400]]
+Final size of remaining dataset:
+[[  0  96]
+ [  1 262]
+ [  5 483]]
+Inside the init function of SurfaceFeatures()
+
+
+Test results on data sampled from same distribution (snopes + buzzfeed):
+[[  0  96]
+ [  1 262]
+ [  5 483]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 40]
+ [ 1 40]]
+Final size of remaining dataset:
+[[  0  56]
+ [  1 222]
+ [  5 483]]
+              precision    recall  f1-score   support
+
+           0       0.62      0.89      0.74        28
+           1       0.93      0.71      0.80        52
+
+   micro avg       0.78      0.78      0.78        80
+   macro avg       0.78      0.80      0.77        80
+weighted avg       0.82      0.78      0.78        80
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 40]
+ [ 1 40]]
+Final size of remaining dataset:
+[[ 0  8]
+ [ 1  4]
+ [ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.07      0.75      0.14         4
+           1       0.97      0.51      0.67        76
+
+   micro avg       0.53      0.53      0.53        80
+   macro avg       0.53      0.63      0.40        80
+weighted avg       0.93      0.53      0.65        80
+
+Test results on data sampled from emergent dataset (a broad distribution acc. to topic modeling -- possibly some overlapping claims):
+[[  0 742]
+ [  1 359]
+ [  5 511]]
+Discarding items for label 5
+Final size of dataset:
+[[  0 300]
+ [  1 300]]
+Final size of remaining dataset:
+[[  0 442]
+ [  1  59]
+ [  5 511]]
+              precision    recall  f1-score   support
+
+           0       0.56      0.71      0.63       237
+           1       0.77      0.64      0.70       363
+
+   micro avg       0.67      0.67      0.67       600
+   macro avg       0.67      0.68      0.66       600
+weighted avg       0.69      0.67      0.67       600
+
