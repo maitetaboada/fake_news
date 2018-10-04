@@ -60,39 +60,48 @@ class LiwcFeatures(BaseEstimator, TransformerMixin):
                 for text in posts]
 
 
-class LexiconFeatures():
+class LexiconFeatures(BaseEstimator, TransformerMixin):
     lexicons = None
+    lexiconNames = None
 
-    def __init__(self, lexicon_directory):
+
+    def __init__(self):
+        print("Inside the init function of LexiconFeatures(0")
+        lexicon_directory = "/Users/fa/workspace/shared/sfu/fake_news/data/bias_related_lexicons"
         self.lexicons = []
+        self.lexiconNames = []
         print("LexiconFeatures() init: loading lexicons")
         for filename in os.listdir(lexicon_directory):
             if filename.endswith(".txt"):
                 file = os.path.join(lexicon_directory, filename)
-                lexicon = {k: 0 for k in nltk.word_tokenize(open(file).read())}
+                words = open(file, encoding = "ISO-8859-1").read()
+                lexicon = {k: 0 for k in nltk.word_tokenize(words)}
                 print("Number of terms in the lexicon " + filename + " : " + str(len(lexicon)))
                 self.lexicons.append(lexicon)
+                self.lexiconNames.append(filename)
                 continue
             else:
                 continue
 
 
+    def fit(self, x, y=None):
+        return self
 
-    def encode(self, texts):
+    def transform(self, texts):
         stoplist = stopwords.words('english')
         #print("transforming:...")
         textvecs = []
         for text in texts:
             #print "*** Current text:\n" + text  + "\n***"
             tokens = nltk.word_tokenize(text)
-            textvec = []
-            for lexicon in self.lexicons:
+            textvec = {}
+            for lexicon, lexiconName in zip(self.lexicons, self.lexiconNames):
                 lexicon_words = [i for i in tokens if i in lexicon]
                 count = len(lexicon_words)
                 #print ("Count: " + str(count))
                 count = count * 1.0 / len(tokens)  #Continous treatment
                 #count = 1 if (count > 0) else 0     #Binary treatment
-                textvec.append(count)
+                textvec[lexiconName] =  count
             #print(textvec)
             textvecs.append(textvec)
         return np.array(textvecs)
@@ -111,9 +120,8 @@ class SubjectBodyExtractor(BaseEstimator, TransformerMixin):
         # first column = 'subject' and second column = 'body'
         features = np.empty(shape=(len(posts), 2), dtype=object)
         for i, text in enumerate(posts):
+            features[i, 0] = text[0:300]
             features[i, 1] = text
-            features[i, 0] = text
-
         return features
 
 
@@ -129,23 +137,32 @@ pipeline = Pipeline([
                                  stop_words='english', ngram_range=(1,3)), 0),
 
             # Pipeline for standard bag-of-words model for body (second column)
-            ('body_bow', Pipeline([
-                ('tfidf', TfidfVectorizer()),
-                ('best', TruncatedSVD(n_components=100)),
-            ]), 1),
+            ('body_bow', TfidfVectorizer(sublinear_tf=True, max_df=0.5,
+                                 stop_words='english', ngram_range=(1,3)), 1),
+
+
+            #('body_bow', Pipeline([
+            #    ('tfidf', TfidfVectorizer()),
+            #    ('best', TruncatedSVD(n_components=10)),
+            #]), 1),
 
             # Pipeline for pulling ad hoc features from post's body
-            ('body_stats', Pipeline([
+            ('surface_features', Pipeline([
                 ('stats', SurfaceFeatures()),  # returns a list of dicts
+                ('vect', DictVectorizer()),  # list of dicts -> feature matrix
+            ]), 1),
+            ('lexicon_features', Pipeline([
+                ('stats', LexiconFeatures()),  # returns a list of dicts
                 ('vect', DictVectorizer()),  # list of dicts -> feature matrix
             ]), 1),
         ],
 
         # weight components in ColumnTransformer
         transformer_weights={
-            'subject': 0.8,
-            'body_bow': 0.1,
-            'body_stats': 0.5,
+            'subject': 0.0,
+            'body_bow': 0.8,
+            'surface_features': 0.8,
+            'lexicon_features': 0.8
         }
     )),
 
