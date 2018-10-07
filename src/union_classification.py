@@ -24,6 +24,11 @@ import numpy as np
 from nltk.corpus import stopwords
 import nltk
 
+import pandas as pd
+CLASSES = 2
+
+
+
 
 class SurfaceFeatures(BaseEstimator, TransformerMixin):
     """Extract features from each document for DictVectorizer"""
@@ -44,20 +49,50 @@ class SurfaceFeatures(BaseEstimator, TransformerMixin):
 
 class LiwcFeatures(BaseEstimator, TransformerMixin):
 
-    liwcDic = None #= map of text to dataframe row (this dataframe should be read from the file including liwc features)
-    def __init__(self, liwcDataframe):
-        self.liwcDic  = 0 # a map of text to row number in liwcDataframe
+    liwcDic = {} #= map of text to dataframe row (this dataframe should be read from the file including liwc features)
+
+    def __init__(self):
+        liwcFile = "/Users/fa/workspace/shared/sfu/fake_news/data/lwic/vocabliwc_cats.csv"
+        cols = list(pd.read_csv(liwcFile, nrows=1))
+        df = pd.read_csv(liwcFile, index_col="Source (A)",
+                         usecols =[i for i in cols if i not in ['WC',	'Analytic',	'Clout'	,'Authentic',	'Tone',	'WPS']])
+        df = df.T
+        #df = df.replace(0, np.nan).replace(100, 1).to_sparse()
+        keys = df.index
+        df = df.reset_index().drop('index', axis ='columns')
+        #print(df[0:10])
+        cols = df.columns
+        values = df.apply(lambda x: x > 0).apply(lambda x: list(cols[x.values]), axis=1)
+        self.liwcDic = dict(zip(keys, values))
+        print("Testing the dictionary made for liwc feature 'function':")
+        print(self.liwcDic['function'])
+
+
 
     def fit(self, x, y=None):
         return self
 
-    def getLiwcRow(self, text):
-        return 0
 
-    def transform(self, posts):
+    def transform(self, texts):
         #find the line related to this text in dataframe posts[['feature1','feature2',...,'feature100']].to_dict('records')
-        return [self.getLiwcRow(text).to_dict('records')
-                for text in posts]
+        #return [self.getLiwcRow(text).to_dict('records')
+        #        for text in posts]
+        textvecs = []
+        for text in texts:
+            #print "*** Current text:\n" + text  + "\n***"
+            tokens = nltk.word_tokenize(text)
+            textvec = {}
+            for category in self.liwcDic.keys():
+                lexicon_words = [i for i in tokens if i in self.liwcDic[category]]
+                count = len(lexicon_words)
+                #print ("Count: " + str(count))
+                count = count * 1.0 / len(tokens)  #Continous treatment
+                #count = 1 if (count > 0) else 0     #Binary treatment
+                textvec[category] =  count
+            #print(textvec)
+            textvecs.append(textvec)
+        return np.array(textvecs)
+
 
 
 class LexiconFeatures(BaseEstimator, TransformerMixin):
@@ -120,7 +155,7 @@ class SubjectBodyExtractor(BaseEstimator, TransformerMixin):
         # first column = 'subject' and second column = 'body'
         features = np.empty(shape=(len(posts), 2), dtype=object)
         for i, text in enumerate(posts):
-            features[i, 0] = text[0:300]
+            features[i, 0] = text[0:100]
             features[i, 1] = text
         return features
 
@@ -155,14 +190,22 @@ pipeline = Pipeline([
                 ('stats', LexiconFeatures()),  # returns a list of dicts
                 ('vect', DictVectorizer()),  # list of dicts -> feature matrix
             ]), 1),
+            ('liwc_features', Pipeline([
+                ('stats', LiwcFeatures()),  # returns a list of dicts
+                ('vect', DictVectorizer()),  # list of dicts -> feature matrix
+            ]), 1),
+
+
+
         ],
 
         # weight components in ColumnTransformer
         transformer_weights={
             'subject': 0.0,
             'body_bow': 0.8,
-            'surface_features': 0.8,
-            'lexicon_features': 0.8
+            'surface_features': 0.5,
+            'lexicon_features': 0.5,
+            'liwc_features':0.5
         }
     )),
 
@@ -183,9 +226,6 @@ test = fetch_20newsgroups(random_state=1,
                           categories=categories,
                           )
 '''
-import pandas as pd
-CLASSES = 2
-
 #test = pd.read_csv("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv")
 #train = pd.read_csv("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv")#"../data/snopes/snopes_leftover_v02_right_forclassificationtrain.csv")
 
