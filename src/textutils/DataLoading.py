@@ -142,16 +142,22 @@ def load_data_rashkin(file_name="../data/rashkin/train.txt"):
     return texts, labels
 
 def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/bf_fb.txt", classes = 2):
-    print("Loading data...")
+    print("Loading data buzzfeed...")
     data_train = pd.read_table(file_name, sep='\t', header=None, names=["ID", "URL", "label", "data", "error"],
                                usecols=[2, 3])
     print(data_train.shape)
+    '''
     texts = []
     labels = []
     for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
+        #text = BeautifulSoup(data_train.data[idx])
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(data_train.label[idx])
+    '''
+
+    texts = data_train.data
+    labels = data_train.label
+
     if (classes == 2):
         transdict = {
             'mostly true': 0,
@@ -171,6 +177,7 @@ def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/bf_fb.txt", classes 
     #labels = to_cat(np.asarray(labels))
     print(texts[0:6])
     print(labels[0:6])
+    print(pd.value_counts((labels)))
     return texts, labels
 
 def balance_data(texts, labels, sample_size, discard_labels=[]):
@@ -210,7 +217,7 @@ def load_data_snopes(file_name, classes = 2 ):
     # "../data/snopes/snopes_checked_v02_right_forclassificationtest.csv"
     # "../data/snopes/snopes_leftover_v02_right_forclassificationtrain.csv"
 
-    print("Loading data...")
+    print("Loading data snopes...")
     data_train = pd.read_csv(file_name)
     print(data_train.shape)
     print(data_train.label[0:10])
@@ -238,13 +245,16 @@ def load_data_snopes(file_name, classes = 2 ):
         }
     labels = [transdict[i] for i in labels]
     # labels = to_cat(np.asarray(labels))
+    print("Data from Snopes looks like...")
+    print(texts[0:10])
     print(labels[0:10])
+    print(pd.value_counts((labels)))
     return texts, labels
 
 
 
-def load_data_snopes312(file_name="../data/snopes/snopes_checked_v02_forCrowd.csv"):
-    print("Loading data...")
+def load_data_snopes312(file_name="../data/snopes/snopes_checked_v02_forCrowd.csv", classes = 2):
+    print("Loading data snopes312...")
     df = pd.read_csv(file_name, encoding="ISO-8859-1")
 
     print(df.shape)
@@ -265,38 +275,54 @@ def load_data_snopes312(file_name="../data/snopes/snopes_checked_v02_forCrowd.cs
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(df.fact_rating_phase1[idx])
     '''
-    transdict = {
-        'true': 1,
-        'mostly true': 2,
-        'mixture': 3,
-        'mostly false':4,
-        'false': 5
-    }
+
+    if (classes == 2):
+        transdict = {
+            'true': 0,
+            'mostly true': 0,
+            'mixture': 5,
+            'mostly false': 1,
+            'false': 1
+        }
+    else:
+        transdict = {
+            'true': 1,
+            'mostly true': 2,
+            'mixture': 3,
+            'mostly false': 4,
+            'false': 5
+        }
+
 
     labels = [transdict[i] for i in labels]
     # labels = to_cat(np.asarray(labels))
-    print(texts[0:6])
-    print(labels[0:6])
+    print("Data from SnopesChecked looks like...")
+    print(texts[0:10])
+    print(labels[0:10])
+    print(pd.value_counts((labels)))
     return texts, labels
 
 
 def load_data_buzzfeedtop(file_name="../data/buzzfeed-top/buzzfeed-top.csv"):
-    print("Loading data...")
+    print("Loading data buzzfeedtop...")
     df = pd.read_csv(file_name, encoding="ISO-8859-1")
     print(df.shape)
     print(df[0:3])
-    texts = df.original_article_text_phase2.apply(lambda x: clean_str(BeautifulSoup(x).encode('ascii', 'ignore')))
+    #texts = df.original_article_text_phase2.apply(lambda x: clean_str(BeautifulSoup(x).encode('ascii', 'ignore')))
+    texts = df.original_article_text_phase2
     labels = [0] * len(df.original_article_text_phase2) # all are false news
     #labels = "false" * len(df.original_article_text_phase2)
-    print(texts[0:6])
-    print(labels[0:6])
+    print("Data from BuzzFeed looks like...")
+    print(texts[0:10])
+    print(labels[0:10])
+    print(pd.value_counts((labels)))
     return texts, labels
 
 
 
 
 def load_data_emergent(file_name="../data/emergent/url-versions-2015-06-14.csv", classes = 2):
-    print("Loading data...")
+    print("Loading data emergent...")
     df = pd.read_csv(file_name, encoding="ISO-8859-1")
 
     print(df.shape)
@@ -310,7 +336,7 @@ def load_data_emergent(file_name="../data/emergent/url-versions-2015-06-14.csv",
     df = df[df["articleStance"] == "for"]
 
     labels = df.claimTruthiness
-    texts = df.articleBody.apply(lambda x: clean_str(BeautifulSoup(str(x)).encode('ascii', 'ignore')))
+    texts = df.articleBody.apply(lambda x: str(x)) #apply(lambda x: clean_str(BeautifulSoup(str(x)).encode('ascii', 'ignore')))
 
     if (classes == 2):
         transdict = {
@@ -327,6 +353,8 @@ def load_data_emergent(file_name="../data/emergent/url-versions-2015-06-14.csv",
 
     labels = [transdict[i] for i in labels]
     # labels = to_cat(np.asarray(labels))
-    print(texts[0:6])
-    print(labels[0:6])
+    print("Data from Emergent looks like...")
+    print(texts[0:10])
+    print(labels[0:10])
+    print(pd.value_counts((labels)))
     return texts, labels
