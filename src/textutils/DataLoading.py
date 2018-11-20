@@ -125,10 +125,16 @@ def load_data_rashkin(file_name="../data/rashkin/train.txt"):
     labels = []
     # for i in range(data_train.data.shape[0]):
     #   print(i, type(data_train.data[i]))
+
+    texts = data_train.data
+    labels = data_train.label
+    '''
     for idx in range(data_train.data.shape[0]):
         text = BeautifulSoup(data_train.data[idx])
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(str(data_train.label[idx]))
+    '''
+
     transdict = {
         '1': 2,  # Satire
         '2': 3,  # Hoax
@@ -262,7 +268,7 @@ def load_data_snopes312(file_name="../data/snopes/snopes_checked_v02_forCrowd.cs
     df = df[df["assessment"] == "right"]
     print(pd.crosstab(df["assessment"], df["fact_rating_phase1"], margins=True))
     labels = df.fact_rating_phase1
-    texts = df.original_article_text_phase2.apply(lambda x: clean_str(BeautifulSoup(x).encode('ascii', 'ignore')))
+    texts = df.original_article_text_phase2     .apply(lambda x: clean_str(BeautifulSoup(x).encode('ascii', 'ignore')))
     #
     '''
     texts = []
