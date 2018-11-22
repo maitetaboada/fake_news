@@ -1,3 +1,4 @@
+
 # Author: Matt Terry <matt.terry@gmail.com>
 #
 # License: BSD 3 clause
@@ -12,7 +13,7 @@ from sklearn.datasets.twenty_newsgroups import strip_newsgroup_quoting
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.svm import LinearSVC
@@ -24,11 +25,7 @@ import os
 import numpy as np
 from nltk.corpus import stopwords
 import nltk
-
 import pandas as pd
-CLASSES = 2
-
-
 from sklearn.feature_selection import SelectFromModel
 
 
@@ -70,7 +67,7 @@ class LiwcFeatures(BaseEstimator, TransformerMixin):
     liwcDic = {} #= map of text to dataframe row (this dataframe should be read from the file including liwc features)
 
     def __init__(self):
-        liwcFile = "/Users/fa/workspace/shared/sfu/fake_news/data/lwic/vocabliwc_cats.csv"
+        liwcFile = "../data/lwic/vocabliwc_cats.csv"
         cols = list(pd.read_csv(liwcFile, nrows=1))
         df = pd.read_csv(liwcFile, index_col="Source (A)",
                          usecols =[i for i in cols if i not in ['WC',	'Analytic',	'Clout'	,'Authentic',	'Tone',	'WPS']])
@@ -120,7 +117,7 @@ class LexiconFeatures(BaseEstimator, TransformerMixin):
 
     def __init__(self):
         print("Inside the init function of LexiconFeatures(0")
-        lexicon_directory = "/Users/fa/workspace/shared/sfu/fake_news/data/bias_related_lexicons"
+        lexicon_directory = "../data/bias_related_lexicons"
         self.lexicons = []
         self.lexiconNames = []
         print("LexiconFeatures() init: loading lexicons")
@@ -220,10 +217,10 @@ pipeline = Pipeline([
         # weight components in ColumnTransformer
         transformer_weights={
             'subject': 0.0,
-            'body_bow': 0.0,
-            'surface_features': 0.9,
-            'lexicon_features': 0.9,
-            'liwc_features':0.9
+            'body_bow': 0.8,
+            'surface_features': 0.0,
+            'lexicon_features': 0.1,
+            'liwc_features':0.1
         }
     )),
 
@@ -239,78 +236,91 @@ pipeline = Pipeline([
     #('classification', RandomForestClassifier())
 ])
 
-'''
-# limit the list of categories to make running this example faster.
-categories = ['alt.atheism', 'talk.religion.misc']
-train = fetch_20newsgroups(random_state=1,
-                           subset='train',
-                           categories=categories,
-                           )
-test = fetch_20newsgroups(random_state=1,
-                          subset='test',
-                          categories=categories,
-                          )
-'''
-#test = pd.read_csv("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv")
-#train = pd.read_csv("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv")#"../data/snopes/snopes_leftover_v02_right_forclassificationtrain.csv")
 
-texts_snopesCheked, labels_snopesCheked = DataLoading.load_data_snopes("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv", CLASSES)#load_data_combined("../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")#load_data_rubin()#load_data_combined("../data/buzzfeed-debunk-combined/rumor-v02.txt")#load_data_rubin()#load_data_liar("../data/liar_dataset/test.tsv")
-texts_emergent, labels_emergent = DataLoading.load_data_emergent("../data/emergent/url-versions-2015-06-14.csv", CLASSES)
-texts_buzzfeedTop, labels_buzzfeedTop = DataLoading.load_data_buzzfeedtop()
+LOAD_DATA_FROM_DISK = True
+CLASSES = 2
 
-## USE LIAR DATA FOR TRAINING A MODEL AND TEST DATA BOTH FROM LIAR AND BUZZFEED
-texts_train_snopes, labels_train_snopes = DataLoading.load_data_snopes("../data/snopes/snopes_leftover_v02_right_forclassificationtrain.csv", CLASSES )#load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/rashkin/xtrain.txt")#load_data_liar("../data/liar_dataset/train.tsv")#
-texts_train_buzzfeed, labels_train_buzzfeed = DataLoading.load_data_buzzfeed("../data/buzzfeed-facebook/bf_fb.txt", CLASSES)
-texts_train_emergent, labels_train_emergent = DataLoading.load_data_emergent("../data/emergent/url-versions-2015-06-14.csv", CLASSES)
+if LOAD_DATA_FROM_DISK:
+	texts_train = np.load("../dump/trainRaw")
+	texts_valid = np.load("../dump/validRaw")
+	texts_test = np.load("../dump/testRaw")
+	labels_train = np.load("../dump/trainlRaw")
+	labels_valid = np.load("../dump/validlRaw")
+	labels_test = np.load("../dump/testlRaw")
+	print("Data loaded from disk!")
 
-len(texts_train_snopes)
-len(texts_train_buzzfeed)
-len(texts_train_emergent)
-print("Loading data is finished!")
+else:
+	# Data sources used for training:
+	texts_train_snopes, labels_train_snopes = DataLoading.load_data_snopes("../data/snopes/snopes_leftover_v02_right_forclassificationtrain.csv", CLASSES )#load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/r$
+	texts_train_buzzfeed, labels_train_buzzfeed = DataLoading.load_data_buzzfeed("../data/buzzfeed-facebook/bf_fb.txt", CLASSES)
+	texts_train_emergent, labels_train_emergent = DataLoading.load_data_emergent("../data/emergent/url-versions-2015-06-14.csv", CLASSES)
+	len(texts_train_snopes)
+	len(texts_train_buzzfeed)
+	len(texts_train_emergent)
+	
+	texts_all_train = pd.concat([pd.Series(texts_train_snopes) ,  pd.Series(texts_train_buzzfeed), pd.Series(texts_train_emergent)])
+	labels_all_train = pd.concat([pd.Series(labels_train_snopes) ,  pd.Series(labels_train_buzzfeed), pd.Series(labels_train_emergent )])
+	#sources_all_train = pd.concat()
 
-print("Preparing training data...")
+	texts_train, labels_train, texts, labels = DataLoading.balance_data(texts_all_train, labels_all_train, 1200, [2,3,4,5])
+	texts_valid, labels_valid, texts, labels = DataLoading.balance_data(texts, labels, 400, [2,3,4,5])
+	texts_test, labels_test, texts, labels = DataLoading.balance_data(texts, labels, 400,[2,3,4,5])
+	texts_train.dump("../dump/trainRaw")
+	texts_valid.dump("../dump/validRaw")
+	texts_test.dump("../dump/testRaw")
+	labels_train.dump("../dump/trainlRaw")
+	labels_valid.dump("../dump/validlRaw")
+	labels_test.dump("../dump/testlRaw")
+	print("Data dumped to disk!")
 
-texts_train = (pd.concat([pd.Series(texts_train_snopes) ,  pd.Series(texts_train_buzzfeed), pd.Series(texts_train_emergent)]))
-labels_train = (pd.concat([pd.Series(labels_train_snopes) ,  pd.Series(labels_train_buzzfeed), pd.Series(labels_train_emergent )]))
+print("Size of train, validataion and test sets: " + str(len(labels_train)) + " , " +  str(len(labels_valid))+ " , "  +  str(len(labels_test)))
+print(texts_train[0:3][0:10])
+print(labels_train[0:3])
 
-#texts_train = (pd.concat([pd.Series(texts_train_snopes) ,   pd.Series(texts_train_buzzfeed)]))
-#labels_train = (pd.concat([pd.Series(labels_train_snopes) ,   pd.Series(labels_train_buzzfeed )]))
-
-texts_train, labels_train, texts, labels = DataLoading.balance_data(texts_train, labels_train, 800, [2,5])
-print(texts_train[0:25][0:100])
-print(labels_train[0:100])
-
-
+#Train:
 print("Fitting the model...")
 pipeline.fit(texts_train, labels_train)
 
 
 
 
+
 #Tests:
+print("Results on training data:")
+y = pipeline.predict(texts_train)
+print(classification_report(labels_train,   y))
 
-print("Test results on data sampled from same distribution as training data:")
-texts_test, labels_test, texts, labels =  DataLoading.balance_data(texts, labels, 200, [2,5])
+print("Results on validation data:")
+y = pipeline.predict(texts_valid)
+print(classification_report( labels_valid, y))
+
+print("Results on test data:")
 y = pipeline.predict(texts_test)
-print(classification_report(y, labels_test))
+print(classification_report( labels_test,  y))
 
+
+# Data sources used for testing:
+texts_snopesChecked, labels_snopesChecked = DataLoading.load_data_snopes("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv", CLASSES)#load_data_combined("../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")#load_d$
+texts_emergent, labels_emergent = DataLoading.load_data_emergent("../data/emergent/url-versions-2015-06-14.csv", CLASSES)
+texts_buzzfeed, labels_buzzfeed = DataLoading.load_data_buzzfeed("../data/buzzfeed-facebook/bf_fb.txt", CLASSES)
+#texts_buzzfeedTop, labels_buzzfeedTop = DataLoading.load_data_buzzfeedtop()
 
 print("Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):")
-texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_snopesCheked, labels_snopesCheked , 40, [2,5])
+texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_snopesChecked, labels_snopesChecked , 40, [2,5])
 y = pipeline.predict(texts_test)
-print(classification_report(y, labels_test))
-
+print(classification_report(labels_test, y))
+print("confusion matrix:")
+print(confusion_matrix(labels_test, y))
+print(pd.DataFrame({'Predicted': y, 'Expected': labels_test}))
 
 print("Test results on data sampled from emergent dataset (a broad distribution acc. to topic modeling -- possibly some overlapping claims):")
 texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_emergent, labels_emergent , 300, [2,5])
 y = pipeline.predict(texts_test)
-print(classification_report(y, labels_test))
-
-
+print(classification_report(labels_test,y))
 
 print("Test results on data sampled from buzzfeed dataset (a narrow distribution : US election topic -- possibly some overlapping claims):")
-texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_train_buzzfeed, labels_train_buzzfeed , 70, [2,5])
+texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_buzzfeed, labels_buzzfeed , 70, [2,5])
 y = pipeline.predict(texts_test)
-print(classification_report(y, labels_test))
+print(classification_report(labels_test, y))
 
 
