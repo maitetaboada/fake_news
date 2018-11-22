@@ -115,7 +115,7 @@ def load_data_combined(file_name="../data/buzzfeed-debunk-combined/all-v02.txt",
     print(labels[0:6])
     return texts, labels
 
-def load_data_rashkin(file_name="../data/rashkin/train.txt"):
+def load_data_rashkin(file_name, classes = 4):
     print("Loading data...")
     data_train = pd.read_table(file_name, sep='\t', header=None, names=["label", "data"], usecols=[0, 1],
                                dtype={"label": np.str, "data": np.str})
@@ -134,13 +134,20 @@ def load_data_rashkin(file_name="../data/rashkin/train.txt"):
         texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
         labels.append(str(data_train.label[idx]))
     '''
-
-    transdict = {
-        '1': 2,  # Satire
-        '2': 3,  # Hoax
-        '3': 1,  # Propaganda
-        '4': 0  # Truested
-    }
+    if( classes == 2):
+        transdict = {
+            '1': 1,  # Satire
+            '2': 1,  # Hoax
+            '3': 1,  # Propaganda
+            '4': 0  # Truested
+        }
+    else:
+        transdict = {
+            '1': 2,  # Satire
+            '2': 3,  # Hoax
+            '3': 1,  # Propaganda
+            '4': 0  # Truested
+        }
     labels = [transdict[i] for i in labels]
     #labels = to_cat(np.asarray(labels))
     print(texts[0:6])
