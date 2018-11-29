@@ -54,7 +54,7 @@ def main(webname):
 	elif webname == "emergent":
 		from emergent_parsing_helper import parsing_whole_wepages
 		print("Parsing Emergent")
-		new_pahse1_file, new_phase2_file = parsing_whole_wepages(input_path)
+		new_phase1_file, new_phase2_file = parsing_whole_wepages(input_path)
 	
 	print("Preparing file names")
 	output_file_name1 = new_phase1_file.split("/")[-1]
