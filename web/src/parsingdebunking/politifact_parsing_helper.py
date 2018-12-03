@@ -61,7 +61,7 @@ def convert_timestamp(timestamp):
 		[STR] formated timestamp: for example: "2 July 2018"
 	"""
 	print(timestamp)
-	formated_timestamp = re.sub("at.*", "", timestamp)
+	formated_timestamp = re.sub(" at.*", "", timestamp)
 	formated_timestamp = formated_timestamp.strip()
 	month = formated_timestamp.split(',')[1].split()[0]
 	day = formated_timestamp.split(',')[1].split()[1]
