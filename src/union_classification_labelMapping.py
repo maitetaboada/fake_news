@@ -1,4 +1,5 @@
 
+
 ## Used ideas from https://www.kaggle.com/metadist/work-like-a-pro-with-pipelines-and-feature-unions
 ## Used ideas from https://www.kaggle.com/edolatabadi/feature-union-with-grid-search
 ## Used ideas from https://github.com/scikit-learn/scikit-learn/issues/6122 feature selection output
@@ -32,6 +33,18 @@ import nltk
 import pandas as pd
 from sklearn.feature_selection import SelectFromModel
 from sklearn.model_selection import GridSearchCV
+from sklearn.externals import joblib
+
+
+#Reproducibility
+import random
+np.random.seed(0)
+random.seed(0)
+
+
+
+LOAD_DATA_FROM_DISK = True
+CLASSES = 2
 
 #################
 
@@ -39,7 +52,7 @@ print("Preparing lexicons & lwicDic")
 lexicon_directory = "../data/bias_related_lexicons"
 lexicons = []
 lexiconNames = []
-# print("LexiconFeatures() init: loading lexicons")
+#print("LexiconFeatures() init: loading lexicons")
 for filename in os.listdir(lexicon_directory):
     if filename.endswith(".txt"):
         file = os.path.join(lexicon_directory, filename)
@@ -68,22 +81,22 @@ liwcDic = dict(zip(keys, values))
 
 
 class PosTagFeatures(BaseEstimator, TransformerMixin):
-    # normalise = True - devide all values by a total number of tags in the sentence
-    # tokenizer - take a custom tokenizer function
+    #normalise = True - devide all values by a total number of tags in the sentence
+    #tokenizer - take a custom tokenizer function
     def __init__(self, tokenizer=lambda x: x.split(), normalize=True):
         print("Inside the init function of PosTagFeatures")
-        self. tokenizer =tokenizer
-        self. normalize =normalize
+        self.tokenizer=tokenizer
+        self.normalize=normalize
 
-    # helper function to tokenize and count parts of speech
+    #helper function to tokenize and count parts of speech
     def pos_func(self, sentence):
-        return Counter(tag for word ,tag in nltk.pos_tag(self.tokenizer(sentence), tagset='universal'))
+        return Counter(tag for word,tag in nltk.pos_tag(self.tokenizer(sentence), tagset='universal'))
 
     # fit() doesn't do anything, this is a transformer class
     def fit(self, X, y = None):
         return self
 
-    # all the work is done here
+    #all the work is done here
     def transform(self, X):
         X = pd.Series(X)
         X_tagged = X.apply(self.pos_func).apply(pd.Series).fillna(0)
@@ -107,25 +120,25 @@ class SurfaceFeatures(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, posts):
-        # posts[['feature1','feature2',...,'feature100']].to_dict('records')[0].to_dict('records')
+        #posts[['feature1','feature2',...,'feature100']].to_dict('records')[0].to_dict('records')
         features = [{'length': len(text),
-                     'num_sentences': text.count('.')}
-                    for text in posts]
+                 'num_sentences': text.count('.')}
+                for text in posts]
 
 
 
         print("In SurfaceFeatures: avg length and avg num_sentences ")
         avgLength = sum(item['length'] for item in features) / len(features)
         avgSentences = sum(item['num_sentences'] for item in features) / len(features)
-        # print(avgLength)
-        # print(avgSentences)
-        # print(features[0:10])
+        #print(avgLength)
+        #print(avgSentences)
+        #print(features[0:10])
 
         return features
 
 class LiwcFeatures(BaseEstimator, TransformerMixin):
 
-    liwcDic = {}  # = map of text to dataframe row (this dataframe should be read from the file including liwc features)
+    liwcDic = {} #= map of text to dataframe row (this dataframe should be read from the file including liwc features)
 
     def __init__(self):
         '''
@@ -151,22 +164,22 @@ class LiwcFeatures(BaseEstimator, TransformerMixin):
 
 
     def transform(self, texts):
-        # find the line related to this text in dataframe posts[['feature1','feature2',...,'feature100']].to_dict('records')
-        # return [self.getLiwcRow(text).to_dict('records')
+        #find the line related to this text in dataframe posts[['feature1','feature2',...,'feature100']].to_dict('records')
+        #return [self.getLiwcRow(text).to_dict('records')
         #        for text in posts]
         textvecs = []
         for text in texts:
-            # print "*** Current text:\n" + text  + "\n***"
+            #print "*** Current text:\n" + text  + "\n***"
             tokens = nltk.word_tokenize(text)
             textvec = {}
             for category in self.liwcDic.keys():
                 lexicon_words = [i for i in tokens if i in self.liwcDic[category]]
                 count = len(lexicon_words)
-                # print ("Count: " + str(count))
-                count = count * 1.0 / len(tokens)  # Continous treatment
-                # count = 1 if (count > 0) else 0     #Binary treatment
+                #print ("Count: " + str(count))
+                count = count * 1.0 / len(tokens)  #Continous treatment
+                #count = 1 if (count > 0) else 0     #Binary treatment
                 textvec[category] =  count
-            # print(textvec)
+            #print(textvec)
             textvecs.append(textvec)
         return np.array(textvecs)
 
@@ -179,10 +192,10 @@ class LexiconFeatures(BaseEstimator, TransformerMixin):
 
     def __init__(self):
         print("Inside the init function of LexiconFeatures(0")
-        # lexicon_directory = "../data/bias_related_lexicons"
+        #lexicon_directory = "../data/bias_related_lexicons"
         self.lexicons = lexicons
         self.lexiconNames = lexiconNames
-        # print("LexiconFeatures() init: loading lexicons")
+        #print("LexiconFeatures() init: loading lexicons")
         '''
         for filename in os.listdir(lexicon_directory):
             if filename.endswith(".txt"):
@@ -202,20 +215,20 @@ class LexiconFeatures(BaseEstimator, TransformerMixin):
 
     def transform(self, texts):
         stoplist = stopwords.words('english')
-        # print("transforming:...")
+        #print("transforming:...")
         textvecs = []
         for text in texts:
-            # print "*** Current text:\n" + text  + "\n***"
+            #print "*** Current text:\n" + text  + "\n***"
             tokens = nltk.word_tokenize(text)
             textvec = {}
             for lexicon, lexiconName in zip(self.lexicons, self.lexiconNames):
                 lexicon_words = [i for i in tokens if i in lexicon]
                 count = len(lexicon_words)
-                # print ("Count: " + str(count))
-                count = count * 1.0 / len(tokens)  # Continous treatment
-                # count = 1 if (count > 0) else 0     #Binary treatment
+                #print ("Count: " + str(count))
+                count = count * 1.0 / len(tokens)  #Continous treatment
+                #count = 1 if (count > 0) else 0     #Binary treatment
                 textvec[lexiconName] =  count
-            # print(textvec)
+            #print(textvec)
             textvecs.append(textvec)
         return np.array(textvecs)
 
@@ -246,20 +259,20 @@ pipeline = Pipeline([
     ('union', ColumnTransformer(
         [
             # Pulling features from the post's subject line (first column)
-            # ('subject', TfidfVectorizer(sublinear_tf=True, max_df=0.5,
+            #('subject', TfidfVectorizer(sublinear_tf=True, max_df=0.5,
             #                     stop_words='english', ngram_range=(1,4)), 0),
 
             # Pipeline for standard bag-of-words model for body (second column)
             ('body_bow', TfidfVectorizer(sublinear_tf=True, max_df=0.5,
-                                         stop_words='english', ngram_range=(1 ,4)), 1),
+                                 stop_words='english', ngram_range=(1,2)), 1),
 
-            # ('pos_features', PosTagFeatures(tokenizer=nltk.word_tokenize), 0 ),
-            # ('body_bow', Pipeline([
+            #('pos_features', PosTagFeatures(tokenizer=nltk.word_tokenize), 0 ),
+            #('body_bow', Pipeline([
             #    ('tfidf', TfidfVectorizer(sublinear_tf=True, max_df=0.5, min_df= 5,
             #                     stop_words='english', ngram_range=(1,3))
             #     ),
             #    ('best', TruncatedSVD(n_components=10))
-            # ]), 1),
+            #]), 1),
 
             # Pipeline for pulling ad hoc features from post's body
             ('surface_features', Pipeline([
@@ -281,102 +294,72 @@ pipeline = Pipeline([
 
         # weight components in ColumnTransformer
         transformer_weights={
-            # 'subject': 0.5,
+            #'subject': 0.5,
             'body_bow': 0.8,
             'surface_features': 0.0,
             'lexicon_features': 0.1,
-            'liwc_features' :0.1
-            # 'pos_features':0.1
+            'liwc_features':0.1
+            #'pos_features':0.1
         }
     )),
 
     # Feature selection
-    # ('feature_selection', SelectFromModel(LinearSVC(penalty="l2", dual=False,
+    #('feature_selection', SelectFromModel(LinearSVC(penalty="l2", dual=False,
     #                                   tol=1e-3))),
 
     # Use a SVC classifier on the combined features
     ('svc', LinearSVC(penalty= "l2", dual=False, tol=1e-3)),
 
     # Use a RandomForest classifier
-    # ('classification', RandomForestClassifier())
+    #('classification', RandomForestClassifier())
 ])
 
 
-LOAD_DATA_FROM_DISK = True
-CLASSES = 2
 
 if LOAD_DATA_FROM_DISK:
-    texts_train = np.load("../dump/trainRaw")
-    texts_valid = np.load("../dump/validRaw")
-    texts_test = np.load("../dump/testRaw")
-    labels_train = np.load("../dump/trainlRaw")
-    labels_valid = np.load("../dump/validlRaw")
-    labels_test = np.load("../dump/testlRaw")
-    print("Data loaded from disk!")
+	texts_train = np.load("../dump/trainRaw_rashkin")
+	texts_test = np.load("../dump/testRaw")
+	labels_train = np.load("../dump/trainlRaw_rashkin")
+	labels_test = np.load("../dump/testlRaw")
+	print("Data loaded from disk!")
 
 else:
-    # Data sources used for training:
-    texts_train_snopes, labels_train_snopes = DataLoading.load_data_snopes \
-        ("../data/snopes/snopes_leftover_v02_right_forclassificationtrain.csv", CLASSES  )  # load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/r$
-    texts_train_buzzfeed, labels_train_buzzfeed = DataLoading.load_data_buzzfeed("../data/buzzfeed-facebook/bf_fb.txt",
-                                                                                 CLASSES)
-    texts_train_emergent, labels_train_emergent = DataLoading.load_data_emergent(
-        "../data/emergent/url-versions-2015-06-14.csv", CLASSES)
-    len(texts_train_snopes)
-    len(texts_train_buzzfeed)
-    len(texts_train_emergent)
+	# Data sources used for training:
+	texts_train_rashkin, labels_train_rashkin = DataLoading.load_data_rashkin("../data/rashkin/xtrain.txt", CLASSES )#load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/r$
+	print(len(texts_train_rashkin))
+	texts_train, labels_train, texts, labels = DataLoading.balance_data(texts_train_rashkin, labels_train_rashkin, 4000, [4])
+	texts_train.dump("../dump/trainRaw_rashkin")
+	labels_train.dump("../dump/trainlRaw_rashkin")
+	print("Data dumped to disk!")
 
-    texts_all_train = pd.concat(
-        [pd.Series(texts_train_snopes), pd.Series(texts_train_buzzfeed), pd.Series(texts_train_emergent)])
-    labels_all_train = pd.concat(
-        [pd.Series(labels_train_snopes), pd.Series(labels_train_buzzfeed), pd.Series(labels_train_emergent)])
-    # sources_all_train = pd.concat()
-
-    texts_train, labels_train, texts, labels = DataLoading.balance_data(texts_all_train, labels_all_train, 1200,
-                                                                        [2, 3, 4, 5])
-    texts_valid, labels_valid, texts, labels = DataLoading.balance_data(texts, labels, 400, [2, 3, 4, 5])
-    texts_test, labels_test, texts, labels = DataLoading.balance_data(texts, labels, 400, [2, 3, 4, 5])
-    texts_train.dump("../dump/trainRaw")
-    texts_valid.dump("../dump/validRaw")
-    texts_test.dump("../dump/testRaw")
-    labels_train.dump("../dump/trainlRaw")
-    labels_valid.dump("../dump/validlRaw")
-    labels_test.dump("../dump/testlRaw")
-    print("Data dumped to disk!")
-
-print("Size of train, validataion and test sets: " + str(len(labels_train)) + " , " + str(
-    len(labels_valid)) + " , " + str(len(labels_test)))
-texts_train_valid = pd.concat(
-    [pd.Series(texts_train), pd.Series(texts_valid)])
-labels_train_valid = pd.concat(
-    [pd.Series(labels_train), pd.Series(labels_valid)])
-
+print("Size of train and test sets: " + str(len(labels_train)) + " , "  +  str(len(labels_test)))
+texts_train_valid = texts_train
+labels_train_valid = labels_train
 print(texts_train_valid[0:3][0:10])
 print(labels_train_valid[0:3])
 
 
-
-# Train:
+'''
+#Train:
 
 parameters = {
-    'union__body_bow__ngram_range': ((1, 2), (1, 3)),
-    # 'union__body_bow__max_df': (1, 3, 5),
-    'union__body_bow__min_df': ( 3, 5),
-    'svc__penalty':("l1", "l2"),
+    'union__body_bow__ngram_range':  ((1, 2),(1,3)),
+    'union__body_bow__min_df': (3, 5),
+    #'union__transformer_weights': (dict('lwic_features'=.1, 'lexicon_features'=.1, 'surface_features'=.1, 'body_bow'=.7 )),
+    'svc__penalty':("l2", "l1"),
     'svc__tol': (1e-2, 1e-3)
 }
+
 grid_search = GridSearchCV(pipeline, parameters, verbose=True, scoring="f1")
 
-# print("Fitting the model...")
-# pipeline.fit(texts_train, labels_train)
 
 print("Performing grid search...")
 print("pipeline:", [name for name, _ in pipeline.steps])
 print("parameters:")
 print(parameters)
 grid_search.fit(texts_train_valid, labels_train_valid)
-# train = grid_search.transform(texts_train)
-# print(train.shape)
+#train = grid_search.transform(texts_train)
+#print(train.shape)
 
 print("Best score: %0.3f" % grid_search.best_score_)
 print("Best parameters set:")
@@ -384,30 +367,29 @@ best_parameters = grid_search.best_estimator_.get_params()
 for param_name in sorted(parameters.keys()):
     print("\t%s: %r" % (param_name, best_parameters[param_name]))
 
-print("CV Results Details:")
-print(grid_search.cv_results_)
+joblib.dump(grid_search.best_estimator_, '../dump/bestSVClassifier.pkl', compress = 1)
+'''
 
-# Tests:
+#Load from disk:
+grid_search = joblib.load('../dump/bestSVClassifier.pkl')
+
+
+
+#Tests:
 print("Results on training data:")
 y = grid_search.predict(texts_train)
-print(classification_report(labels_train, y))
-
-print("Results on validation data:")
-y = grid_search.predict(texts_valid)
-print(classification_report(labels_valid, y))
+print(classification_report(labels_train,   y))
 
 print("Results on test data:")
 y = grid_search.predict(texts_test)
-print(classification_report(labels_test, y))
+print(classification_report( labels_test,  y))
+
 
 # Data sources used for testing:
-texts_snopesChecked, labels_snopesChecked = DataLoading.load_data_snopes(
-    "../data/snopes/snopes_checked_v02_right_forclassificationtest.csv",
-    CLASSES)  # load_data_combined("../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")#load_d$
-texts_emergent, labels_emergent = DataLoading.load_data_emergent("../data/emergent/url-versions-2015-06-14.csv",
-                                                                 CLASSES)
+texts_snopesChecked, labels_snopesChecked = DataLoading.load_data_snopes("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv", CLASSES)#load_data_combined("../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")#load_d$
+texts_emergent, labels_emergent = DataLoading.load_data_emergent("../data/emergent/url-versions-2015-06-14.csv", CLASSES)
 texts_buzzfeed, labels_buzzfeed = DataLoading.load_data_buzzfeed("../data/buzzfeed-facebook/bf_fb.txt", CLASSES)
-# texts_buzzfeedTop, labels_buzzfeedTop = DataLoading.load_data_buzzfeedtop()
+#texts_buzzfeedTop, labels_buzzfeedTop = DataLoading.load_data_buzzfeedtop()
 
 print("Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):")
 texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_snopesChecked, labels_snopesChecked ,sample_size=None , discard_labels=[2,5])
@@ -417,18 +399,15 @@ print("confusion matrix:")
 print(confusion_matrix(labels_test, y))
 print(pd.DataFrame({'Predicted': y, 'Expected': labels_test}))
 
-print(
-    "Test results on data sampled from emergent dataset (a broad distribution acc. to topic modeling -- possibly some overlapping claims):")
-texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_emergent, labels_emergent, 300, [2, 5])
+print("Test results on data sampled from emergent dataset (a broad distribution acc. to topic modeling -- possibly some overlapping claims):")
+texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_emergent, labels_emergent , 300, [2,5])
+y = grid_search.predict(texts_test)
+print(classification_report(labels_test,y))
+
+print("Test results on data sampled from buzzfeed dataset (a narrow distribution : US election topic -- possibly some overlapping claims):")
+texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_buzzfeed, labels_buzzfeed , 70, [2,5])
 y = grid_search.predict(texts_test)
 print(classification_report(labels_test, y))
-
-print(
-    "Test results on data sampled from buzzfeed dataset (a narrow distribution : US election topic -- possibly some overlapping claims):")
-texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_buzzfeed, labels_buzzfeed, 70, [2, 5])
-y = grid_search.predict(texts_test)
-print(classification_report(labels_test, y))
-
 
 
 

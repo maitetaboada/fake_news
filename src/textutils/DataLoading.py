@@ -193,7 +193,7 @@ def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/bf_fb.txt", classes 
     print(pd.value_counts((labels)))
     return texts, labels
 
-def balance_data(texts, labels, sample_size, discard_labels=[]):
+def balance_data(texts, labels, sample_size = None, discard_labels=[]):
     ## sample size is the number of items we want to have from EACH class
     unique, counts = np.unique(labels, return_counts=True)
     print(np.asarray((unique, counts)).T)
@@ -203,7 +203,10 @@ def balance_data(texts, labels, sample_size, discard_labels=[]):
             print ("Discarding items for label " + str(l))
             continue
         l_index = (np.where(labels == l)[0]).tolist()  ## index of input data with current label
-        if (sample_size - f > 0):
+        if (sample_size == None ):
+            # print "No up or down sampling")
+            l_index = np.asarray(l_index)
+        elif (sample_size - f > 0):
             # print "Upsampling ", sample_size - f, " items for class ", l
             x = np.random.choice(f, sample_size - f).tolist()
             l_index = np.append(np.asarray(l_index), np.asarray(l_index)[x])
