@@ -63,7 +63,7 @@ def tokenize_news_articles(*, docs, path):
     return tokenizer
 
 
-def load_tokenizer(path="../tokenizer.pickle"):
+def load_tokenizer(path="../dump/tokenizer.pickle"):
     with open(path, 'rb') as handle:
         tokenizer = pickle.load(handle)
         return tokenizer
