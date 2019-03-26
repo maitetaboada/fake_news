@@ -112,6 +112,7 @@ def load_snopes_data(tokenizer):
 
 
 # Maybe add Dropout(0.5)?
+# Maybe add kernel_regularizer=regularizers.l2(0.01)
 def create_simple_model(tokenizer):
     embedding_layer = Embedding(len(tokenizer.word_index) + 1,
                                 EMBEDDING_DIM,
@@ -248,7 +249,7 @@ def pretrain_complex_model(x, y, tokenizer,
                            path="cnn_pretrain_complex.h5"):
     x_train, x_valid, y_train, y_valid = train_test_split(x, y, test_size=0.05)
     print("Pre-training complex CNN model")
-    model = create_complex_model()
+    model = create_complex_model(tokenizer)
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
                   metrics=['accuracy', km.f1_score()])
