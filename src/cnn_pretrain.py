@@ -149,7 +149,8 @@ def pretrain_simple_model(x, y, tokenizer,
     model.save_weights(path)
 
 
-def fake_news_simple_model(x, y, x_test, y_test, snopestext_test, snopeslabels_test, tokenizer):
+def fake_news_simple_model(x, y, x_test, y_test, snopestext_test, snopeslabels_test,
+                           tokenizer, args):
     "Runs experiment on fake news data with simple CNN model"
     # Use k-fold cross validation
     cv_scores = []
@@ -186,11 +187,11 @@ def fake_news_simple_model(x, y, x_test, y_test, snopestext_test, snopeslabels_t
     # train on the full dataset
     model = create_simple_model(tokenizer)
     model.load_weights("cnn_pretrain_simple.h5")
-    for l in model.layers[:7]:
+    for l in model.layers[:args.simple_freeze]:
         l.trainable = False
 
     model.compile(loss='categorical_crossentropy',
-                  optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
+                  optimizer=optimizers.SGD(lr=args.lr, momentum=0.9),
                   metrics=['accuracy', km.f1_score()])
 
     model.summary()
@@ -257,7 +258,8 @@ def pretrain_complex_model(x, y, tokenizer,
     model.save_weights("cnn_pretrain_complex.h5")
 
 
-def fake_news_complex_model(x, y, x_test, y_test, snopestext_test, snopeslabels_test, tokenizer):
+def fake_news_complex_model(x, y, x_test, y_test, snopestext_test, snopeslabels_test,
+                            tokenizer, args):
     "Runs experiment on fake news data with complex CNN model"
 
     # Use k-fold cross validation
@@ -296,11 +298,11 @@ def fake_news_complex_model(x, y, x_test, y_test, snopestext_test, snopeslabels_
 
         model = create_complex_model(tokenizer)
         model.load_weights("cnn_pretrain_complex.h5")
-        for l in model.layers[:14]:
+        for l in model.layers[:args.complex_freeze]:
             l.trainable = False
 
         model.compile(loss='categorical_crossentropy',
-                      optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
+                      optimizer=optimizers.SGD(lr=args.lr, momentum=0.9),
                       metrics=['accuracy', km.f1_score()])
 
         model.summary()
@@ -328,6 +330,9 @@ def main():
     parser.add_argument('--complex_freeze', metavar="L", type=int,
                         default=14,
                         help='Layers to freeze in complex network')
+    parser.add_argument('--lr', type=float,
+                        default=1e-4,
+                        help='Learning rate for fine-tuning')
     args = parser.parse_args()
 
     if args.pretrain:
@@ -340,8 +345,12 @@ def main():
     x, y, x_test, y_test = load_fake_news_training_data(tokenizer)
     snopestext_test, snopeslabels_test = load_snopes_data(tokenizer)
 
-    fake_news_simple_model(x, y, x_test, y_test, snopestext_test, snopeslabels_test, tokenizer)
-    fake_news_complex_model(x, y, x_test, y_test, snopestext_test, snopeslabels_test, tokenizer)
+    fake_news_simple_model(x, y, x_test, y_test,
+                           snopestext_test, snopeslabels_test,
+                           tokenizer, args)
+    fake_news_complex_model(x, y, x_test, y_test,
+                            snopestext_test, snopeslabels_test,
+                            tokenizer, args)
 
 
 if __name__ == '__main__':
