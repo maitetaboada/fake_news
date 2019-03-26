@@ -1,9 +1,12 @@
 import numpy as np
 import re
+import pickle
+import argparse
 
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils.np_utils import to_categorical
+from keras import optimizers
 
 from keras.layers import Embedding
 from keras.layers import Dense, Input, Flatten
@@ -11,7 +14,7 @@ from keras.layers import Conv1D, MaxPooling1D, Concatenate
 from keras.models import Model
 import keras_metrics as km
 
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from textutils import DataLoading
 
 MAX_SEQUENCE_LENGTH = 1000
@@ -31,72 +34,86 @@ def clean_str(string):
     return string.strip().lower()
 
 
-cnn_docs = np.load("../dump/cnn_dump.npy")
-cnn_labels = np.zeros(cnn_docs.shape)
+def load_news_articles():
+    cnn_docs = np.load("../dump/cnn_dump.npy")
+    cnn_labels = np.zeros(cnn_docs.shape)
 
-dm_docs = np.load("../dump/dm_dump.npy")
-dm_labels = np.ones(dm_docs.shape)
+    dm_docs = np.load("../dump/dm_dump.npy")
+    dm_labels = np.ones(dm_docs.shape)
 
-docs = np.concatenate((cnn_docs, dm_docs))
-labels = np.concatenate((cnn_labels, dm_labels))
+    docs = np.concatenate((cnn_docs, dm_docs))
+    labels = np.concatenate((cnn_labels, dm_labels))
+    tokenizer = tokenize_news_articles(docs=docs, path="../dump/tokenizer.pickle")
+    word_index = tokenizer.word_index
+    print('Found %s unique tokens.' % len(word_index))
 
-tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
-tokenizer.fit_on_texts(docs)
-word_index = tokenizer.word_index
-print('Found %s unique tokens.' % len(word_index))
+    sequences = tokenizer.texts_to_sequences(docs)
+    x_news = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
+    y_news = to_categorical(np.asarray(labels))
+    return (x_news, y_news, tokenizer)
 
-sequences = tokenizer.texts_to_sequences(docs)
-x_news = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
-y_news = to_categorical(np.asarray(labels))
 
-n_rows_total = x_news.shape[0]
-n_rows_train = int(n_rows_total * 0.95)
-indices = np.arange(n_rows_total)
-np.random.shuffle(indices)
-x_news = x_news[indices]
-y_news = y_news[indices]
-x_news_train = x_news[:n_rows_train]
-x_news_valid = x_news[n_rows_train:]
-y_news_train = y_news[:n_rows_train]
-y_news_valid = y_news[n_rows_train:]
+def tokenize_news_articles(*, docs, path):
+    tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
+    tokenizer.fit_on_texts(docs)
 
-texts_train = np.load("../dump/trainRaw")
-labels_train = np.load("../dump/trainlRaw")
-sequences = tokenizer.texts_to_sequences(texts_train)
+    with open(path, 'wb') as handle:
+        pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-x_train = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
-y_train = to_categorical(np.asarray(labels_train))
+    return tokenizer
 
-print('Shape of data tensor:', x_train.shape)
-print('Shape of label tensor:', y_train.shape)
 
-texts_valid = np.load("../dump/validRaw")
-labels_valid = np.load("../dump/validlRaw")
+def load_tokenizer(path="../tokenizer.pickle"):
+    with open(path, 'rb') as handle:
+        tokenizer = pickle.load(handle)
+        return tokenizer
 
-sequences = tokenizer.texts_to_sequences(texts_valid)
-x_valid = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
-y_valid = to_categorical(np.asarray(labels_valid))
 
-texts_test = np.load("../dump/testRaw")
-sequences = tokenizer.texts_to_sequences(texts_test)
-x_test = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
+def load_fake_news_training_data(tokenizer):
+    texts_train = np.load("../dump/trainRaw")
+    labels_train = np.load("../dump/trainlRaw")
+    sequences = tokenizer.texts_to_sequences(texts_train)
 
-y_test = np.load("../dump/testlRaw")
-y_test = to_categorical(np.asarray(y_test))
+    x_train = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
+    y_train = to_categorical(np.asarray(labels_train))
 
-snopes_filename = "../data/snopes/snopes_checked_v02_right_forclassificationtest.csv"
-texts_snopesChecked, labels_snopesChecked = DataLoading.load_data_snopes(snopes_filename, 2)
+    print('Shape of data tensor:', x_train.shape)
+    print('Shape of label tensor:', y_train.shape)
 
-print("Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):")
-snopestext_test, snopeslabels_test, _, _ = DataLoading.balance_data(texts_snopesChecked, labels_snopesChecked, 40, [2, 5])
-sequences = tokenizer.texts_to_sequences(snopestext_test)
-snopestext_test = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
-snopeslabels_test = to_categorical(np.asarray(snopeslabels_test))
+    texts_valid = np.load("../dump/validRaw")
+    labels_valid = np.load("../dump/validlRaw")
+
+    sequences = tokenizer.texts_to_sequences(texts_valid)
+    x_valid = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
+    y_valid = to_categorical(np.asarray(labels_valid))
+
+    x_combined = np.concatenate((x_train, x_valid), axis=0)
+    y_combined = np.concatenate((y_train, y_valid), axis=0)
+
+    texts_test = np.load("../dump/testRaw")
+    sequences = tokenizer.texts_to_sequences(texts_test)
+    x_test = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
+
+    y_test = np.load("../dump/testlRaw")
+    y_test = to_categorical(np.asarray(y_test))
+    return (x_combined, y_combined, x_test, y_test)
+
+
+def load_snopes_data(tokenizer):
+    snopes_filename = "../data/snopes/snopes_checked_v02_right_forclassificationtest.csv"
+    texts_snopesChecked, labels_snopesChecked = DataLoading.load_data_snopes(snopes_filename, 2)
+
+    print("Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):")
+    text, labels, _, _ = DataLoading.balance_data(texts_snopesChecked, labels_snopesChecked, 40, [2, 5])
+    sequences = tokenizer.texts_to_sequences(text)
+    text = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
+    labels = to_categorical(np.asarray(labels))
+    return (text, labels)
 
 
 # Maybe add Dropout(0.5)?
-def create_simple_model():
-    embedding_layer = Embedding(len(word_index) + 1,
+def create_simple_model(tokenizer):
+    embedding_layer = Embedding(len(tokenizer.word_index) + 1,
                                 EMBEDDING_DIM,
                                 input_length=MAX_SEQUENCE_LENGTH)
 
@@ -116,42 +133,44 @@ def create_simple_model():
 
 
 # pre-train simple model
-print("Pre-training simple CNN model")
-model = create_simple_model()
-model.compile(loss='categorical_crossentropy',
-              optimizer='rmsprop',
-              metrics=['accuracy', km.f1_score()])
-model.summary()
-model.fit(x_news_train, y_news_train, validation_data=(x_news_valid, y_news_valid),
-          epochs=10, batch_size=128)
-model.save_weights("cnn_pretrain_simple.h5")
+def pretrain_simple_model(x, y, tokenizer,
+                          epochs=10,
+                          batch_size=128,
+                          path="cnn_pretrain_simple.h5"):
+    x_train, x_valid, y_train, y_valid = train_test_split(x, y, test_size=0.05)
+    print("Pre-training simple CNN model")
+    model = create_simple_model(tokenizer)
+    model.compile(loss='categorical_crossentropy',
+                  optimizer='rmsprop',
+                  metrics=['accuracy', km.f1_score()])
+    model.summary()
+    model.fit(x_train, y_train, validation_data=(x_valid, y_valid),
+              epochs=epochs, batch_size=batch_size)
+    model.save_weights(path)
 
 
-x_combined = np.concatenate((x_train, x_valid), axis=0)
-y_combined = np.concatenate((y_train, y_valid), axis=0)
-n_rows_total = x_combined.shape[0]
-n_rows_train = x_train.shape[0]
+def fake_news_simple_model(x, y, x_test, y_test, snopestext_test, snopeslabels_test, tokenizer):
+    "Runs experiment on fake news data with simple CNN model"
+    # Use k-fold cross validation
+    cv_scores = []
 
-# Use k-fold cross validation
-cv_scores = []
+    skf = StratifiedKFold(n_splits=3)
 
-skf = StratifiedKFold(n_splits=3)
+    for train_index, valid_index in skf.split(x, y[:, 1]):
+        print("model fine-tuning - simplified convolutional neural network")
 
-for train_index, valid_index in skf.split(x_combined, y_combined[:, 1]):
-    print("model fine-tuning - simplified convolutional neural network")
+    x_train = x[train_index]
+    x_valid = x[valid_index]
+    y_train = y[train_index]
+    y_valid = y[valid_index]
 
-    x_train = x_combined[train_index]
-    x_valid = x_combined[valid_index]
-    y_train = y_combined[train_index]
-    y_valid = y_combined[valid_index]
-
-    model = create_simple_model()
+    model = create_simple_model(tokenizer)
     model.load_weights("cnn_pretrain_simple.h5")
     for l in model.layers[:9]:
         l.trainable = False
 
     model.compile(loss='categorical_crossentropy',
-                  optimizer='rmsprop',
+                  optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
                   metrics=['accuracy', km.f1_score()])
 
     model.summary()
@@ -161,42 +180,40 @@ for train_index, valid_index in skf.split(x_combined, y_combined[:, 1]):
     scores = model.evaluate(x_valid, y_valid, verbose=0)
     cv_scores.append(scores)
 
-print("Scores for CV on simple model")
-print(list(zip(model.metrics_names, np.mean(cv_scores, axis=0))))
+    print("Scores for CV on simple model")
+    print(list(zip(model.metrics_names, np.mean(cv_scores, axis=0))))
 
+    # train on the full dataset
+    model = create_simple_model(tokenizer)
+    model.load_weights("cnn_pretrain_simple.h5")
+    for l in model.layers[:7]:
+        l.trainable = False
 
-# train on the full dataset
+    model.compile(loss='categorical_crossentropy',
+                  optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
+                  metrics=['accuracy', km.f1_score()])
 
-model = create_simple_model()
-model.load_weights("cnn_pretrain_simple.h5")
-for l in model.layers[:9]:
-    l.trainable = False
+    model.summary()
+    model.fit(x, y, validation_data=(x_test, y_test),
+              epochs=10, batch_size=128)
 
-model.compile(loss='categorical_crossentropy',
-              optimizer='rmsprop',
-              metrics=['accuracy', km.f1_score()])
+    # test on heldout test and snopes data
 
-model.summary()
-model.fit(x_combined, y_combined, validation_data=(x_test, y_test),
-          epochs=10, batch_size=128)
+    print("Scores for Test set:")
+    scores = model.evaluate(x_test, y_test, verbose=0)
+    print(list(zip(model.metrics_names, scores)))
 
-# test on heldout test and snopes data
-
-print("Scores for Test set:")
-scores = model.evaluate(x_test, y_test, verbose=0)
-print(list(zip(model.metrics_names, scores)))
-
-print("Scores for Snopes:")
-scores = model.evaluate(snopestext_test, snopeslabels_test, verbose=0)
-print(list(zip(model.metrics_names, scores)))
+    print("Scores for Snopes:")
+    scores = model.evaluate(snopestext_test, snopeslabels_test, verbose=0)
+    print(list(zip(model.metrics_names, scores)))
 
 
 ####################################################################
 # More complicated model below
 ####################################################################
 
-def create_complex_model():
-    embedding_layer = Embedding(len(word_index) + 1,
+def create_complex_model(tokenizer):
+    embedding_layer = Embedding(len(tokenizer.word_index) + 1,
                                 EMBEDDING_DIM,
                                 input_length=MAX_SEQUENCE_LENGTH)
 
@@ -224,70 +241,108 @@ def create_complex_model():
     return model
 
 
-print("Pre-training complex CNN model")
-model = create_complex_model()
-model.compile(loss='categorical_crossentropy',
-              optimizer='rmsprop',
-              metrics=['accuracy', km.f1_score()])
-model.summary()
-model.fit(x_news_train, y_news_train, validation_data=(x_news_valid, y_news_valid),
-          epochs=20, batch_size=128)
-model.save_weights("cnn_pretrain_complex.h5")
-
-# Use k-fold cross validation
-cv_scores = []
-
-skf = StratifiedKFold(n_splits=3)
-
-for train_index, valid_index in skf.split(x_combined, y_combined[:, 1]):
-    print("model fitting - simplified convolutional neural network")
-
-    x_train = x_combined[train_index]
-    x_valid = x_combined[valid_index]
-    y_train = y_combined[train_index]
-    y_valid = y_combined[valid_index]
-
+def pretrain_complex_model(x, y, tokenizer,
+                           epochs=20,
+                           batch_size=128,
+                           path="cnn_pretrain_complex.h5"):
+    x_train, x_valid, y_train, y_valid = train_test_split(x, y, test_size=0.05)
+    print("Pre-training complex CNN model")
     model = create_complex_model()
-    model.load_weights("cnn_pretrain_complex.h5")
-    for l in model.layers[:14]:
-        l.trainable = False
-
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
                   metrics=['accuracy', km.f1_score()])
-
     model.summary()
     model.fit(x_train, y_train, validation_data=(x_valid, y_valid),
-              epochs=20, batch_size=50)
-
-    scores = model.evaluate(x_valid, y_valid, verbose=0)
-    cv_scores.append(scores)
-
-print("Scores for CV on complex model")
-print(list(zip(model.metrics_names, np.mean(cv_scores, axis=0))))
+              epochs=epochs, batch_size=batch_size)
+    model.save_weights("cnn_pretrain_complex.h5")
 
 
-# train on the full dataset
+def fake_news_complex_model(x, y, x_test, y_test, snopestext_test, snopeslabels_test, tokenizer):
+    "Runs experiment on fake news data with complex CNN model"
 
-model = create_complex_model()
-model.load_weights("cnn_pretrain_complex.h5")
-for l in model.layers[:14]:
-    l.trainable = False
+    # Use k-fold cross validation
+    cv_scores = []
 
-model.compile(loss='categorical_crossentropy',
-              optimizer='rmsprop',
-              metrics=['accuracy', km.f1_score()])
+    skf = StratifiedKFold(n_splits=3)
 
-model.summary()
-model.fit(x_combined, y_combined, validation_data=(x_test, y_test),
-          epochs=20, batch_size=128)
+    for train_index, valid_index in skf.split(x, y[:, 1]):
+        print("model fitting - simplified convolutional neural network")
 
-# test on heldout test and snopes data
+        x_train = x[train_index]
+        x_valid = x[valid_index]
+        y_train = y[train_index]
+        y_valid = y[valid_index]
 
-print("Scores for Test set:")
-scores = model.evaluate(x_test, y_test, verbose=0)
-print(list(zip(model.metrics_names, scores)))
+        model = create_complex_model(tokenizer)
+        model.load_weights("cnn_pretrain_complex.h5")
+        for l in model.layers[:14]:
+            l.trainable = False
 
-print("Scores for Snopes:")
-scores = model.evaluate(snopestext_test, snopeslabels_test, verbose=0)
-print(list(zip(model.metrics_names, scores)))
+        model.compile(loss='categorical_crossentropy',
+                      optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
+                      metrics=['accuracy', km.f1_score()])
+
+        model.summary()
+        model.fit(x_train, y_train, validation_data=(x_valid, y_valid),
+                  epochs=20, batch_size=50)
+
+        scores = model.evaluate(x_valid, y_valid, verbose=0)
+        cv_scores.append(scores)
+
+        print("Scores for CV on complex model")
+        print(list(zip(model.metrics_names, np.mean(cv_scores, axis=0))))
+
+        # train on the full dataset
+
+        model = create_complex_model(tokenizer)
+        model.load_weights("cnn_pretrain_complex.h5")
+        for l in model.layers[:14]:
+            l.trainable = False
+
+        model.compile(loss='categorical_crossentropy',
+                      optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
+                      metrics=['accuracy', km.f1_score()])
+
+        model.summary()
+        model.fit(x, y, validation_data=(x_test, y_test),
+                  epochs=20, batch_size=128)
+
+        # test on heldout test and snopes data
+
+        print("Scores for Test set:")
+        scores = model.evaluate(x_test, y_test, verbose=0)
+        print(list(zip(model.metrics_names, scores)))
+
+        print("Scores for Snopes:")
+        scores = model.evaluate(snopestext_test, snopeslabels_test, verbose=0)
+        print(list(zip(model.metrics_names, scores)))
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Pretrain a CNN language model.')
+    parser.add_argument('--pretrain', action='store_true',
+                        help='Pretrain a model before training')
+    parser.add_argument('--simple_freeze', metavar="L", type=int,
+                        default=9,
+                        help='Layers to freeze in simple network')
+    parser.add_argument('--complex_freeze', metavar="L", type=int,
+                        default=14,
+                        help='Layers to freeze in complex network')
+    args = parser.parse_args()
+
+    if args.pretrain:
+        x_news, y_news, tokenizer = load_news_articles()
+        pretrain_simple_model(x_news, y_news, tokenizer)
+        pretrain_complex_model(x_news, y_news, tokenizer)
+    else:
+        tokenizer = load_tokenizer("../tokenizer.pickle")
+
+    x, y, x_test, y_test = load_fake_news_training_data(tokenizer)
+    snopestext_test, snopeslabels_test = load_snopes_data(tokenizer)
+
+    fake_news_simple_model(x, y, x_test, y_test, snopestext_test, snopeslabels_test, tokenizer)
+    fake_news_complex_model(x, y, x_test, y_test, snopestext_test, snopeslabels_test, tokenizer)
+
+
+if __name__ == '__main__':
+    main()
