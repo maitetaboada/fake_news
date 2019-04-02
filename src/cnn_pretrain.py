@@ -161,26 +161,26 @@ def fake_news_simple_model(x, y, x_test, y_test, snopestext_test, snopeslabels_t
     for train_index, valid_index in skf.split(x, y[:, 1]):
         print("model fine-tuning - simplified convolutional neural network")
 
-    x_train = x[train_index]
-    x_valid = x[valid_index]
-    y_train = y[train_index]
-    y_valid = y[valid_index]
+        x_train = x[train_index]
+        x_valid = x[valid_index]
+        y_train = y[train_index]
+        y_valid = y[valid_index]
 
-    model = create_simple_model(tokenizer)
-    model.load_weights("cnn_pretrain_simple.h5")
-    for l in model.layers[:9]:
-        l.trainable = False
+        model = create_simple_model(tokenizer)
+        model.load_weights("cnn_pretrain_simple.h5")
+        for l in model.layers[:9]:
+            l.trainable = False
 
-    model.compile(loss='categorical_crossentropy',
-                  optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
-                  metrics=['accuracy', km.f1_score()])
+        model.compile(loss='categorical_crossentropy',
+                      optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
+                      metrics=['accuracy', km.f1_score()])
 
-    model.summary()
-    model.fit(x_train, y_train, validation_data=(x_valid, y_valid),
-              epochs=10, batch_size=128)
+        model.summary()
+        model.fit(x_train, y_train, validation_data=(x_valid, y_valid),
+                  epochs=10, batch_size=128)
 
-    scores = model.evaluate(x_valid, y_valid, verbose=0)
-    cv_scores.append(scores)
+        scores = model.evaluate(x_valid, y_valid, verbose=0)
+        cv_scores.append(scores)
 
     print("Scores for CV on simple model")
     print(list(zip(model.metrics_names, np.mean(cv_scores, axis=0))))
@@ -295,30 +295,30 @@ def fake_news_complex_model(x, y, x_test, y_test, snopestext_test, snopeslabels_
         print("Scores for CV on complex model")
         print(list(zip(model.metrics_names, np.mean(cv_scores, axis=0))))
 
-        # train on the full dataset
+    # train on the full dataset
 
-        model = create_complex_model(tokenizer)
-        model.load_weights("cnn_pretrain_complex.h5")
-        for l in model.layers[:args.complex_freeze]:
-            l.trainable = False
+    model = create_complex_model(tokenizer)
+    model.load_weights("cnn_pretrain_complex.h5")
+    for l in model.layers[:args.complex_freeze]:
+        l.trainable = False
 
-        model.compile(loss='categorical_crossentropy',
-                      optimizer=optimizers.SGD(lr=args.lr, momentum=0.9),
-                      metrics=['accuracy', km.f1_score()])
+    model.compile(loss='categorical_crossentropy',
+                  optimizer=optimizers.SGD(lr=args.lr, momentum=0.9),
+                  metrics=['accuracy', km.f1_score()])
 
-        model.summary()
-        model.fit(x, y, validation_data=(x_test, y_test),
-                  epochs=20, batch_size=128)
+    model.summary()
+    model.fit(x, y, validation_data=(x_test, y_test),
+              epochs=20, batch_size=128)
 
-        # test on heldout test and snopes data
+    # test on heldout test and snopes data
 
-        print("Scores for Test set:")
-        scores = model.evaluate(x_test, y_test, verbose=0)
-        print(list(zip(model.metrics_names, scores)))
+    print("Scores for Test set:")
+    scores = model.evaluate(x_test, y_test, verbose=0)
+    print(list(zip(model.metrics_names, scores)))
 
-        print("Scores for Snopes:")
-        scores = model.evaluate(snopestext_test, snopeslabels_test, verbose=0)
-        print(list(zip(model.metrics_names, scores)))
+    print("Scores for Snopes:")
+    scores = model.evaluate(snopestext_test, snopeslabels_test, verbose=0)
+    print(list(zip(model.metrics_names, scores)))
 
 
 def main():
