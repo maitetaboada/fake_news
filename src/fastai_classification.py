@@ -3,7 +3,7 @@ from fastai import *
 from fastai.text import *
 from textutils import DataLoading
 from sklearn.metrics import classification_report, confusion_matrix
-
+from sklearn.model_selection import StratifiedKFold
 
 #reprudicibility:
 
@@ -31,6 +31,11 @@ CLASSES = 2
 LOAD_DATA_FROM_DISK = True
 LOAD_LM_FROM_DISK = True
 LOAD_TC_FROM_DISK = False
+
+my_drop_mult = 0.5
+my_lr = 2e-3 # 1e-2,2e-3
+my_epochs = 30
+
 
 if LOAD_DATA_FROM_DISK:
 	texts_train = np.load("../dump/trainRaw")
@@ -117,96 +122,87 @@ else:
 #******************************
 #****Classifier model**********
 
-if (LOAD_DATA_FROM_DISK and LOAD_LM_FROM_DISK): #as long as the input data and the language model has not changed, classification data remains the same
-	print("Reading classification data from " + str(path) )
-	data_clas = TextClasDataBunch.load(path + "/classification", bs=32)
-else:
+texts_train_valid = pd.concat([pd.Series(texts_train), pd.Series(texts_valid)])
+labels_train_valid = pd.concat([pd.Series(labels_train), pd.Series(labels_valid)])
+
+print(texts_train_valid[0:3][0:10])
+print(labels_train_valid[0:3])
+
+def predict(learn, mytexts):
+    return [learn.predict(x)[0] for x in mytexts]
+def train(data_clas):
+	print("Building the text classifier")
+	learn = text_classifier_learner(data_clas, drop_mult=my_drop_mult)
+	learn.load_encoder("../../languageModel/models/"+ 'LM_selfData')
+	print("Language model loaded!")
+	#learn.freeze()
+	learn.freeze_to(-1)
+	lr = my_lr/2.0
+	learn.fit_one_cycle(1, slice(lr/100, lr))
+	#learn.freeze_to(-2)
+	#learn.fit(1, slice(lr/100, lr))
+	learn.unfreeze()
+	lr = my_lr
+	learn.fit(my_epochs, slice(lr/100, lr))
+	#print("saving the classifier...")
+	#learn.save('TC_LM_selfData_fold'+ str(fold))
+	return learn
+
+print("Preparing the classifier and experiments using 3-fold CV")
+test_df = pd.DataFrame( {'label':  labels_test.astype(str), 'text':  texts_test})
+skf = StratifiedKFold(n_splits=3)
+for train_index, val_index in skf.split(texts_train_valid, labels_train_valid):
+	print("\n\n\nFOLD")
+	print(train_index[0:10])
+	print(val_index[0:10])
+	print("train:", len(train_index), "validation:", len(val_index))
+	texts_train, texts_valid= np.asarray(texts_train_valid)[train_index], np.asarray(texts_train_valid)[val_index]
+	labels_train, labels_valid = np.asarray(labels_train_valid)[train_index], np.asarray(labels_train_valid)[val_index]
+	#print("\n\n A sample of classifier training data:")
+	#print(texts_train[0:5])
+	#print("\n\n A sample of classifier validation data:")
+	#print(texts_valid[0:5])
 	train_df = pd.DataFrame( {'label':  labels_train.astype(str), 'text':  texts_train})
 	valid_df = pd.DataFrame( { 'label':  labels_valid.astype(str), 'text':  texts_valid})
-	test_df = pd.DataFrame( {'label':  labels_test.astype(str), 'text':  texts_test})
 	print("\n\n A sample of classifier training data:")
-	print(train_df.head(100))
-	data_clas = TextClasDataBunch.from_df(path + "/classification", train_df = train_df, valid_df = valid_df, test_df = test_df, vocab=data_lm.train_ds.vocab, bs=32)
-	print("Saving classification data to " + str(path) )
-	data_clas.save()
+	print(train_df.head(5))
+	print("\n\n A sample of classifier validation data:")
+	print(valid_df.head(5))
+	data_clas = TextClasDataBunch.from_df(path + "/classification", train_df = train_df, valid_df = valid_df, vocab=data_lm.train_ds.vocab, bs=32)
+
+	learn = train(data_clas)
+
+	#Predictions
+	sentence = "Hilary Clinton won the 2016 US election"
+	p = learn.predict(sentence)
+	print("Prediction for sentence \" " + sentence + "\" is " + str(p))
+
+	print("Results on training data:")
+	y = predict(learn, texts_train)
+	print(classification_report(labels_train,  list(map(int, y))))
+
+	print("Results on validation data:")
+	y = predict(learn, texts_valid)
+	print(classification_report( labels_valid, list(map(int, y))))
 
 
-# Building a classifier
+print("REFIT on train+valid and then testing...")
+train_df = pd.DataFrame( {'label':  labels_train_valid.astype(str), 'text':  texts_train_valid})
+test_df = pd.DataFrame( { 'label':  labels_test.astype(str), 'text':  texts_test})
+data_clas = TextClasDataBunch.from_df(path + "/classification", train_df = train_df, valid_df = test_df, vocab=data_lm.train_ds.vocab, bs=32)
 
-print("Building the text classifier")
-learn = text_classifier_learner(data_clas, drop_mult=0.7)
-learn.load_encoder("../../languageModel/models/"+ 'LM_selfData')
-print("Language model loaded!")
-
-if (LOAD_TC_FROM_DISK):
-	learn.load("TC_LM_selfData")
-	print("Classifier loaded!")
-
-#Fitting from scratch (if LOAD_TC is false) or continue fitting (if LOAD_TC is true):
-learn.freeze()
-learn.freeze_to(-1)
-learn.fit_one_cycle(1, 1e-2)
-learn.freeze_to(-2)
-learn.fit(1, 1e-3)
-learn.unfreeze()
-learn.fit(1, 1e-3)
-#learn.fit_one_cycle(1, 1e-3)
-#learn.fit_one_cycle(1, 1e-3/2.)
-learn.fit(15, slice(2e-3/100, 2e-3))
-
-print("saving the classifier...")
-learn.save('TC_LM_selfData')
-
-
+learn = train(data_clas)
 
 #Predictions
-sentence = "Hilary Clinton won the 2016 US election"
-p = learn.predict(sentence)
-print("Prediction for sentence \" " + sentence + "\" is " + str(p))
-
-
-
-def predict(mytexts):
-    return [learn.predict(x)[0] for x in mytexts]
-
-
-print("Results on training data:")
-y = predict(texts_train)
-print(classification_report(labels_train,  list(map(int, y))))
-
-print("Results on validation data:")
-y = predict(texts_valid)
-print(classification_report( labels_valid, list(map(int, y))))
-
 print("Results on test data:")
-y = predict(texts_test)
+y = predict(learn, texts_test)
 print(classification_report( labels_test, list(map(int, y))))
-
 
 # Data sources used for testing:
 texts_snopesChecked, labels_snopesChecked = DataLoading.load_data_snopes("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv", CLASSES)#load_data_combined("../data/buzzfeed-debunk-combined/buzzfeed-v02.txt")#load_d$
-texts_emergent, labels_emergent = DataLoading.load_data_emergent("../data/emergent/url-versions-2015-06-14.csv", CLASSES)
-texts_buzzfeed, labels_buzzfeed = DataLoading.load_data_buzzfeed("../data/buzzfeed-facebook/bf_fb.txt", CLASSES)
-#texts_buzzfeedTop, labels_buzzfeedTop = DataLoading.load_data_buzzfeedtop()
-
 print("Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):")
 texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_snopesChecked, labels_snopesChecked , 40, [2,5])
-y = predict(texts_test)
-print(classification_report( labels_test, list(map(int, y))))
-texts_test, labels_test =  DataLoading.load_data_snopes("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv", classes = 5)
-y = predict(texts_test)
-print("confusion matrix:")
-print(confusion_matrix(labels_test, list(map(int, y))))
-print(pd.DataFrame({'Predicted': list(map(int, y)), 'Expected': labels_test}))
-
-print("Test results on data sampled from emergent dataset (a broad distribution acc. to topic modeling -- possibly some overlapping claims):")
-texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_emergent, labels_emergent , 300, [2,5])
-y = predict(texts_test)
-print(classification_report( labels_test, list(map(int, y))))
-
-print("Test results on data sampled from buzzfeed dataset (a narrow distribution : US election topic -- possibly some overlapping claims):")
-texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_buzzfeed, labels_buzzfeed , 70, [2,5])
-y = predict(texts_test)
+y = predict(learn, texts_test)
 print(classification_report( labels_test, list(map(int, y))))
 
 

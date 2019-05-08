@@ -93,10 +93,7 @@
           <h1 class="text-uppercase mb-0" style="color: #18bc9c">Our Battle against Fake News</h1>
 
           The aim of the fake news project is to help news readers to identify bias and misinformation in news articles in a quick and reliable fashion.
-          We have collected about 10,000 news articles from web and labeled them at different levels of <b>veracity</b> (from true to false) based on extensively explained annotations of online fact-checkers.
-          This data is used to train the fact-checking system demoed here.
-          In addition, we obtained another collection of news articles from previous work <a href ="https://aclanthology.coli.uni-saarland.de/papers/D17-1317/d17-1317" target="_blank">(Rashkin et al., 2017)</a> with labels indicating the <b>genera</b> of news (satire, propaganda, hoax and trusted styles).
-          Our second demo system is trained on this data set and can score your text based on its similarity to these four genera of news. Enjoy testing!
+          We have collected news articles with veracity labels from fact-checking websites and used them to train text classification systems to detect fake from real news. You can paste a piece of text and examine its similarity to our collection of true vs. false news articles, or to news from four different types/genre. Enjoy testing!
         <br>
         <br>
       </div>
@@ -145,7 +142,7 @@
                 <b><label>Please enter your text: </label></b>&nbsp;&nbsp;
                 <br>
                 <!--input name=comment style="width: 600px; height:300px; border-radius: 5px"-->
-                <textarea name="text" style="width:600px;height:250px;border-radius: 5px"> Hillary Clinton won the 2016 US election.
+                <textarea name="text" style="width:600px;height:250px;border-radius: 5px"> Clinton won the 2016 US election.
                 </textarea>
                 <br>
                 <a id="submit_button"><button type="submit" class="btn btn-secondary btn-sm" id="submitButton" >Submit</button></a>&nbsp;
@@ -327,7 +324,7 @@
 
             <form action="/download_data" method="POST">
               <input type="radio" name="is_whole_web" value= "True" onclick="closeText()" checked> Entire archive <br>
-              <input type="radio" name="is_whole_web" value= "False" onclick="showText()"> A specific fact-checking webpage <br><br>
+              <input type="radio" name="is_whole_web" value= "False" onclick="showText()" disabled > One page (currently unavailable)<br><br>
               <!-- <a id="select_model"><button type="submit" class="btn btn-secondary btn-sm" id="sendMessageButton">Select</button></a> -->
           </div>
           <script type="text/javascript">
@@ -346,7 +343,7 @@
 
             
               <input type="radio" name="webname" value= "snopes" onclick="showText()" checked> www.snopes.com 
-              <input style="display: none" type="text" name="snopesAddr" value=""><br>
+              <input style="display: none" type="text" name="snopesAddr" value="" ><br>
               <input type="radio" name="webname" value= "politifact" onclick="showText()"> www.politifact.com 
               <input style="display: none" type="text" name="politifactAddr" value=""><br>
               <input type="radio" name="webname" value= "emergent" onclick="showText()"> www.emergent.info 
