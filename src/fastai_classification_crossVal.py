@@ -1,119 +1,26 @@
-import re
-from bs4 import BeautifulSoup
-import pandas as pd
-import numpy as np
-#from keras.utils.np_utils import to_categorical as to_cat
+
+
+
+
+
+from fastai import *
+from fastai.text import *
+#from textutils import DataLoading
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import StratifiedKFold
+
 import random
+import numpy as np
+import torch
+
+#reprudicibility:
+torch.manual_seed(0)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+np.random.seed(0)
+random.seed(0)
 
 
-def generalfunct():
-    print("yes")
-
-
-
-
-
-
-
-def load_data_imdb():
-    print("Loading data...")
-    data_train = pd.read_csv('../data/imdbReviews/labeledTrainData.tsv', sep='\t')
-    print(data_train.shape)
-    texts = []
-    labels = []
-    for idx in range(data_train.review.shape[0]):
-        text = BeautifulSoup(data_train.review[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(data_train.sentiment[idx])
-    #labels = to_cat(np.asarray(labels))
-
-    return texts, labels
-
-def clean_str(string):
-    """
-    Tokenization/string cleaning for dataset
-    Every dataset is lower cased except
-    """
-    string = str(string)
-    #string = re.sub(r"\\", "", string.decode("utf-8"))
-    #string = re.sub(r"\'", "", string.decode("utf-8"))
-    #string = re.sub(r"\"", "", string.decode("utf-8"))
-    string = ''.join(e for e in string if (e.isspace() or e.isalnum()))  # comment the if part for Mehvish parser
-    return string.strip().lower()
-    '''
-
-    ## using this version for NE recognition and anonymization
-    string = re.sub(r"\\", " ", string.decode("utf-8"))
-    string = re.sub(r"\'", " ", string.decode("utf-8"))
-    #string = re.sub(r"\"", " ", string.decode("utf-8"))
-    return string
-    '''
-
-def load_data_liar(file_name):
-    print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header=None, names=["id", "label", "data"], usecols=[0, 1, 2])
-    print(data_train.shape)
-    texts = []
-    labels = []
-    for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
-        texts.append(clean_str(text.get_text().encode('ascii', 'ignore')))
-        labels.append(data_train.label[idx])
-    transdict = {
-        'true': 0,
-        'mostly-true': 0,
-        'half-true': 0,
-        'barely-true': 1,
-        'false': 1,
-        'pants-fire': 1
-    }
-    labels = [transdict[i] for i in labels]
-    #labels = to_cat(np.asarray(labels))
-    print(texts[0:6])
-    print(labels[0:6])
-    return texts, labels
-
-def load_data_combined(file_name="../data/buzzfeed-debunk-combined/all-v02.txt", classes = 2 ):
-    print("Loading data...")
-    data_train = pd.read_table(file_name, sep='\t', header=None,
-                               names=["id", "url", "label", "data", "domain", "source"], usecols=[2, 3])
-    print(data_train.shape)
-    print(data_train.label[0:10])
-    print(data_train.label.unique())
-    # print(data_train[data_train["label"].isnull()])
-    texts = []
-    labels = []
-    for idx in range(data_train.data.shape[0]):
-        text = BeautifulSoup(data_train.data[idx])
-        text = clean_str(text.get_text().encode('ascii', 'ignore'))
-        texts.append(text)
-        labels.append(data_train.label[idx])
-    if (classes == 2):
-        transdict = {
-            'ftrue': 0,
-            'mtrue': 0,
-            'mfalse': 1,
-            'ffalse': 1,
-
-            'mixture': 4,
-            'pantsfire': 5,
-            'nofact': 6
-        }
-    else:
-        transdict = {
-            'ftrue': 0,
-            'mtrue': 1,
-            'mixture': 2,
-            'mfalse': 3,
-            'ffalse': 4,
-
-            'pantsfire': 5,
-            'nofact': 6
-        }
-    labels = [transdict[i] for i in labels]
-    # labels = to_cat(np.asarray(labels))
-    print(labels[0:6])
-    return texts, labels
 
 def load_data_rashkin(file_name, classes = 4):
     print("Loading data...")
@@ -399,18 +306,113 @@ def load_data_perez(file_name="../data/perez/celeb.csv"):
     return texts, labels
 
 
-def textsToDF(directory ):
-    texts = []
-    filenames = []
-    # print("LexiconFeatures() init: loading lexicons")
-    for filename in os.listdir(directory):
-        if filename.endswith(".txt"):
-            file = os.path.join(directory, filename)
-            words = open(file, encoding="ISO-8859-1").read()
-            texts.append(words)
-            filenames.append(filename)
-            continue
-        else:
-            continue
-    df = pd.DataFrame(texts)
-    return df
+
+
+
+#path = untar_data(URLs.IMDB_SAMPLE)
+path =  "~/workspace/shared/sfu/fake_news/dump/fastai"
+
+CLASSES = 2
+
+texts_all = np.load("../dump/trainRaw")
+labels_all = np.load("../dump/trainlRaw")
+texts_train_external = np.load("../dump/trainRaw_external")
+texts_valid_external = np.load("../dump/validRaw_external")
+texts_test_external = np.load("../dump/testRaw_external")
+labels_train_external = np.load("../dump/trainlRaw_external")
+labels_valid_external = np.load("../dump/validlRaw_external")
+labels_test_external = np.load("../dump/testlRaw_external")
+
+texts_snopesChecked, labels_snopesChecked = load_data_snopes("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv", CLASSES)
+texts_buzzfeedTop, labels_buzzfeedTop = load_data_buzzfeedtop()
+texts_perez, labels_perez = load_data_perez("../data/perez/celeb.csv")
+
+print("Data loaded from disk!")
+
+
+# Use training data for language model tuning (or some external big [unlabeled] corpus)
+#train_df = pd.DataFrame( {'label':  labels_train_external.astype(str), 'text':  texts_train_external})
+#valid_df = pd.DataFrame( { 'label':  labels_valid_external.astype(str), 'text':  texts_valid_external})
+print(labels_all.shape, int(labels_all.shape[0]/3))
+texts_valid, labels_valid, texts_train, labels_train = balance_data(texts_all, labels_all, int(labels_all.shape[0]/3), [2,3,4,5])
+train_df = pd.DataFrame( {'label':  labels_train.astype(str), 'text':  texts_train})
+valid_df = pd.DataFrame( { 'label':  labels_valid.astype(str), 'text':  texts_valid})
+print(train_df.head(3))
+data_lm = TextLMDataBunch.from_df(path + "/languageModel", train_df = train_df, valid_df = valid_df)
+
+# Building a language model
+print("Language model learning")
+learn = language_model_learner(data_lm, pretrained_model=URLs.WT103, drop_mult=0.5)
+learn.freeze_to(-1)
+learn.fit_one_cycle(1, 1e-3/2)
+learn.unfreeze()
+learn.fit(10, 1e-3)
+learn.save_encoder('LM_selfData')
+
+
+def predict(mytexts):
+    return [learn.predict(x)[0] for x in mytexts]
+
+
+# ******************************
+# ****Classifier model**********
+print("Cross validation starts:")
+kf = StratifiedKFold(n_splits=3)
+for train, valid in kf.split(texts_all, labels_all):
+    print("%s %s" % (train, valid))
+    texts_train, texts_valid = texts_all[train], texts_all[valid]
+    labels_train, labels_valid = labels_all[train], labels_all[valid]
+    print(texts_train.shape)
+    print(texts_valid.shape)
+
+    train_df = pd.DataFrame({'label': labels_train.astype(str), 'text': texts_train})
+    valid_df = pd.DataFrame({'label': labels_valid.astype(str), 'text': texts_valid})
+    print("\n\n A sample of classifier training data:")
+    print(train_df.head(100))
+    data_clas = TextClasDataBunch.from_df(path + "/classification", train_df=train_df, valid_df=valid_df,
+                                          vocab=data_lm.train_ds.vocab, bs=32)
+    learn = text_classifier_learner(data_clas, drop_mult=0.7)
+    learn.load_encoder("../../languageModel/models/" + 'LM_selfData')
+    print("Language model loaded!")
+    print("Building the text classifier...")
+    learn.freeze()
+    learn.freeze_to(-1)
+    learn.fit_one_cycle(1, 1e-2)
+    learn.freeze_to(-2)
+    learn.fit(1, 1e-3)
+    learn.unfreeze()
+    learn.fit(1, 1e-3)
+    # learn.fit_one_cycle(1, 1e-3)
+    # learn.fit_one_cycle(1, 1e-3/2.)
+    learn.fit(15, slice(2e-3 / 100, 2e-3))
+    print("saving the classifier...")
+    learn.save('TC_LM_selfData')
+
+    # Predictions
+    sentence = "Hilary Clinton won the 2016 US election"
+    p = learn.predict(sentence)
+    print("Prediction for sentence \" " + sentence + "\" is " + str(p))
+
+    print("Results on training data:")
+    y = predict(texts_train)
+    print(classification_report(labels_train, list(map(int, y))))
+
+    print(
+        "Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):")
+    texts_test, labels_test, texts, labels = balance_data(texts_snopesChecked, labels_snopesChecked, None, [2, 5])
+    y = predict(texts_test)
+    print(classification_report(labels_test, list(map(int, y))))
+
+    print("Test results on data sampled only from buzzfeedTop (mixed claims):")
+    texts_test, labels_test, texts, labels = balance_data(texts_buzzfeedTop, labels_buzzfeedTop, sample_size=None,
+                                                          discard_labels=[])
+    y = predict(texts_test)
+    print(classification_report(labels_test, y))
+
+    print("Test results on data sampled only from perez (celebrity stories):")
+    texts_test, labels_test, texts, labels = balance_data(texts_perez, labels_perez, sample_size=None,
+                                                          discard_labels=[])
+    y = predict(texts_test)
+    print(classification_report(labels_test, y))
+
+
