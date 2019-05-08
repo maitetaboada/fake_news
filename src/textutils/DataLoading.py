@@ -154,9 +154,9 @@ def load_data_rashkin(file_name, classes = 4):
     print(labels[0:6])
     return texts, labels
 
-def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/bf_fb.txt", classes = 2):
+def load_data_buzzfeed(file_name="../data/buzzfeed-facebook/buzzfeed-v02-originalLabels.txt", classes = 2):
     print("Loading data buzzfeed...")
-    data_train = pd.read_table(file_name, sep='\t', header=None, names=["ID", "URL", "label", "data", "error"],
+    data_train = pd.read_table(file_name, sep='\t', header=None, names=["ID", "URL", "label", "data", "domain", "source"],
                                usecols=[2, 3])
     print(data_train.shape)
     '''
@@ -326,7 +326,7 @@ def load_data_buzzfeedtop(file_name="../data/buzzfeed-top/buzzfeed-top.csv"):
     print(df[0:3])
     #texts = df.original_article_text_phase2.apply(lambda x: clean_str(BeautifulSoup(x).encode('ascii', 'ignore')))
     texts = df.original_article_text_phase2
-    labels = [0] * len(df.original_article_text_phase2) # all are false news
+    labels = [1] * len(df.original_article_text_phase2) # all are false news
     #labels = "false" * len(df.original_article_text_phase2)
     print("Data from BuzzFeed looks like...")
     print(texts[0:10])
@@ -374,3 +374,43 @@ def load_data_emergent(file_name="../data/emergent/url-versions-2015-06-14.csv",
     print(labels[0:10])
     print(pd.value_counts((labels)))
     return texts, labels
+
+
+
+
+def load_data_perez(file_name="../data/perez/celeb.csv"):
+    print("Loading data perez...")
+    df = pd.read_csv(file_name, encoding="ISO-8859-1")
+    print(df.shape)
+    print(df[0:3])
+    #texts = df.original_article_text_phase2.apply(lambda x: clean_str(BeautifulSoup(x).encode('ascii', 'ignore')))
+    texts = df.text
+    labels = df.label
+    transdict = {
+        'legit': 0,
+        'fake': 1
+    }
+    labels = [transdict[i] for i in labels]
+    #labels = "false" * len(df.original_article_text_phase2)
+    print("Data from perez looks like...")
+    print(texts[0:10])
+    print(labels[0:10])
+    print(pd.value_counts((labels)))
+    return texts, labels
+
+
+def textsToDF(directory ):
+    texts = []
+    filenames = []
+    # print("LexiconFeatures() init: loading lexicons")
+    for filename in os.listdir(directory):
+        if filename.endswith(".txt"):
+            file = os.path.join(directory, filename)
+            words = open(file, encoding="ISO-8859-1").read()
+            texts.append(words)
+            filenames.append(filename)
+            continue
+        else:
+            continue
+    df = pd.DataFrame(texts)
+    return df

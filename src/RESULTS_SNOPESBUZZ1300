@@ -1,0 +1,5044 @@
+/Users/fa/anaconda/envs/py35/bin/python /Users/fa/workspace/shared/sfu/fake_news/src/union_classification_explore.py
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/utils/fixes.py:313: FutureWarning: numpy not_equal will not check object identity in the future. The comparison did not return the same result as suggested by the identity (`is`)) and will change.
+  _nan_object_mask = _nan_object_array != _nan_object_array
+Preparing lexicons & lwicDic
+Number of terms in the lexicon act_adverbs.txt : 15
+Number of terms in the lexicon assertives_hooper1975.txt : 67
+Number of terms in the lexicon comparative_forms.txt : 2122
+Number of terms in the lexicon factives_hooper1975.txt : 29
+Number of terms in the lexicon hedges_hyland2005.txt : 105
+Number of terms in the lexicon implicatives_karttunen1971.txt : 32
+Number of terms in the lexicon manner_adverbs.txt : 128
+Number of terms in the lexicon modal_adverbs.txt : 94
+Number of terms in the lexicon negative-HuLui.txt : 4784
+Number of terms in the lexicon negative_mpqa.txt : 3078
+Number of terms in the lexicon neutral_mpqa.txt : 175
+Number of terms in the lexicon posative_mpqa.txt : 2304
+Number of terms in the lexicon positive-HuLui.txt : 2007
+Number of terms in the lexicon report_verbs.txt : 181
+Number of terms in the lexicon superlative_forms.txt : 2306
+Loading data snopes...
+(2075, 5)
+0     ffalse
+1     ffalse
+2     ffalse
+3      ftrue
+4     ffalse
+5      ftrue
+6     ffalse
+7    mixture
+8    mixture
+9     ffalse
+Name: label, dtype: object
+['ffalse' 'ftrue' 'mixture' 'mtrue' 'mfalse']
+Data from Snopes looks like...
+0     ITALY | Anatolia Vertadella, a 101-year-old I...
+1     Comments Off on Breaking News 106 Dead In Cal...
+2     Eleven states working in conjunction with the...
+3     WASHINGTON A top official with the Department...
+4     CHICAGOPromising that every effort would be m...
+5     Donald Trump, current GOP front-runner and gu...
+6     When women used to be depressed or were not t...
+7     We all have loose change sitting around, desp...
+8     The bills approval, coming on the heels of th...
+9     216K  156K Like  Tweet  36  reddit Upvote Dow...
+Name: data, dtype: object
+[1, 1, 1, 0, 1, 0, 1, 5, 5, 1]
+1    1585
+0     259
+5     231
+dtype: int64
+Loading data buzzfeed...
+(1380, 2)
+0     A few days ago, DonaldTrump despicable spawn ...
+1     A group of over fifty former intelligence off...
+2     A new investigation has determined that Donal...
+3     A new video has emerged of the moments before...
+4     A ninety-six-year-old World War II veteran an...
+5     A trail of clues provided by a Washington Pos...
+Name: data, dtype: object
+[0, 0, 5, 0, 0, 0]
+0    1090
+5     226
+1      64
+dtype: int64
+Loading data emergent...
+(7112, 13)
+                                claimId                     claimSlug  \
+0  8faeb4b0-c41b-11e4-88c9-eb158a06b9a5    19-million-watches-in-2015
+1  8faeb4b0-c41b-11e4-88c9-eb158a06b9a5    19-million-watches-in-2015
+2  d54aaf40-b6a8-11e4-8507-b58af63d1078  20-year-old-McDonalds-burger
+
+                                       claimHeadline claimTruthiness  \
+0  Claim: Apple will sell 19 million Apple Watche...         unknown
+1  Claim: Apple will sell 19 million Apple Watche...         unknown
+2  Claim: Two Australian men kept a McDonald's Qu...         unknown
+
+                              articleId  \
+0  116a3920-c41c-11e4-883c-a7fa7a3c5066
+1  7c11b0a0-c41c-11e4-883c-a7fa7a3c5066
+2  8bb10fd0-b6aa-11e4-8507-b58af63d1078
+
+                                          articleUrl  articleVersion  \
+0  http://appleinsider.com/articles/15/03/06/bmo-...               1
+1  http://www.smarteranalyst.com/2015/03/05/apple...               1
+2  https://au.tv.yahoo.com/sunrise/video/watch/26...               1
+
+                       articleVersionId  \
+0  11925a90-c41c-11e4-9d52-ed599189429c
+1  a49d2d10-c41c-11e4-883c-a7fa7a3c5066
+2  a5c8e6e0-b6aa-11e4-8507-b58af63d1078
+
+                                     articleHeadline articleByline  \
+0  BMO forecasts 19M Apple Watch sales in 2015, w...   Neil Hughes
+1  Apple Inc. (AAPL) Bullish Stance Reiterated at...  Scott Fields
+2                              World's oldest burger       Sunrise
+
+  articleStance articleHeadlineStance  \
+0     observing             observing
+1     observing              ignoring
+2           for                   for
+
+                                         articleBody
+0  Momentum for the Apple Watch will likely take ...
+1  Apple Inc. (NASDAQ:AAPL) received another set ...
+2  Mates Casey Dean and Eduard Nitz wish a happy ...
+claimTruthiness  false  true  unknown   All
+articleStance
+against            691    22      110   823
+for                359   742      511  1612
+ignoring            53    15       25    93
+observing          943   705     1236  2884
+All               2046  1484     1882  5412
+Data from Emergent looks like...
+2     Mates Casey Dean and Eduard Nitz wish a happy ...
+4     Two Australian men think they may be in posses...
+5     A McDonald's burger bought 20 years ago has an...
+25    A guru who ordered 400 of his followers to und...
+30    Multi-millionaire religious "guru" Gurmeet Ram...
+31    HE is adored by millions of followers worldwid...
+33    Guru Gurmeet Ram Rahim Singh has 40 to 50 mill...
+36    Perth | A 600-pound woman has given birth to a...
+63    BEIRUT: Lebanon's interior minister said that ...
+78    DNA tests have confirmed that a daughter and a...
+Name: articleBody, dtype: object
+[5, 5, 5, 5, 5, 5, 5, 1, 5, 5]
+0    742
+5    511
+1    359
+dtype: int64
+[[   0  259]
+ [   1 1585]
+ [   5  231]]
+Discarding items for label 5
+Final size of dataset:
+[[   0  259]
+ [   1 1585]]
+Final size of remaining dataset:
+[[  5 231]]
+[[   0 1090]
+ [   1   64]
+ [   5  226]]
+Discarding items for label 5
+Final size of dataset:
+[[   0 1090]
+ [   1   64]]
+Final size of remaining dataset:
+[[  5 226]]
+[[  0 742]
+ [  1 359]
+ [  5 511]]
+Discarding items for label 5
+Final size of dataset:
+[]
+Final size of remaining dataset:
+[[  0 742]
+ [  1 359]
+ [  5 511]]
+[[   0 1349]
+ [   1 1649]]
+Final size of dataset:
+[[   0 1300]
+ [   1 1300]]
+Final size of remaining dataset:
+[[  0  49]
+ [  1 349]]
+[[  0  49]
+ [  1 349]]
+Final size of dataset:
+[]
+Final size of remaining dataset:
+[[  0  49]
+ [  1 349]]
+[[  0  49]
+ [  1 349]]
+Final size of dataset:
+[]
+Final size of remaining dataset:
+[[  0  49]
+ [  1 349]]
+Data dumped to disk!
+Size of train, validataion and test sets: 2600 , 0 , 0
+0     Hail Trump, hail our people, hail victory!  T...
+1    Trump?s Campaign Manager was interrupted on CN...
+2    Trump suggests Tulsa officer was 'choking' in ...
+dtype: object
+0    0
+1    0
+2    0
+dtype: int64
+Loading data snopes...
+(118, 5)
+0    mixture
+1     mfalse
+2    mixture
+3    mixture
+4      mtrue
+5     ffalse
+6     mfalse
+7      mtrue
+8     ffalse
+9     ffalse
+Name: label, dtype: object
+['mixture' 'mfalse' 'mtrue' 'ffalse' 'ftrue']
+Data from Snopes looks like...
+0     Massive Pedophile Ring With '70,000 Elite Mem...
+1     NBC Bay Area's SkyRanger on Saturday captured...
+2     Today is Flag Day, the anniversary of when 19...
+3     HONOLULU Federal authorities on Friday added ...
+4     Text smaller    Text bigger    We have all he...
+5     A 79-year-old retired officer of the CIA, Bil...
+6     Governor Jerry Brown is retiring but not befo...
+7     Sneed: 108 could be the Cubs magic number thi...
+8     Clint Eastwood, more famous for westerns than...
+9     Delaware City Council passed a resolution thi...
+Name: data, dtype: object
+[5, 1, 5, 5, 0, 1, 1, 0, 1, 1]
+0    48
+1    44
+5    26
+dtype: int64
+Loading data buzzfeedtop...
+(33, 15)
+                                               title  \
+0  Babysitter transported to hospital after inser...
+1  FBI seizes over 3,000 penises during raid at m...
+2  Charles Manson to be released on parole, to Jo...
+
+                                                 url Politifact  \
+0  http://worldnewsdailyreport.com/babysitter-tra...        NaN
+1  http://worldnewsdailyreport.com/fbi-seizes-ove...        NaN
+2  http://www.breakingnews365.net/59690fb994b9c/c...        NaN
+
+   Politifact FB                                             Snopes  \
+0            NaN  https://www.snopes.com/babysitter-transported-...
+1            NaN  https://www.snopes.com/fbi-seizes-3000-penises...
+2            NaN  https://www.snopes.com/politics/satire/mansonp...
+
+   Snopes FB Factcheck  Factcheck FB  ABC  ABC FB error_phase2  \
+0     1734.0       NaN           NaN  NaN     NaN     No Error
+1       14.0       NaN           NaN  NaN     NaN     No Error
+2        NaN       NaN           NaN  NaN     NaN     No Error
+
+                        original_article_text_phase2  \
+0  Cincinnati, Ohio | A 31-year old woman was adm...
+1  FBI agents made an astonishing discovery this ...
+2  Giant Squid Washes Ashore on Lake Michigan Mic...
+
+                                article_title_phase2 publish_date_phase2  \
+0  Babysitter transported to hospital after inser...          2017-05-03
+1  FBI seizes over 3,000 penises during raid at m...          2017-09-25
+2  Charles Manson to be released on parole, to Jo...                 NaN
+
+       author_phase2
+0  Barbara Jennnings
+1  Barbara Jennnings
+2                NaN
+Data from BuzzFeed looks like...
+0    Cincinnati, Ohio | A 31-year old woman was adm...
+1    FBI agents made an astonishing discovery this ...
+2    Giant Squid Washes Ashore on Lake Michigan Mic...
+3    Police have reportedly launched a murder inves...
+4    Beaumont, Texas | An employee of the Jefferson...
+5    WASHINGTON, DC (By J. McConkey)A group of lead...
+6    WASHINGTON, D.C.  In another sweeping move aim...
+7    Columbus, Ohio | An 83-year old woman was arre...
+8    A couple was transported to the hospital in a ...
+9    Darrel Whitaker from Glenwood Springs in Color...
+Name: original_article_text_phase2, dtype: object
+[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+1    33
+dtype: int64
+Loading data perez...
+(500, 3)
+   Unnamed: 0                                               text  label
+0           0  Jennifer Aniston dashes 'Friends' reunion hope...  legit
+1           1  This Is What Brad Pitt Has Been Texting Jennif...  legit
+2           2  Jennifer Aniston's spokesman denies reports th...  legit
+Data from perez looks like...
+0    Jennifer Aniston dashes 'Friends' reunion hope...
+1    This Is What Brad Pitt Has Been Texting Jennif...
+2    Jennifer Aniston's spokesman denies reports th...
+3    Jennifer Aniston sparks adoption rumors\n\nBef...
+4    Jennifer Aniston denies she had an affair with...
+5    Jennifer Aniston: I'm Not a 'Sad, Childless Hu...
+6    Jennifer Aniston Finally Pregnant At 48 Years ...
+7    Brad Pitt is not reuniting with Jennifer Anist...
+8    Miley And Liam Fighting? False Rumors Swirl Th...
+9    Kristen Stewart not dropping another "Twilight...
+Name: text, dtype: object
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+1    250
+0    250
+dtype: int64
+
+*** Feature weigths ***
+ {'lexicon_features': 0.2, 'body_bow': 0.2, 'pos_features': 0.2, 'liwc_features': 0.2, 'surface_features': 0.0, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.86489607,  0.86620531,  0.8644752 ]), 'test_score': array([ 0.81105991,  0.81293303,  0.82448037]), 'fit_time': array([ 219.23652506,  207.82051706,  211.49306107]), 'score_time': array([ 107.13736892,   94.73386502,  110.12126803])}
+ Mean train score:  0.8651921938
+ Mean test score:  0.816157767584
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+
+           0       0.92      0.79      0.85      1300
+           1       0.82      0.93      0.87      1300
+
+   micro avg       0.86      0.86      0.86      2600
+   macro avg       0.87      0.86      0.86      2600
+weighted avg       0.87      0.86      0.86      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.80      0.17      0.28        48
+           1       0.51      0.95      0.67        44
+
+   micro avg       0.54      0.54      0.54        92
+   macro avg       0.66      0.56      0.47        92
+weighted avg       0.66      0.54      0.46        92
+
+confusion matrix:
+[[ 8 40]
+ [ 2 42]]
+    Expected  Predicted
+0          0          1
+1          0          1
+2          0          1
+3          0          1
+4          0          1
+5          0          1
+6          0          1
+7          0          1
+8          0          1
+9          0          1
+10         0          1
+11         0          1
+12         0          1
+13         0          1
+14         0          1
+15         0          1
+16         0          1
+17         0          1
+18         0          0
+19         0          1
+20         0          1
+21         0          1
+22         0          1
+23         0          1
+24         0          1
+25         0          1
+26         0          0
+27         0          1
+28         0          1
+29         0          0
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          1
+67         1          1
+68         1          1
+69         1          1
+70         1          1
+71         1          1
+72         1          1
+73         1          1
+74         1          1
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          1
+81         1          1
+82         1          1
+83         1          1
+84         1          1
+85         1          1
+86         1          1
+87         1          1
+88         1          1
+89         1          1
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.97      0.98        33
+
+   micro avg       0.97      0.97      0.97        33
+   macro avg       0.50      0.48      0.49        33
+weighted avg       1.00      0.97      0.98        33
+
+confusion matrix:
+[[ 0  0]
+ [ 1 32]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          1
+3          1          1
+4          1          1
+5          1          1
+6          1          1
+7          1          1
+8          1          1
+9          1          1
+10         1          1
+11         1          1
+12         1          1
+13         1          1
+14         1          1
+15         1          1
+16         1          1
+17         1          1
+18         1          1
+19         1          0
+20         1          1
+21         1          1
+22         1          1
+23         1          1
+24         1          1
+25         1          1
+26         1          1
+27         1          1
+28         1          1
+29         1          1
+30         1          1
+31         1          1
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+              precision    recall  f1-score   support
+
+           0       0.69      0.04      0.07       250
+           1       0.51      0.98      0.67       250
+
+   micro avg       0.51      0.51      0.51       500
+   macro avg       0.60      0.51      0.37       500
+weighted avg       0.60      0.51      0.37       500
+
+confusion matrix:
+[[  9 241]
+ [  4 246]]
+     Expected  Predicted
+0           0          1
+1           0          1
+2           0          1
+3           0          1
+4           0          1
+5           0          1
+6           0          1
+7           0          1
+8           0          1
+9           0          1
+10          0          1
+11          0          0
+12          0          1
+13          0          1
+14          0          1
+15          0          1
+16          0          1
+17          0          1
+18          0          1
+19          0          1
+20          0          1
+21          0          1
+22          0          1
+23          0          1
+24          0          1
+25          0          1
+26          0          1
+27          0          1
+28          0          1
+29          0          1
+..        ...        ...
+470         1          1
+471         1          1
+472         1          1
+473         1          1
+474         1          1
+475         1          1
+476         1          1
+477         1          1
+478         1          1
+479         1          1
+480         1          1
+481         1          1
+482         1          1
+483         1          1
+484         1          1
+485         1          1
+486         1          1
+487         1          1
+488         1          1
+489         1          1
+490         1          1
+491         1          1
+492         1          1
+493         1          1
+494         1          1
+495         1          1
+496         1          1
+497         1          1
+498         1          1
+499         1          1
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.2, 'body_bow': 0.2, 'pos_features': 0.2, 'liwc_features': 0.0, 'surface_features': 0.2, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.83371824,  0.84313725,  0.85467128]), 'test_score': array([ 0.78341014,  0.79561201,  0.8187067 ]), 'fit_time': array([ 199.11807013,  202.35546494,  194.68016601]), 'score_time': array([  98.06159401,   95.00415611,  102.2174499 ])}
+ Mean train score:  0.843842259994
+ Mean test score:  0.799242948315
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+
+           0       0.88      0.75      0.81      1300
+           1       0.78      0.90      0.84      1300
+
+   micro avg       0.82      0.82      0.82      2600
+   macro avg       0.83      0.82      0.82      2600
+weighted avg       0.83      0.82      0.82      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.82      0.19      0.31        48
+           1       0.52      0.95      0.67        44
+
+   micro avg       0.55      0.55      0.55        92
+   macro avg       0.67      0.57      0.49        92
+weighted avg       0.67      0.55      0.48        92
+
+confusion matrix:
+[[ 9 39]
+ [ 2 42]]
+    Expected  Predicted
+0          0          1
+1          0          1
+2          0          1
+3          0          1
+4          0          1
+5          0          1
+6          0          1
+7          0          1
+8          0          1
+9          0          1
+10         0          0
+11         0          1
+12         0          1
+13         0          1
+14         0          1
+15         0          1
+16         0          1
+17         0          1
+18         0          0
+19         0          1
+20         0          1
+21         0          1
+22         0          1
+23         0          1
+24         0          1
+25         0          1
+26         0          0
+27         0          1
+28         0          1
+29         0          0
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          1
+67         1          1
+68         1          1
+69         1          1
+70         1          1
+71         1          1
+72         1          1
+73         1          1
+74         1          1
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          1
+81         1          1
+82         1          1
+83         1          1
+84         1          1
+85         1          1
+86         1          1
+87         1          1
+88         1          1
+89         1          1
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.94      0.97        33
+
+   micro avg       0.94      0.94      0.94        33
+   macro avg       0.50      0.47      0.48        33
+weighted avg       1.00      0.94      0.97        33
+
+confusion matrix:
+[[ 0  0]
+ [ 2 31]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          1
+3          1          1
+4          1          1
+5          1          1
+6          1          1
+7          1          1
+8          1          1
+9          1          1
+10         1          1
+11         1          1
+12         1          1
+13         1          1
+14         1          0
+15         1          1
+16         1          1
+17         1          1
+18         1          1
+19         1          0
+20         1          1
+21         1          1
+22         1          1
+23         1          1
+24         1          1
+25         1          1
+26         1          1
+27         1          1
+28         1          1
+29         1          1
+30         1          1
+31         1          1
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+              precision    recall  f1-score   support
+
+           0       0.69      0.04      0.07       250
+           1       0.51      0.98      0.67       250
+
+   micro avg       0.51      0.51      0.51       500
+   macro avg       0.60      0.51      0.37       500
+weighted avg       0.60      0.51      0.37       500
+
+confusion matrix:
+[[  9 241]
+ [  4 246]]
+     Expected  Predicted
+0           0          1
+1           0          1
+2           0          1
+3           0          1
+4           0          1
+5           0          1
+6           0          1
+7           0          1
+8           0          1
+9           0          1
+10          0          1
+11          0          0
+12          0          1
+13          0          1
+14          0          1
+15          0          1
+16          0          1
+17          0          1
+18          0          1
+19          0          1
+20          0          1
+21          0          1
+22          0          1
+23          0          1
+24          0          1
+25          0          1
+26          0          1
+27          0          1
+28          0          1
+29          0          1
+..        ...        ...
+470         1          1
+471         1          1
+472         1          1
+473         1          1
+474         1          1
+475         1          1
+476         1          1
+477         1          1
+478         1          1
+479         1          1
+480         1          1
+481         1          1
+482         1          1
+483         1          1
+484         1          1
+485         1          1
+486         1          1
+487         1          1
+488         1          1
+489         1          1
+490         1          1
+491         1          1
+492         1          1
+493         1          1
+494         1          1
+495         1          1
+496         1          1
+497         1          1
+498         1          1
+499         1          1
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.2, 'body_bow': 0.2, 'pos_features': 0.0, 'liwc_features': 0.0, 'surface_features': 0.2, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.86431871,  0.84313725,  0.85467128]), 'test_score': array([ 0.80529954,  0.79907621,  0.8187067 ]), 'fit_time': array([ 199.31113982,  202.39822578,  194.81241703]), 'score_time': array([  97.83999205,   94.80041718,  102.25990105])}
+ Mean train score:  0.854042413959
+ Mean test score:  0.8076941497
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+
+           0       0.88      0.75      0.81      1300
+           1       0.78      0.90      0.84      1300
+
+   micro avg       0.83      0.83      0.83      2600
+   macro avg       0.83      0.83      0.83      2600
+weighted avg       0.83      0.83      0.83      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.83      0.21      0.33        48
+           1       0.53      0.95      0.68        44
+
+   micro avg       0.57      0.57      0.57        92
+   macro avg       0.68      0.58      0.51        92
+weighted avg       0.69      0.57      0.50        92
+
+confusion matrix:
+[[10 38]
+ [ 2 42]]
+    Expected  Predicted
+0          0          1
+1          0          1
+2          0          1
+3          0          1
+4          0          1
+5          0          1
+6          0          1
+7          0          1
+8          0          1
+9          0          1
+10         0          0
+11         0          1
+12         0          1
+13         0          1
+14         0          1
+15         0          1
+16         0          1
+17         0          1
+18         0          0
+19         0          1
+20         0          1
+21         0          1
+22         0          1
+23         0          1
+24         0          1
+25         0          1
+26         0          0
+27         0          1
+28         0          1
+29         0          0
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          1
+67         1          1
+68         1          1
+69         1          1
+70         1          1
+71         1          1
+72         1          1
+73         1          1
+74         1          1
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          1
+81         1          1
+82         1          1
+83         1          1
+84         1          1
+85         1          1
+86         1          1
+87         1          1
+88         1          1
+89         1          1
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.94      0.97        33
+
+   micro avg       0.94      0.94      0.94        33
+   macro avg       0.50      0.47      0.48        33
+weighted avg       1.00      0.94      0.97        33
+
+confusion matrix:
+[[ 0  0]
+ [ 2 31]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          1
+3          1          1
+4          1          1
+5          1          1
+6          1          1
+7          1          1
+8          1          1
+9          1          1
+10         1          1
+11         1          1
+12         1          1
+13         1          1
+14         1          0
+15         1          1
+16         1          1
+17         1          1
+18         1          1
+19         1          0
+20         1          1
+21         1          1
+22         1          1
+23         1          1
+24         1          1
+25         1          1
+26         1          1
+27         1          1
+28         1          1
+29         1          1
+30         1          1
+31         1          1
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+              precision    recall  f1-score   support
+
+           0       0.71      0.04      0.08       250
+           1       0.51      0.98      0.67       250
+
+   micro avg       0.51      0.51      0.51       500
+   macro avg       0.61      0.51      0.37       500
+weighted avg       0.61      0.51      0.37       500
+
+confusion matrix:
+[[ 10 240]
+ [  4 246]]
+     Expected  Predicted
+0           0          1
+1           0          1
+2           0          1
+3           0          1
+4           0          1
+5           0          1
+6           0          1
+7           0          1
+8           0          1
+9           0          1
+10          0          1
+11          0          0
+12          0          1
+13          0          1
+14          0          1
+15          0          1
+16          0          1
+17          0          1
+18          0          1
+19          0          1
+20          0          1
+21          0          1
+22          0          1
+23          0          1
+24          0          1
+25          0          1
+26          0          1
+27          0          1
+28          0          1
+29          0          1
+..        ...        ...
+470         1          1
+471         1          1
+472         1          1
+473         1          1
+474         1          1
+475         1          1
+476         1          1
+477         1          1
+478         1          1
+479         1          1
+480         1          1
+481         1          1
+482         1          1
+483         1          1
+484         1          1
+485         1          1
+486         1          1
+487         1          1
+488         1          1
+489         1          1
+490         1          1
+491         1          1
+492         1          1
+493         1          1
+494         1          1
+495         1          1
+496         1          1
+497         1          1
+498         1          1
+499         1          1
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.0, 'body_bow': 0.2, 'pos_features': 0.2, 'liwc_features': 0.0, 'surface_features': 0.2, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.83429561,  0.85582468,  0.85582468]), 'test_score': array([ 0.78341014,  0.80600462,  0.8187067 ]), 'fit_time': array([ 199.39007592,  202.30455303,  194.69170308]), 'score_time': array([  98.02613997,   94.54720807,  102.11318779])}
+ Mean train score:  0.848648325879
+ Mean test score:  0.802707151549
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+
+           0       0.89      0.77      0.83      1300
+           1       0.80      0.91      0.85      1300
+
+   micro avg       0.84      0.84      0.84      2600
+   macro avg       0.85      0.84      0.84      2600
+weighted avg       0.85      0.84      0.84      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.78      0.15      0.25        48
+           1       0.51      0.95      0.66        44
+
+   micro avg       0.53      0.53      0.53        92
+   macro avg       0.64      0.55      0.45        92
+weighted avg       0.65      0.53      0.44        92
+
+confusion matrix:
+[[ 7 41]
+ [ 2 42]]
+    Expected  Predicted
+0          0          1
+1          0          1
+2          0          1
+3          0          1
+4          0          1
+5          0          1
+6          0          1
+7          0          1
+8          0          1
+9          0          1
+10         0          1
+11         0          1
+12         0          1
+13         0          1
+14         0          1
+15         0          1
+16         0          1
+17         0          1
+18         0          0
+19         0          1
+20         0          1
+21         0          1
+22         0          1
+23         0          1
+24         0          1
+25         0          1
+26         0          0
+27         0          1
+28         0          1
+29         0          0
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          1
+67         1          1
+68         1          1
+69         1          1
+70         1          1
+71         1          1
+72         1          1
+73         1          1
+74         1          1
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          1
+81         1          1
+82         1          1
+83         1          1
+84         1          1
+85         1          1
+86         1          1
+87         1          1
+88         1          1
+89         1          1
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.97      0.98        33
+
+   micro avg       0.97      0.97      0.97        33
+   macro avg       0.50      0.48      0.49        33
+weighted avg       1.00      0.97      0.98        33
+
+confusion matrix:
+[[ 0  0]
+ [ 1 32]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          1
+3          1          1
+4          1          1
+5          1          1
+6          1          1
+7          1          1
+8          1          1
+9          1          1
+10         1          1
+11         1          1
+12         1          1
+13         1          1
+14         1          1
+15         1          1
+16         1          1
+17         1          1
+18         1          1
+19         1          0
+20         1          1
+21         1          1
+22         1          1
+23         1          1
+24         1          1
+25         1          1
+26         1          1
+27         1          1
+28         1          1
+29         1          1
+30         1          1
+31         1          1
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+              precision    recall  f1-score   support
+
+           0       0.71      0.04      0.08       250
+           1       0.51      0.98      0.67       250
+
+   micro avg       0.51      0.51      0.51       500
+   macro avg       0.61      0.51      0.37       500
+weighted avg       0.61      0.51      0.37       500
+
+confusion matrix:
+[[ 10 240]
+ [  4 246]]
+     Expected  Predicted
+0           0          1
+1           0          1
+2           0          1
+3           0          1
+4           0          1
+5           0          1
+6           0          1
+7           0          1
+8           0          1
+9           0          1
+10          0          1
+11          0          0
+12          0          1
+13          0          1
+14          0          1
+15          0          1
+16          0          1
+17          0          1
+18          0          1
+19          0          1
+20          0          1
+21          0          1
+22          0          1
+23          0          1
+24          0          1
+25          0          1
+26          0          1
+27          0          1
+28          0          1
+29          0          1
+..        ...        ...
+470         1          1
+471         1          1
+472         1          1
+473         1          1
+474         1          1
+475         1          1
+476         1          1
+477         1          1
+478         1          1
+479         1          1
+480         1          1
+481         1          1
+482         1          1
+483         1          1
+484         1          1
+485         1          1
+486         1          1
+487         1          1
+488         1          1
+489         1          1
+490         1          1
+491         1          1
+492         1          1
+493         1          1
+494         1          1
+495         1          1
+496         1          1
+497         1          1
+498         1          1
+499         1          1
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.2, 'body_bow': 0.2, 'pos_features': 0.2, 'liwc_features': 0.0, 'surface_features': 0.0, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.86374134,  0.86851211,  0.8633218 ]), 'test_score': array([ 0.80760369,  0.81062356,  0.8256351 ]), 'fit_time': array([ 199.06475616,  201.91996503,  194.63051486]), 'score_time': array([  97.93817902,   94.65369701,  102.40214205])}
+ Mean train score:  0.865191749842
+ Mean test score:  0.814620782381
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+
+  'recall', 'true', average, warn_for)
+           0       0.92      0.79      0.85      1300
+           1       0.82      0.93      0.87      1300
+
+   micro avg       0.86      0.86      0.86      2600
+   macro avg       0.87      0.86      0.86      2600
+weighted avg       0.87      0.86      0.86      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.75      0.12      0.21        48
+           1       0.50      0.95      0.66        44
+
+   micro avg       0.52      0.52      0.52        92
+   macro avg       0.62      0.54      0.44        92
+weighted avg       0.63      0.52      0.43        92
+
+confusion matrix:
+[[ 6 42]
+ [ 2 42]]
+    Expected  Predicted
+0          0          1
+1          0          1
+2          0          1
+3          0          1
+4          0          1
+5          0          1
+6          0          1
+7          0          1
+8          0          1
+9          0          1
+10         0          1
+11         0          1
+12         0          1
+13         0          1
+14         0          1
+15         0          1
+16         0          1
+17         0          1
+18         0          0
+19         0          1
+20         0          1
+21         0          1
+22         0          1
+23         0          1
+24         0          1
+25         0          1
+26         0          0
+27         0          1
+28         0          1
+29         0          0
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          1
+67         1          1
+68         1          1
+69         1          1
+70         1          1
+71         1          1
+72         1          1
+73         1          1
+74         1          1
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          1
+81         1          1
+82         1          1
+83         1          1
+84         1          1
+85         1          1
+86         1          1
+87         1          1
+88         1          1
+89         1          1
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.97      0.98        33
+
+   micro avg       0.97      0.97      0.97        33
+   macro avg       0.50      0.48      0.49        33
+weighted avg       1.00      0.97      0.98        33
+
+confusion matrix:
+[[ 0  0]
+ [ 1 32]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          1
+3          1          1
+4          1          1
+5          1          1
+6          1          1
+7          1          1
+8          1          1
+9          1          1
+10         1          1
+11         1          1
+12         1          1
+13         1          1
+14         1          1
+15         1          1
+16         1          1
+17         1          1
+18         1          1
+19         1          0
+20         1          1
+21         1          1
+22         1          1
+23         1          1
+24         1          1
+25         1          1
+26         1          1
+27         1          1
+28         1          1
+29         1          1
+30         1          1
+31         1          1
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.67      0.03      0.06       250
+           1       0.50      0.98      0.67       250
+
+   micro avg       0.51      0.51      0.51       500
+   macro avg       0.59      0.51      0.36       500
+weighted avg       0.59      0.51      0.36       500
+
+confusion matrix:
+[[  8 242]
+ [  4 246]]
+     Expected  Predicted
+0           0          1
+1           0          1
+2           0          1
+3           0          1
+4           0          1
+5           0          1
+6           0          1
+7           0          1
+8           0          1
+9           0          1
+10          0          1
+11          0          1
+12          0          1
+13          0          1
+14          0          1
+15          0          1
+16          0          1
+17          0          1
+18          0          1
+19          0          1
+20          0          1
+21          0          1
+22          0          1
+23          0          1
+24          0          1
+25          0          1
+26          0          1
+27          0          1
+28          0          1
+29          0          1
+..        ...        ...
+470         1          1
+471         1          1
+472         1          1
+473         1          1
+474         1          1
+475         1          1
+476         1          1
+477         1          1
+478         1          1
+479         1          1
+480         1          1
+481         1          1
+482         1          1
+483         1          1
+484         1          1
+485         1          1
+486         1          1
+487         1          1
+488         1          1
+489         1          1
+490         1          1
+491         1          1
+492         1          1
+493         1          1
+494         1          1
+495         1          1
+496         1          1
+497         1          1
+498         1          1
+499         1          1
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.2, 'body_bow': 0.2, 'pos_features': 0.2, 'liwc_features': 0.2, 'surface_features': 0.2, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.84815242,  0.84083045,  0.85582468]), 'test_score': array([ 0.79493088,  0.79792148,  0.8221709 ]), 'fit_time': array([ 199.05186796,  202.06018186,  194.50745797]), 'score_time': array([  97.83533311,   94.53223896,  102.21231699])}
+ Mean train score:  0.848269185861
+ Mean test score:  0.805007751443
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+
+           0       0.88      0.76      0.82      1300
+           1       0.79      0.90      0.84      1300
+
+   micro avg       0.83      0.83      0.83      2600
+   macro avg       0.83      0.83      0.83      2600
+weighted avg       0.83      0.83      0.83      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.82      0.19      0.31        48
+           1       0.52      0.95      0.67        44
+
+   micro avg       0.55      0.55      0.55        92
+   macro avg       0.67      0.57      0.49        92
+weighted avg       0.67      0.55      0.48        92
+
+confusion matrix:
+[[ 9 39]
+ [ 2 42]]
+    Expected  Predicted
+0          0          1
+1          0          1
+2          0          1
+3          0          1
+4          0          1
+5          0          1
+6          0          1
+7          0          1
+8          0          1
+9          0          1
+10         0          0
+11         0          1
+12         0          1
+13         0          1
+14         0          1
+15         0          1
+16         0          1
+17         0          1
+18         0          0
+19         0          1
+20         0          1
+21         0          1
+22         0          1
+23         0          1
+24         0          1
+25         0          1
+26         0          0
+27         0          1
+28         0          1
+29         0          0
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          1
+67         1          1
+68         1          1
+69         1          1
+70         1          1
+71         1          1
+72         1          1
+73         1          1
+74         1          1
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          1
+81         1          1
+82         1          1
+83         1          1
+84         1          1
+85         1          1
+86         1          1
+87         1          1
+88         1          1
+89         1          1
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.94      0.97        33
+
+   micro avg       0.94      0.94      0.94        33
+   macro avg       0.50      0.47      0.48        33
+weighted avg       1.00      0.94      0.97        33
+
+confusion matrix:
+[[ 0  0]
+ [ 2 31]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          1
+3          1          1
+4          1          1
+5          1          1
+6          1          1
+7          1          1
+8          1          1
+9          1          1
+10         1          1
+11         1          1
+12         1          1
+13         1          1
+14         1          0
+15         1          1
+16         1          1
+17         1          1
+18         1          1
+19         1          0
+20         1          1
+21         1          1
+22         1          1
+23         1          1
+24         1          1
+25         1          1
+26         1          1
+27         1          1
+28         1          1
+29         1          1
+30         1          1
+31         1          1
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+              precision    recall  f1-score   support
+
+           0       0.64      0.04      0.07       250
+           1       0.50      0.98      0.67       250
+
+   micro avg       0.51      0.51      0.51       500
+   macro avg       0.57      0.51      0.37       500
+weighted avg       0.57      0.51      0.37       500
+
+confusion matrix:
+[[  9 241]
+ [  5 245]]
+     Expected  Predicted
+0           0          1
+1           0          1
+2           0          1
+3           0          1
+4           0          1
+5           0          1
+6           0          1
+7           0          1
+8           0          1
+9           0          1
+10          0          1
+11          0          0
+12          0          1
+13          0          1
+14          0          1
+15          0          1
+16          0          1
+17          0          1
+18          0          1
+19          0          1
+20          0          1
+21          0          1
+22          0          1
+23          0          1
+24          0          1
+25          0          1
+26          0          1
+27          0          1
+28          0          1
+29          0          1
+..        ...        ...
+470         1          1
+471         1          1
+472         1          1
+473         1          1
+474         1          1
+475         1          1
+476         1          1
+477         1          1
+478         1          1
+479         1          1
+480         1          1
+481         1          1
+482         1          1
+483         1          1
+484         1          1
+485         1          1
+486         1          1
+487         1          1
+488         1          1
+489         1          1
+490         1          1
+491         1          1
+492         1          1
+493         1          1
+494         1          1
+495         1          1
+496         1          1
+497         1          1
+498         1          1
+499         1          1
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.2, 'body_bow': 0.2, 'pos_features': 0.0, 'liwc_features': 0.2, 'surface_features': 0.2, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.83602771,  0.83506344,  0.85813149]), 'test_score': array([ 0.78801843,  0.78752887,  0.8221709 ]), 'fit_time': array([ 199.15545392,  202.60061407,  194.08045697]), 'score_time': array([  98.37724209,   94.66498303,  102.2179029 ])}
+ Mean train score:  0.843074212885
+ Mean test score:  0.799239400744
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+
+           0       0.89      0.76      0.82      1300
+           1       0.79      0.90      0.84      1300
+
+   micro avg       0.83      0.83      0.83      2600
+   macro avg       0.84      0.83      0.83      2600
+weighted avg       0.84      0.83      0.83      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.82      0.19      0.31        48
+           1       0.52      0.95      0.67        44
+
+   micro avg       0.55      0.55      0.55        92
+   macro avg       0.67      0.57      0.49        92
+weighted avg       0.67      0.55      0.48        92
+
+confusion matrix:
+[[ 9 39]
+ [ 2 42]]
+    Expected  Predicted
+0          0          1
+1          0          1
+2          0          1
+3          0          1
+4          0          1
+5          0          1
+6          0          1
+7          0          1
+8          0          1
+9          0          1
+10         0          0
+11         0          1
+12         0          1
+13         0          1
+14         0          1
+15         0          1
+16         0          1
+17         0          1
+18         0          0
+19         0          1
+20         0          1
+21         0          1
+22         0          1
+23         0          1
+24         0          1
+25         0          1
+26         0          0
+27         0          1
+28         0          1
+29         0          0
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          1
+67         1          1
+68         1          1
+69         1          1
+70         1          1
+71         1          1
+72         1          1
+73         1          1
+74         1          1
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          1
+81         1          1
+82         1          1
+83         1          1
+84         1          1
+85         1          1
+86         1          1
+87         1          1
+88         1          1
+89         1          1
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.94      0.97        33
+
+   micro avg       0.94      0.94      0.94        33
+   macro avg       0.50      0.47      0.48        33
+weighted avg       1.00      0.94      0.97        33
+
+confusion matrix:
+[[ 0  0]
+ [ 2 31]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          1
+3          1          1
+4          1          1
+5          1          1
+6          1          1
+7          1          1
+8          1          1
+9          1          1
+10         1          1
+11         1          1
+12         1          1
+13         1          1
+14         1          0
+15         1          1
+16         1          1
+17         1          1
+18         1          1
+19         1          0
+20         1          1
+21         1          1
+22         1          1
+23         1          1
+24         1          1
+25         1          1
+26         1          1
+27         1          1
+28         1          1
+29         1          1
+30         1          1
+31         1          1
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+              precision    recall  f1-score   support
+
+           0       0.64      0.04      0.07       250
+           1       0.50      0.98      0.67       250
+
+   micro avg       0.51      0.51      0.51       500
+   macro avg       0.57      0.51      0.37       500
+weighted avg       0.57      0.51      0.37       500
+
+confusion matrix:
+[[  9 241]
+ [  5 245]]
+     Expected  Predicted
+0           0          1
+1           0          1
+2           0          1
+3           0          1
+4           0          1
+5           0          1
+6           0          1
+7           0          1
+8           0          1
+9           0          1
+10          0          1
+11          0          0
+12          0          1
+13          0          1
+14          0          1
+15          0          1
+16          0          1
+17          0          1
+18          0          1
+19          0          1
+20          0          1
+21          0          1
+22          0          1
+23          0          1
+24          0          1
+25          0          1
+26          0          1
+27          0          1
+28          0          1
+29          0          1
+..        ...        ...
+470         1          1
+471         1          1
+472         1          1
+473         1          1
+474         1          1
+475         1          1
+476         1          1
+477         1          1
+478         1          1
+479         1          1
+480         1          1
+481         1          1
+482         1          1
+483         1          1
+484         1          1
+485         1          1
+486         1          1
+487         1          1
+488         1          1
+489         1          1
+490         1          1
+491         1          1
+492         1          1
+493         1          1
+494         1          1
+495         1          1
+496         1          1
+497         1          1
+498         1          1
+499         1          1
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.2, 'body_bow': 0.2, 'pos_features': 0.0, 'liwc_features': 0.2, 'surface_features': 0.0, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.86605081,  0.86735871,  0.8633218 ]), 'test_score': array([ 0.8156682 ,  0.81177829,  0.8256351 ]), 'fit_time': array([ 199.14078093,  202.30227613,  194.04053497]), 'score_time': array([  98.03141212,   94.83419704,  102.28631115])}
+ Mean train score:  0.86557710527
+ Mean test score:  0.817693865895
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+              precision    recall  f1-score   support
+
+           0       0.92      0.79      0.85      1300
+           1       0.82      0.93      0.87      1300
+
+   micro avg       0.86      0.86      0.86      2600
+   macro avg       0.87      0.86      0.86      2600
+weighted avg       0.87      0.86      0.86      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.80      0.17      0.28        48
+           1       0.51      0.95      0.67        44
+
+   micro avg       0.54      0.54      0.54        92
+   macro avg       0.66      0.56      0.47        92
+weighted avg       0.66      0.54      0.46        92
+
+confusion matrix:
+[[ 8 40]
+ [ 2 42]]
+    Expected  Predicted
+0          0          1
+1          0          1
+2          0          1
+3          0          1
+4          0          1
+5          0          1
+6          0          1
+7          0          1
+8          0          1
+9          0          1
+10         0          1
+11         0          1
+12         0          1
+13         0          1
+14         0          1
+15         0          1
+16         0          1
+17         0          1
+18         0          0
+19         0          1
+20         0          1
+21         0          1
+22         0          1
+23         0          1
+24         0          1
+25         0          1
+26         0          0
+27         0          1
+28         0          1
+29         0          0
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          1
+67         1          1
+68         1          1
+69         1          1
+70         1          1
+71         1          1
+72         1          1
+73         1          1
+74         1          1
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          1
+81         1          1
+82         1          1
+83         1          1
+84         1          1
+85         1          1
+86         1          1
+87         1          1
+88         1          1
+89         1          1
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.97      0.98        33
+
+   micro avg       0.97      0.97      0.97        33
+   macro avg       0.50      0.48      0.49        33
+weighted avg       1.00      0.97      0.98        33
+
+confusion matrix:
+[[ 0  0]
+ [ 1 32]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          1
+3          1          1
+4          1          1
+5          1          1
+6          1          1
+7          1          1
+8          1          1
+9          1          1
+10         1          1
+11         1          1
+12         1          1
+13         1          1
+14         1          1
+15         1          1
+16         1          1
+17         1          1
+18         1          1
+19         1          0
+20         1          1
+21         1          1
+22         1          1
+23         1          1
+24         1          1
+25         1          1
+26         1          1
+27         1          1
+28         1          1
+29         1          1
+30         1          1
+31         1          1
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.67      0.03      0.06       250
+           1       0.50      0.98      0.67       250
+
+   micro avg       0.51      0.51      0.51       500
+   macro avg       0.59      0.51      0.36       500
+weighted avg       0.59      0.51      0.36       500
+
+confusion matrix:
+[[  8 242]
+ [  4 246]]
+     Expected  Predicted
+0           0          1
+1           0          1
+2           0          1
+3           0          1
+4           0          1
+5           0          1
+6           0          1
+7           0          1
+8           0          1
+9           0          1
+10          0          1
+11          0          1
+12          0          1
+13          0          1
+14          0          1
+15          0          1
+16          0          1
+17          0          1
+18          0          1
+19          0          1
+20          0          1
+21          0          1
+22          0          1
+23          0          1
+24          0          1
+25          0          1
+26          0          1
+27          0          1
+28          0          1
+29          0          1
+..        ...        ...
+470         1          1
+471         1          1
+472         1          1
+473         1          1
+474         1          1
+475         1          1
+476         1          1
+477         1          1
+478         1          1
+479         1          1
+480         1          1
+481         1          1
+482         1          1
+483         1          1
+484         1          1
+485         1          1
+486         1          1
+487         1          1
+488         1          1
+489         1          1
+490         1          1
+491         1          1
+492         1          1
+493         1          1
+494         1          1
+495         1          1
+496         1          1
+497         1          1
+498         1          1
+499         1          1
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.2, 'body_bow': 0.2, 'pos_features': 0.2, 'liwc_features': 0.2, 'surface_features': 0.2, 'readability_features': 0.2}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.8256351 ,  0.82064591,  0.84775087]), 'test_score': array([ 0.80645161,  0.76096998,  0.81177829]), 'fit_time': array([ 199.47127819,  202.56250405,  194.74597597]), 'score_time': array([  98.20324397,   94.56893015,  102.36341   ])}
+ Mean train score:  0.831343958133
+ Mean test score:  0.793066626934
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+
+           0       0.87      0.81      0.84      1300
+           1       0.82      0.88      0.85      1300
+
+   micro avg       0.84      0.84      0.84      2600
+   macro avg       0.85      0.84      0.84      2600
+weighted avg       0.85      0.84      0.84      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.62      0.10      0.18        48
+           1       0.49      0.93      0.64        44
+
+   micro avg       0.50      0.50      0.50        92
+   macro avg       0.56      0.52      0.41        92
+weighted avg       0.56      0.50      0.40        92
+
+confusion matrix:
+[[ 5 43]
+ [ 3 41]]
+    Expected  Predicted
+0          0          1
+1          0          1
+2          0          1
+3          0          1
+4          0          1
+5          0          1
+6          0          1
+7          0          1
+8          0          0
+9          0          1
+10         0          1
+11         0          1
+12         0          1
+13         0          0
+14         0          1
+15         0          1
+16         0          1
+17         0          1
+18         0          1
+19         0          1
+20         0          1
+21         0          1
+22         0          1
+23         0          1
+24         0          0
+25         0          1
+26         0          1
+27         0          1
+28         0          0
+29         0          1
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          1
+67         1          1
+68         1          1
+69         1          1
+70         1          1
+71         1          1
+72         1          1
+73         1          0
+74         1          1
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          1
+81         1          1
+82         1          1
+83         1          1
+84         1          1
+85         1          1
+86         1          1
+87         1          1
+88         1          1
+89         1          1
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.85      0.92        33
+
+   micro avg       0.85      0.85      0.85        33
+   macro avg       0.50      0.42      0.46        33
+weighted avg       1.00      0.85      0.92        33
+
+confusion matrix:
+[[ 0  0]
+ [ 5 28]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          1
+3          1          1
+4          1          1
+5          1          1
+6          1          0
+7          1          1
+8          1          1
+9          1          1
+10         1          1
+11         1          1
+12         1          0
+13         1          0
+14         1          1
+15         1          1
+16         1          1
+17         1          1
+18         1          1
+19         1          0
+20         1          1
+21         1          1
+22         1          1
+23         1          1
+24         1          1
+25         1          1
+26         1          1
+27         1          1
+28         1          0
+29         1          1
+30         1          1
+31         1          1
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+              precision    recall  f1-score   support
+
+           0       0.52      0.56      0.54       250
+           1       0.53      0.48      0.50       250
+
+   micro avg       0.52      0.52      0.52       500
+   macro avg       0.52      0.52      0.52       500
+weighted avg       0.52      0.52      0.52       500
+
+confusion matrix:
+[[141 109]
+ [129 121]]
+     Expected  Predicted
+0           0          1
+1           0          1
+2           0          0
+3           0          1
+4           0          1
+5           0          1
+6           0          0
+7           0          1
+8           0          0
+9           0          0
+10          0          1
+11          0          0
+12          0          1
+13          0          1
+14          0          0
+15          0          1
+16          0          0
+17          0          1
+18          0          1
+19          0          0
+20          0          0
+21          0          0
+22          0          0
+23          0          0
+24          0          1
+25          0          0
+26          0          1
+27          0          1
+28          0          1
+29          0          1
+..        ...        ...
+470         1          0
+471         1          0
+472         1          0
+473         1          0
+474         1          0
+475         1          0
+476         1          0
+477         1          0
+478         1          1
+479         1          1
+480         1          0
+481         1          1
+482         1          0
+483         1          0
+484         1          0
+485         1          1
+486         1          1
+487         1          1
+488         1          1
+489         1          0
+490         1          1
+491         1          1
+492         1          0
+493         1          1
+494         1          0
+495         1          0
+496         1          0
+497         1          0
+498         1          0
+499         1          0
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.0, 'body_bow': 0.2, 'pos_features': 0.0, 'liwc_features': 0.0, 'surface_features': 0.0, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.86662818,  0.8650519 ,  0.8633218 ]), 'test_score': array([ 0.80990783,  0.81177829,  0.82448037]), 'fit_time': array([ 199.56760216,  202.12027001,  194.81768513]), 'score_time': array([  98.02558994,   94.61228108,  102.59274101])}
+ Mean train score:  0.865000625981
+ Mean test score:  0.815388831536
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+
+  'recall', 'true', average, warn_for)
+           0       0.92      0.79      0.85      1300
+           1       0.82      0.93      0.87      1300
+
+   micro avg       0.86      0.86      0.86      2600
+   macro avg       0.87      0.86      0.86      2600
+weighted avg       0.87      0.86      0.86      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.80      0.17      0.28        48
+           1       0.51      0.95      0.67        44
+
+   micro avg       0.54      0.54      0.54        92
+   macro avg       0.66      0.56      0.47        92
+weighted avg       0.66      0.54      0.46        92
+
+confusion matrix:
+[[ 8 40]
+ [ 2 42]]
+    Expected  Predicted
+0          0          1
+1          0          1
+2          0          1
+3          0          1
+4          0          1
+5          0          1
+6          0          1
+7          0          1
+8          0          1
+9          0          1
+10         0          1
+11         0          1
+12         0          1
+13         0          1
+14         0          1
+15         0          1
+16         0          1
+17         0          1
+18         0          0
+19         0          1
+20         0          1
+21         0          1
+22         0          1
+23         0          1
+24         0          1
+25         0          1
+26         0          0
+27         0          1
+28         0          1
+29         0          0
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          1
+67         1          1
+68         1          1
+69         1          1
+70         1          1
+71         1          1
+72         1          1
+73         1          1
+74         1          1
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          1
+81         1          1
+82         1          1
+83         1          1
+84         1          1
+85         1          1
+86         1          1
+87         1          1
+88         1          1
+89         1          1
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.97      0.98        33
+
+   micro avg       0.97      0.97      0.97        33
+   macro avg       0.50      0.48      0.49        33
+weighted avg       1.00      0.97      0.98        33
+
+confusion matrix:
+[[ 0  0]
+ [ 1 32]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          1
+3          1          1
+4          1          1
+5          1          1
+6          1          1
+7          1          1
+8          1          1
+9          1          1
+10         1          1
+11         1          1
+12         1          1
+13         1          1
+14         1          1
+15         1          1
+16         1          1
+17         1          1
+18         1          1
+19         1          0
+20         1          1
+21         1          1
+22         1          1
+23         1          1
+24         1          1
+25         1          1
+26         1          1
+27         1          1
+28         1          1
+29         1          1
+30         1          1
+31         1          1
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.67      0.03      0.06       250
+           1       0.50      0.98      0.67       250
+
+   micro avg       0.51      0.51      0.51       500
+   macro avg       0.59      0.51      0.36       500
+weighted avg       0.59      0.51      0.36       500
+
+confusion matrix:
+[[  8 242]
+ [  4 246]]
+     Expected  Predicted
+0           0          1
+1           0          1
+2           0          1
+3           0          1
+4           0          1
+5           0          1
+6           0          1
+7           0          1
+8           0          1
+9           0          1
+10          0          1
+11          0          1
+12          0          1
+13          0          1
+14          0          1
+15          0          1
+16          0          1
+17          0          1
+18          0          1
+19          0          1
+20          0          1
+21          0          1
+22          0          1
+23          0          1
+24          0          1
+25          0          1
+26          0          1
+27          0          1
+28          0          1
+29          0          1
+..        ...        ...
+470         1          1
+471         1          1
+472         1          1
+473         1          1
+474         1          1
+475         1          1
+476         1          1
+477         1          1
+478         1          1
+479         1          1
+480         1          1
+481         1          1
+482         1          1
+483         1          1
+484         1          1
+485         1          1
+486         1          1
+487         1          1
+488         1          1
+489         1          1
+490         1          1
+491         1          1
+492         1          1
+493         1          1
+494         1          1
+495         1          1
+496         1          1
+497         1          1
+498         1          1
+499         1          1
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.0, 'body_bow': 0.0, 'pos_features': 0.0, 'liwc_features': 0.0, 'surface_features': 0.2, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.50115473,  0.50346021,  0.50461361]), 'test_score': array([ 0.48271889,  0.48845266,  0.49422633]), 'fit_time': array([ 198.91555214,  202.25624299,  194.27221298]), 'score_time': array([  97.99557686,   94.55712509,  102.0150671 ])}
+ Mean train score:  0.503076184058
+ Mean test score:  0.488465959281
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+
+           0       0.50      0.57      0.53      1300
+           1       0.50      0.43      0.46      1300
+
+   micro avg       0.50      0.50      0.50      2600
+   macro avg       0.50      0.50      0.50      2600
+weighted avg       0.50      0.50      0.50      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.51      0.52      0.52        48
+           1       0.47      0.45      0.46        44
+
+   micro avg       0.49      0.49      0.49        92
+   macro avg       0.49      0.49      0.49        92
+weighted avg       0.49      0.49      0.49        92
+
+confusion matrix:
+[[25 23]
+ [24 20]]
+    Expected  Predicted
+0          0          1
+1          0          0
+2          0          0
+3          0          0
+4          0          1
+5          0          0
+6          0          0
+7          0          0
+8          0          0
+9          0          1
+10         0          0
+11         0          1
+12         0          0
+13         0          0
+14         0          1
+15         0          0
+16         0          0
+17         0          0
+18         0          1
+19         0          1
+20         0          1
+21         0          1
+22         0          0
+23         0          1
+24         0          1
+25         0          1
+26         0          0
+27         0          1
+28         0          1
+29         0          0
+..       ...        ...
+62         1          1
+63         1          0
+64         1          0
+65         1          1
+66         1          0
+67         1          0
+68         1          0
+69         1          1
+70         1          0
+71         1          0
+72         1          0
+73         1          1
+74         1          0
+75         1          0
+76         1          1
+77         1          0
+78         1          0
+79         1          1
+80         1          0
+81         1          1
+82         1          0
+83         1          1
+84         1          0
+85         1          0
+86         1          0
+87         1          1
+88         1          1
+89         1          1
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.30      0.47        33
+
+   micro avg       0.30      0.30      0.30        33
+   macro avg       0.50      0.15      0.23        33
+weighted avg       1.00      0.30      0.47        33
+
+confusion matrix:
+[[ 0  0]
+ [23 10]]
+    Expected  Predicted
+0          1          0
+1          1          0
+2          1          0
+3          1          1
+4          1          0
+5          1          1
+6          1          0
+7          1          0
+8          1          0
+9          1          0
+10         1          1
+11         1          0
+12         1          1
+13         1          1
+14         1          1
+15         1          0
+16         1          1
+17         1          0
+18         1          1
+19         1          1
+20         1          0
+21         1          0
+22         1          0
+23         1          0
+24         1          0
+25         1          0
+26         1          1
+27         1          0
+28         1          0
+29         1          0
+30         1          0
+31         1          0
+32         1          0
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+              precision    recall  f1-score   support
+
+           0       0.49      0.74      0.59       250
+           1       0.48      0.24      0.32       250
+
+   micro avg       0.49      0.49      0.49       500
+   macro avg       0.49      0.49      0.46       500
+weighted avg       0.49      0.49      0.46       500
+
+confusion matrix:
+[[184  66]
+ [189  61]]
+     Expected  Predicted
+0           0          0
+1           0          0
+2           0          0
+3           0          0
+4           0          0
+5           0          0
+6           0          0
+7           0          0
+8           0          0
+9           0          0
+10          0          0
+11          0          0
+12          0          1
+13          0          1
+14          0          0
+15          0          1
+16          0          0
+17          0          0
+18          0          0
+19          0          0
+20          0          0
+21          0          0
+22          0          0
+23          0          0
+24          0          1
+25          0          0
+26          0          1
+27          0          0
+28          0          0
+29          0          0
+..        ...        ...
+470         1          0
+471         1          0
+472         1          0
+473         1          0
+474         1          0
+475         1          0
+476         1          1
+477         1          0
+478         1          0
+479         1          0
+480         1          0
+481         1          0
+482         1          0
+483         1          0
+484         1          0
+485         1          0
+486         1          0
+487         1          0
+488         1          0
+489         1          0
+490         1          1
+491         1          0
+492         1          0
+493         1          0
+494         1          0
+495         1          0
+496         1          0
+497         1          0
+498         1          1
+499         1          0
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.2, 'body_bow': 0.0, 'pos_features': 0.0, 'liwc_features': 0.0, 'surface_features': 0.0, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.5669746 ,  0.57554787,  0.57554787]), 'test_score': array([ 0.57488479,  0.56812933,  0.5704388 ]), 'fit_time': array([ 199.20303297,  202.65297794,  194.53673601]), 'score_time': array([  98.1795311 ,   94.95038295,  102.44569397])}
+ Mean train score:  0.572690109418
+ Mean test score:  0.571150973986
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+              precision    recall  f1-score   support
+  'recall', 'true', average, warn_for)
+
+           0       0.58      0.55      0.57      1300
+           1       0.57      0.60      0.59      1300
+
+   micro avg       0.58      0.58      0.58      2600
+   macro avg       0.58      0.58      0.58      2600
+weighted avg       0.58      0.58      0.58      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.64      0.48      0.55        48
+           1       0.55      0.70      0.62        44
+
+   micro avg       0.59      0.59      0.59        92
+   macro avg       0.60      0.59      0.58        92
+weighted avg       0.60      0.59      0.58        92
+
+confusion matrix:
+[[23 25]
+ [13 31]]
+    Expected  Predicted
+0          0          1
+1          0          1
+2          0          1
+3          0          0
+4          0          0
+5          0          1
+6          0          0
+7          0          1
+8          0          0
+9          0          1
+10         0          0
+11         0          1
+12         0          0
+13         0          0
+14         0          0
+15         0          0
+16         0          1
+17         0          1
+18         0          1
+19         0          1
+20         0          0
+21         0          0
+22         0          0
+23         0          1
+24         0          1
+25         0          1
+26         0          0
+27         0          0
+28         0          0
+29         0          0
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          1
+67         1          0
+68         1          1
+69         1          1
+70         1          0
+71         1          1
+72         1          0
+73         1          1
+74         1          1
+75         1          0
+76         1          0
+77         1          0
+78         1          0
+79         1          1
+80         1          1
+81         1          1
+82         1          1
+83         1          0
+84         1          1
+85         1          1
+86         1          0
+87         1          1
+88         1          1
+89         1          0
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.64      0.78        33
+
+   micro avg       0.64      0.64      0.64        33
+   macro avg       0.50      0.32      0.39        33
+weighted avg       1.00      0.64      0.78        33
+
+confusion matrix:
+[[ 0  0]
+ [12 21]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          0
+3          1          0
+4          1          1
+5          1          1
+6          1          1
+7          1          1
+8          1          1
+9          1          1
+10         1          1
+11         1          0
+12         1          1
+13         1          1
+14         1          0
+15         1          0
+16         1          0
+17         1          1
+18         1          1
+19         1          1
+20         1          0
+21         1          1
+22         1          1
+23         1          1
+24         1          0
+25         1          0
+26         1          0
+27         1          1
+28         1          1
+29         1          0
+30         1          0
+31         1          1
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.44      0.45      0.45       250
+           1       0.44      0.44      0.44       250
+
+   micro avg       0.44      0.44      0.44       500
+   macro avg       0.44      0.44      0.44       500
+weighted avg       0.44      0.44      0.44       500
+
+confusion matrix:
+[[113 137]
+ [141 109]]
+     Expected  Predicted
+0           0          0
+1           0          1
+2           0          1
+3           0          1
+4           0          0
+5           0          0
+6           0          0
+7           0          0
+8           0          0
+9           0          1
+10          0          0
+11          0          1
+12          0          1
+13          0          0
+14          0          0
+15          0          1
+16          0          0
+17          0          1
+18          0          1
+19          0          0
+20          0          0
+21          0          1
+22          0          0
+23          0          0
+24          0          1
+25          0          0
+26          0          1
+27          0          0
+28          0          0
+29          0          0
+..        ...        ...
+470         1          0
+471         1          1
+472         1          1
+473         1          0
+474         1          0
+475         1          1
+476         1          1
+477         1          1
+478         1          0
+479         1          1
+480         1          1
+481         1          1
+482         1          1
+483         1          1
+484         1          1
+485         1          1
+486         1          1
+487         1          0
+488         1          0
+489         1          1
+490         1          1
+491         1          0
+492         1          1
+493         1          0
+494         1          0
+495         1          1
+496         1          1
+497         1          0
+498         1          0
+499         1          0
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.0, 'body_bow': 0.0, 'pos_features': 0.0, 'liwc_features': 0.2, 'surface_features': 0.0, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.61258661,  0.60092272,  0.64821223]), 'test_score': array([ 0.59792627,  0.57852194,  0.6408776 ]), 'fit_time': array([ 199.23278713,  202.40881491,  194.69284296]), 'score_time': array([  98.05434608,   94.80841899,  102.32773209])}
+ Mean train score:  0.620573851059
+ Mean test score:  0.605775268462
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+
+           0       0.62      0.62      0.62      1300
+           1       0.62      0.62      0.62      1300
+
+   micro avg       0.62      0.62      0.62      2600
+   macro avg       0.62      0.62      0.62      2600
+weighted avg       0.62      0.62      0.62      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.56      0.46      0.51        48
+           1       0.51      0.61      0.56        44
+
+   micro avg       0.53      0.53      0.53        92
+   macro avg       0.54      0.54      0.53        92
+weighted avg       0.54      0.53      0.53        92
+
+confusion matrix:
+[[22 26]
+ [17 27]]
+    Expected  Predicted
+0          0          1
+1          0          0
+2          0          1
+3          0          1
+4          0          1
+5          0          1
+6          0          0
+7          0          0
+8          0          0
+9          0          1
+10         0          0
+11         0          1
+12         0          0
+13         0          1
+14         0          1
+15         0          1
+16         0          0
+17         0          0
+18         0          0
+19         0          0
+20         0          1
+21         0          1
+22         0          0
+23         0          1
+24         0          0
+25         0          1
+26         0          0
+27         0          1
+28         0          0
+29         0          0
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          0
+67         1          1
+68         1          1
+69         1          0
+70         1          1
+71         1          1
+72         1          1
+73         1          1
+74         1          0
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          1
+81         1          1
+82         1          0
+83         1          0
+84         1          0
+85         1          1
+86         1          0
+87         1          1
+88         1          0
+89         1          0
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.64      0.78        33
+
+   micro avg       0.64      0.64      0.64        33
+   macro avg       0.50      0.32      0.39        33
+weighted avg       1.00      0.64      0.78        33
+
+confusion matrix:
+[[ 0  0]
+ [12 21]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          1
+3          1          0
+4          1          0
+5          1          1
+6          1          0
+7          1          1
+8          1          1
+9          1          1
+10         1          0
+11         1          1
+12         1          1
+13         1          1
+14         1          1
+15         1          1
+16         1          0
+17         1          1
+18         1          1
+19         1          1
+20         1          0
+21         1          1
+22         1          1
+23         1          0
+24         1          1
+25         1          1
+26         1          0
+27         1          1
+28         1          0
+29         1          0
+30         1          0
+31         1          0
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+              precision    recall  f1-score   support
+
+           0       0.47      0.48      0.47       250
+           1       0.46      0.45      0.46       250
+
+   micro avg       0.46      0.46      0.46       500
+   macro avg       0.46      0.46      0.46       500
+weighted avg       0.46      0.46      0.46       500
+
+confusion matrix:
+[[120 130]
+ [138 112]]
+     Expected  Predicted
+0           0          1
+1           0          1
+2           0          0
+3           0          0
+4           0          0
+5           0          1
+6           0          1
+7           0          1
+8           0          0
+9           0          1
+10          0          1
+11          0          0
+12          0          1
+13          0          0
+14          0          1
+15          0          0
+16          0          1
+17          0          1
+18          0          0
+19          0          0
+20          0          1
+21          0          1
+22          0          1
+23          0          0
+24          0          0
+25          0          0
+26          0          0
+27          0          0
+28          0          0
+29          0          1
+..        ...        ...
+470         1          0
+471         1          1
+472         1          1
+473         1          0
+474         1          1
+475         1          1
+476         1          0
+477         1          0
+478         1          0
+479         1          1
+480         1          0
+481         1          1
+482         1          0
+483         1          1
+484         1          0
+485         1          1
+486         1          0
+487         1          0
+488         1          1
+489         1          0
+490         1          1
+491         1          1
+492         1          0
+493         1          1
+494         1          0
+495         1          0
+496         1          0
+497         1          0
+498         1          1
+499         1          0
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.0, 'body_bow': 0.0, 'pos_features': 0.2, 'liwc_features': 0.0, 'surface_features': 0.0, 'readability_features': 0.0}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.57332564,  0.57785467,  0.56632065]), 'test_score': array([ 0.57142857,  0.55658199,  0.58314088]), 'fit_time': array([ 198.79155612,  202.08170199,  194.38385201]), 'score_time': array([  97.94110894,   94.77023292,  102.3119061 ])}
+ Mean train score:  0.57250031743
+ Mean test score:  0.570383811723
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+
+           0       0.58      0.54      0.56      1300
+           1       0.57      0.61      0.59      1300
+
+   micro avg       0.58      0.58      0.58      2600
+   macro avg       0.58      0.58      0.58      2600
+weighted avg       0.58      0.58      0.58      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.49      0.44      0.46        48
+           1       0.45      0.50      0.47        44
+
+   micro avg       0.47      0.47      0.47        92
+   macro avg       0.47      0.47      0.47        92
+weighted avg       0.47      0.47      0.47        92
+
+confusion matrix:
+[[21 27]
+ [22 22]]
+    Expected  Predicted
+0          0          1
+1          0          0
+2          0          0
+3          0          1
+4          0          1
+5          0          0
+6          0          1
+7          0          1
+8          0          0
+9          0          1
+10         0          1
+11         0          1
+12         0          0
+13         0          1
+14         0          1
+15         0          0
+16         0          0
+17         0          0
+18         0          0
+19         0          1
+20         0          0
+21         0          1
+22         0          0
+23         0          1
+24         0          0
+25         0          1
+26         0          0
+27         0          1
+28         0          0
+29         0          1
+..       ...        ...
+62         1          1
+63         1          1
+64         1          0
+65         1          0
+66         1          0
+67         1          0
+68         1          0
+69         1          1
+70         1          1
+71         1          0
+72         1          1
+73         1          1
+74         1          0
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          0
+81         1          0
+82         1          1
+83         1          0
+84         1          1
+85         1          1
+86         1          0
+87         1          1
+88         1          0
+89         1          0
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.79      0.88        33
+
+   micro avg       0.79      0.79      0.79        33
+   macro avg       0.50      0.39      0.44        33
+weighted avg       1.00      0.79      0.88        33
+
+confusion matrix:
+[[ 0  0]
+ [ 7 26]]
+    Expected  Predicted
+0          1          1
+1          1          1
+2          1          1
+3          1          0
+4          1          1
+5          1          1
+6          1          1
+7          1          0
+8          1          1
+9          1          1
+10         1          1
+11         1          1
+12         1          1
+13         1          1
+14         1          1
+15         1          1
+16         1          0
+17         1          0
+18         1          1
+19         1          1
+20         1          1
+21         1          1
+22         1          1
+23         1          1
+24         1          1
+25         1          1
+26         1          0
+27         1          1
+28         1          0
+29         1          0
+30         1          1
+31         1          1
+32         1          1
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+              precision    recall  f1-score   support
+
+           0       0.50      0.50      0.50       250
+           1       0.50      0.50      0.50       250
+
+   micro avg       0.50      0.50      0.50       500
+   macro avg       0.50      0.50      0.50       500
+weighted avg       0.50      0.50      0.50       500
+
+confusion matrix:
+[[124 126]
+ [126 124]]
+     Expected  Predicted
+0           0          1
+1           0          1
+2           0          1
+3           0          1
+4           0          1
+5           0          1
+6           0          1
+7           0          0
+8           0          0
+9           0          1
+10          0          1
+11          0          0
+12          0          1
+13          0          0
+14          0          0
+15          0          0
+16          0          1
+17          0          1
+18          0          0
+19          0          0
+20          0          1
+21          0          1
+22          0          1
+23          0          1
+24          0          0
+25          0          0
+26          0          1
+27          0          0
+28          0          0
+29          0          1
+..        ...        ...
+470         1          0
+471         1          0
+472         1          1
+473         1          0
+474         1          1
+475         1          0
+476         1          0
+477         1          0
+478         1          0
+479         1          0
+480         1          0
+481         1          1
+482         1          1
+483         1          1
+484         1          0
+485         1          1
+486         1          1
+487         1          1
+488         1          1
+489         1          1
+490         1          0
+491         1          1
+492         1          0
+493         1          1
+494         1          0
+495         1          0
+496         1          0
+497         1          0
+498         1          1
+499         1          0
+
+[500 rows x 2 columns]
+
+*** Feature weigths ***
+ {'lexicon_features': 0.0, 'body_bow': 0.0, 'pos_features': 0.0, 'liwc_features': 0.0, 'surface_features': 0.0, 'readability_features': 0.2}
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Fitting the model...
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+********************
+
+
+{'train_score': array([ 0.70612009,  0.74106113,  0.72260669]), 'test_score': array([ 0.73963134,  0.70438799,  0.7182448 ]), 'fit_time': array([ 199.21279478,  218.50378203,  198.11893392]), 'score_time': array([  98.02950215,  102.79921103,  102.54514599])}
+ Mean train score:  0.723262637483
+ Mean test score:  0.720754710288
+********************
+
+
+Inside the init function of PosTagFeatures()
+Inside the init function of SurfaceFeatures()
+Inside the init function of LexiconFeatures()
+Inside the init function of LiwcFeatures()
+Inside the init function of readabilityFeatures()
+Results on training data:
+              precision    recall  f1-score   support
+
+           0       0.71      0.76      0.74      1300
+           1       0.74      0.69      0.72      1300
+
+   micro avg       0.73      0.73      0.73      2600
+   macro avg       0.73      0.73      0.73      2600
+weighted avg       0.73      0.73      0.73      2600
+
+Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):
+[[ 0 48]
+ [ 1 44]
+ [ 5 26]]
+Discarding items for label 5
+Final size of dataset:
+[[ 0 48]
+ [ 1 44]]
+Final size of remaining dataset:
+[[ 5 26]]
+              precision    recall  f1-score   support
+
+           0       0.50      0.08      0.14        48
+           1       0.48      0.91      0.62        44
+
+   micro avg       0.48      0.48      0.48        92
+   macro avg       0.49      0.50      0.38        92
+weighted avg       0.49      0.48      0.37        92
+
+confusion matrix:
+[[ 4 44]
+ [ 4 40]]
+    Expected  Predicted
+0          0          1
+1          0          1
+2          0          1
+3          0          1
+4          0          1
+5          0          1
+6          0          1
+7          0          1
+8          0          0
+9          0          1
+10         0          1
+11         0          1
+12         0          1
+13         0          0
+14         0          1
+15         0          1
+16         0          1
+17         0          1
+18         0          1
+19         0          1
+20         0          1
+21         0          1
+22         0          1
+23         0          1
+24         0          0
+25         0          1
+26         0          1
+27         0          1
+28         0          0
+29         0          1
+..       ...        ...
+62         1          1
+63         1          1
+64         1          1
+65         1          1
+66         1          1
+67         1          1
+68         1          1
+69         1          1
+70         1          0
+71         1          1
+72         1          1
+73         1          0
+74         1          1
+75         1          1
+76         1          1
+77         1          1
+78         1          1
+79         1          1
+80         1          1
+81         1          1
+82         1          1
+83         1          1
+84         1          1
+85         1          1
+86         1          1
+87         1          1
+88         1          1
+89         1          1
+90         1          1
+91         1          1
+
+[92 rows x 2 columns]
+Test results on data sampled only from buzzfeedTop (mixed claims):
+[[ 1 33]]
+Final size of dataset:
+[[ 1 33]]
+Final size of remaining dataset:
+[]
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         0
+           1       1.00      0.36      0.53        33
+
+   micro avg       0.36      0.36      0.36        33
+   macro avg       0.50      0.18      0.27        33
+weighted avg       1.00      0.36      0.53        33
+
+confusion matrix:
+[[ 0  0]
+ [21 12]]
+    Expected  Predicted
+0          1          1
+1          1          0
+2          1          0
+3          1          0
+4          1          1
+5          1          1
+6          1          0
+7          1          0
+8          1          1
+9          1          0
+10         1          0
+11         1          1
+12         1          0
+13         1          0
+14         1          1
+15         1          1
+16         1          1
+17         1          0
+18         1          0
+19         1          0
+20         1          1
+21         1          0
+22         1          1
+23         1          0
+24         1          0
+25         1          0
+26         1          1
+27         1          0
+28         1          0
+29         1          1
+30         1          0
+31         1          0
+32         1          0
+Test results on data sampled only from perez (celebrity stories):
+[[  0 250]
+ [  1 250]]
+Final size of dataset:
+[[  0 250]
+ [  1 250]]
+Final size of remaining dataset:
+[]
+/Users/fa/anaconda/envs/py35/lib/python3.5/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+              precision    recall  f1-score   support
+
+           0       0.51      0.82      0.63       250
+           1       0.53      0.20      0.29       250
+
+   micro avg       0.51      0.51      0.51       500
+   macro avg       0.52      0.51      0.46       500
+weighted avg       0.52      0.51      0.46       500
+
+confusion matrix:
+[[205  45]
+ [199  51]]
+     Expected  Predicted
+0           0          0
+1           0          1
+2           0          0
+3           0          1
+4           0          1
+5           0          0
+6           0          0
+7           0          0
+8           0          0
+9           0          0
+10          0          0
+11          0          0
+12          0          1
+13          0          0
+14          0          0
+15          0          0
+16          0          0
+17          0          1
+18          0          0
+19          0          0
+20          0          0
+21          0          0
+22          0          0
+23          0          0
+24          0          1
+25          0          0
+26          0          1
+27          0          1
+28          0          0
+29          0          0
+..        ...        ...
+470         1          0
+471         1          0
+472         1          0
+473         1          0
+474         1          0
+475         1          0
+476         1          0
+477         1          0
+478         1          1
+479         1          0
+480         1          0
+481         1          0
+482         1          0
+483         1          0
+484         1          0
+485         1          0
+486         1          1
+487         1          1
+488         1          0
+489         1          0
+490         1          1
+491         1          0
+492         1          0
+493         1          1
+494         1          0
+495         1          0
+496         1          0
+497         1          0
+498         1          0
+499         1          0
+
+[500 rows x 2 columns]
+
+Process finished with exit code 0
+
+
+
+
+
+
+## Used ideas from https://www.kaggle.com/metadist/work-like-a-pro-with-pipelines-and-feature-unions
+## Used ideas from https://www.kaggle.com/edolatabadi/feature-union-with-grid-search
+## Used ideas from https://github.com/scikit-learn/scikit-learn/issues/6122 feature selection output
+
+
+
+from __future__ import print_function
+
+import numpy as np
+
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.datasets.twenty_newsgroups import strip_newsgroup_footer
+from sklearn.datasets.twenty_newsgroups import strip_newsgroup_quoting
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.svm import LinearSVC
+from sklearn.ensemble import RandomForestClassifier
+from collections import Counter
+from sklearn.model_selection import cross_validate
+
+from textutils import DataLoading
+import os
+import numpy as np
+from nltk.corpus import stopwords
+import nltk
+import pandas as pd
+from sklearn.feature_selection import SelectFromModel
+from sklearn.model_selection import GridSearchCV
+import string
+import textstat
+import textblob
+
+#################
+
+print("Preparing lexicons & lwicDic")
+lexicon_directory = "../data/bias_related_lexicons"
+lexicons = []
+lexiconNames = []
+# print("LexiconFeatures() init: loading lexicons")
+for filename in os.listdir(lexicon_directory):
+    if filename.endswith(".txt"):
+        file = os.path.join(lexicon_directory, filename)
+        words = open(file, encoding = "ISO-8859-1").read()
+        lexicon = {k: 0 for k in nltk.word_tokenize(words)}
+        print("Number of terms in the lexicon " + filename + " : " + str(len(lexicon)))
+        lexicons.append(lexicon)
+        lexiconNames.append(filename)
+        continue
+    else:
+        continue
+
+liwcFile = "../data/lwic/vocabliwc_cats.csv"
+cols = list(pd.read_csv(liwcFile, nrows=1))
+df = pd.read_csv(liwcFile, index_col="Source (A)",
+                 usecols=[i for i in cols if i not in ['WC', 'Analytic', 'Clout', 'Authentic', 'Tone', 'WPS']])
+df = df.T
+keys = df.index
+df = df.reset_index().drop('index', axis='columns')
+cols = df.columns
+values = df.apply(lambda x: x > 0).apply(lambda x: list(cols[x.values]), axis=1)
+liwcDic = dict(zip(keys, values))
+
+#####################
+class PosTagFeatures(BaseEstimator, TransformerMixin):
+    pos_family = {}
+
+    def __init__(self):
+        print("Inside the init function of PosTagFeatures()")
+
+    # fit() doesn't do anything, this is a transformer class
+    def fit(self, texts, y=None):
+        return self
+
+    # all the work is done here
+    def transform(self, texts):
+        allTags = ['NOUN', 'PRON', 'ADJ', 'ADV', 'VERB', 'ADP', 'NUM', 'PRT', 'DET', 'X', 'CONJ', '.']
+        tokenizer = lambda x: x.split()
+        features = [dict(Counter(allTags + [tag for word, tag in nltk.pos_tag(tokenizer(text), tagset='universal')]))
+                    for text in texts]
+        # normalize by the number of all tags (words in the text + 12 smoothing factor)
+        features = [{key: val / (len(text.split()) + 12) for key, val in d.items()} for text, d in zip(texts, features)]
+        features = np.array(features)
+        return features
+
+
+class SurfaceFeatures(BaseEstimator, TransformerMixin):
+    """Extract features from each document for DictVectorizer"""
+    XXX = None
+
+    def __init__(self):
+        self.XXX = "Inside the init function of SurfaceFeatures()"
+        print(self.XXX)
+
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, posts):
+        # posts[['feature1','feature2',...,'feature100']].to_dict('records')[0].to_dict('records')
+        features = [{'num_char': len(text),
+                     'num_sentence': text.count('.'),
+                     'num_punc/num_char': len("".join(_ for _ in text if _ in string.punctuation)) / (len(text) + 1),
+                     'num_upper/num_char': len([wrd for wrd in text.split() if wrd.isupper()]) / (len(text) + 1),
+                     'num_word/num_sentence': len(text.split()) / (text.count('.') + 1)
+                     }
+                    for text in posts]
+        return features
+
+
+class LiwcFeatures(BaseEstimator, TransformerMixin):
+    liwcDic = {}  # = map of text to dataframe row (this dataframe should be read from the file including liwc features)
+
+    def __init__(self):
+        print("Inside the init function of LiwcFeatures()")
+        self.liwcDic = liwcDic
+
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, texts):
+        textvecs = []
+        for text in texts:
+            # print "*** Current text:\n" + text  + "\n***"
+            tokens = nltk.word_tokenize(text)
+            textvec = {}
+            for category in self.liwcDic.keys():
+                lexicon_words = [i for i in tokens if i in self.liwcDic[category]]
+                count = len(lexicon_words)
+                count = count * 1.0 / len(tokens)  # Continous treatment
+                # count = 1 if (count > 0) else 0     #Binary treatment
+                textvec[category] = count
+            textvecs.append(textvec)
+        textvecs = np.array(textvecs)
+        return textvecs
+
+
+class LexiconFeatures(BaseEstimator, TransformerMixin):
+    lexicons = None
+    lexiconNames = None
+
+    def __init__(self):
+        print("Inside the init function of LexiconFeatures()")
+        self.lexicons = lexicons
+        self.lexiconNames = lexiconNames
+
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, texts):
+        stoplist = stopwords.words('english')
+        textvecs = []
+        for text in texts:
+            tokens = nltk.word_tokenize(text)
+            textvec = {}
+            for lexicon, lexiconName in zip(self.lexicons, self.lexiconNames):
+                lexicon_words = [i for i in tokens if i in lexicon]
+                count = len(lexicon_words)
+                count = count * 1.0 / len(tokens)  # Continous treatment
+                # count = 1 if (count > 0) else 0     #Binary treatment
+                textvec[lexiconName] = count
+            textvecs.append(textvec)
+        textvecs = np.array(textvecs)
+        return textvecs
+
+
+class ReadabilityFeatures(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        print("Inside the init function of readabilityFeatures()")
+
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, posts):
+        # posts[['feature1','feature2',...,'feature100']].to_dict('records')[0].to_dict('records')
+        features = [{'flesch_reading_ease': textstat.flesch_reading_ease(text),
+                     'smog_index': textstat.smog_index(text),
+                     'flesch_kincaid_grade': textstat.flesch_kincaid_grade(text),
+                     'coleman_liau_index': textstat.coleman_liau_index(text),
+                     'automated_readability_index': textstat.automated_readability_index(text),
+                     'dale_chall_readability_score': textstat.dale_chall_readability_score(text),
+                     'linsear_write_formula': textstat.linsear_write_formula(text),
+                     'gunning_fog': textstat.gunning_fog(text)
+                     # 'text_standard': textstat.text_standard(text)
+                     }
+                    for text in posts]
+        return features
+
+
+class SubjectBodyExtractor(BaseEstimator, TransformerMixin):
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, posts):
+        # construct object dtype array with two columns
+        # first column = 'subject' and second column = 'body'
+        features = np.empty(shape=(len(posts), 2), dtype=object)
+        for i, text in enumerate(posts):
+            features[i, 0] = text[0:100]
+            features[i, 1] = text
+        return features
+
+
+
+#################################
+
+LOAD_DATA_FROM_DISK = False
+CLASSES = 2
+
+if LOAD_DATA_FROM_DISK:
+    texts_train = np.load("../dump/trainRaw")
+    texts_valid = np.load("../dump/validRaw")
+    texts_test = np.load("../dump/testRaw")
+    labels_train = np.load("../dump/trainlRaw")
+    labels_valid = np.load("../dump/validlRaw")
+    labels_test = np.load("../dump/testlRaw")
+    print("Data loaded from disk!")
+
+else:
+    # Data sources used for training:
+    texts_snopes, labels_snopes = DataLoading.load_data_snopes \
+        ("../data/snopes/snopes_leftover_v02_right_forclassificationtrain.csv", CLASSES  )  # load_data_liar("../data/liar_dataset/train.tsv")#load_data_rashkin("../data/r$
+    texts_buzzfeed, labels_buzzfeed = DataLoading.load_data_buzzfeed("../data/buzzfeed-facebook/buzzfeed-v02-originalLabels.txt",
+                                                                                 CLASSES)
+    texts_emergent, labels_emergent = DataLoading.load_data_emergent(
+        "../data/emergent/url-versions-2015-06-14.csv", CLASSES)
+    len(texts_snopes)
+    len(texts_buzzfeed)
+    len(texts_emergent)
+
+    texts_snopes, labels_snopes, texts, labels = DataLoading.balance_data(texts_snopes, labels_snopes, None, [2, 3, 4, 5])
+    texts_buzzfeed, labels_buzzfeed, texts, labels = DataLoading.balance_data(texts_buzzfeed, labels_buzzfeed, None, [2, 3, 4, 5])
+    texts_emergent, labels_emergent, texts, labels = DataLoading.balance_data(texts_emergent,labels_emergent, 0, [2, 3, 4, 5])
+
+    texts_all = pd.concat(
+        [pd.Series(texts_snopes), pd.Series(texts_buzzfeed), pd.Series(texts_emergent)])
+    labels_all = pd.concat(
+        [pd.Series(labels_snopes), pd.Series(labels_buzzfeed), pd.Series(labels_emergent)])
+
+
+    texts_train, labels_train, texts, labels = DataLoading.balance_data(texts_all, labels_all, 1300,
+                                                                        [2, 3, 4, 5])
+    texts_valid, labels_valid, texts, labels = DataLoading.balance_data(texts, labels, 0  , [2, 3, 4, 5])
+    texts_test, labels_test, texts, labels = DataLoading.balance_data(texts, labels, 0, [2, 3, 4, 5])
+    texts_train.dump("../dump/trainRaw")
+    texts_valid.dump("../dump/validRaw")
+    texts_test.dump("../dump/testRaw")
+    labels_train.dump("../dump/trainlRaw")
+    labels_valid.dump("../dump/validlRaw")
+    labels_test.dump("../dump/testlRaw")
+    print("Data dumped to disk!")
+
+print("Size of train, validataion and test sets: " + str(len(labels_train)) + " , " + str(
+    len(labels_valid)) + " , " + str(len(labels_test)))
+texts_train_valid = pd.concat(
+    [pd.Series(texts_train), pd.Series(texts_valid)])
+labels_train_valid = pd.concat(
+    [pd.Series(labels_train), pd.Series(labels_valid)])
+print(texts_train_valid[0:3][0:10])
+print(labels_train_valid[0:3])
+
+
+
+# Train & Test Loop
+
+tws = [
+    {'body_bow': 0.2,
+            'surface_features': 0.0,
+            'lexicon_features': 0.2,
+            'liwc_features' :0.2,
+            'pos_features':0.2,
+            'readability_features': 0.0},
+    {'body_bow': 0.2,
+            'surface_features': 0.2,
+            'lexicon_features': 0.2,
+            'liwc_features' :0.0,
+            'pos_features':0.2,
+            'readability_features': 0.0},
+    {'body_bow': 0.2,
+     'surface_features': 0.2,
+     'lexicon_features': 0.2,
+     'liwc_features': 0.0,
+     'pos_features': 0.0,
+     'readability_features': 0.0},
+    {'body_bow': 0.2,
+     'surface_features': 0.2,
+     'lexicon_features': 0.0,
+     'liwc_features': 0.0,
+     'pos_features': 0.2,
+     'readability_features': 0.0},
+    {'body_bow': 0.2,
+     'surface_features': 0.0,
+     'lexicon_features': 0.2,
+     'liwc_features': 0.0,
+     'pos_features': 0.2,
+     'readability_features': 0.0},
+    {'body_bow': 0.2,
+     'surface_features': 0.2,
+     'lexicon_features': 0.2,
+     'liwc_features': 0.2,
+     'pos_features': 0.2,
+     'readability_features': 0.0},
+    {'body_bow': 0.2,
+     'surface_features': 0.2,
+     'lexicon_features': 0.2,
+     'liwc_features': 0.2,
+     'pos_features': 0.0,
+     'readability_features': 0.0},
+    {'body_bow': 0.2,
+            'surface_features': 0.0,
+            'lexicon_features': 0.2,
+            'liwc_features' :0.2,
+            'pos_features':0.0,
+            'readability_features': 0.0},
+    {'body_bow': 0.2,
+        'surface_features': 0.2,
+        'lexicon_features': 0.2,
+        'liwc_features' :0.2,
+        'pos_features':0.2,
+        'readability_features': 0.2},
+    {'body_bow': 0.2,
+     'surface_features': 0.0,
+     'lexicon_features': 0.0,
+     'liwc_features': 0.0,
+     'pos_features': 0.0,
+     'readability_features': 0.0},
+    {'body_bow': 0.0,
+        'surface_features': 0.2,
+        'lexicon_features': 0.0,
+        'liwc_features' :0.0,
+        'pos_features':0.0,
+        'readability_features': 0.0},
+    {'body_bow': 0.0,
+        'surface_features': 0.0,
+        'lexicon_features': 0.2,
+        'liwc_features' :0.0,
+        'pos_features':0.0,
+        'readability_features': 0.0},
+    {'body_bow': 0.0,
+        'surface_features': 0.0,
+        'lexicon_features': 0.0,
+        'liwc_features' :0.2,
+        'pos_features':0.0,
+        'readability_features': 0.0},
+    {'body_bow': 0.0,
+        'surface_features': 0.0,
+        'lexicon_features': 0.0,
+        'liwc_features' :0.0,
+        'pos_features':0.2,
+        'readability_features': 0.0},
+    {'body_bow': 0.0,
+        'surface_features': 0.0,
+        'lexicon_features': 0.0,
+        'liwc_features' :0.0,
+        'pos_features':0.0,
+        'readability_features': 0.2}]
+
+
+
+texts_snopesChecked, labels_snopesChecked = DataLoading.load_data_snopes("../data/snopes/snopes_checked_v02_right_forclassificationtest.csv",CLASSES)
+texts_buzzfeedTop, labels_buzzfeedTop = DataLoading.load_data_buzzfeedtop()
+texts_perez, labels_perez = DataLoading.load_data_perez("../data/perez/celeb.csv")
+
+for tw in tws:
+    print("\n*** Feature weigths *** \n", tw)
+    pipeline = Pipeline([
+        # Extract the subject & body
+        ('subjectbody', SubjectBodyExtractor()),
+
+        # Use ColumnTransformer to combine the features from subject and body
+        ('union', ColumnTransformer(
+            [
+                ('body_bow', TfidfVectorizer(sublinear_tf=True, max_df=0.5, min_df=5, ngram_range=(1 ,2),
+                                             stop_words='english'), 1),
+                ('pos_features', Pipeline([
+                    ('stats', PosTagFeatures()),  # returns a list of dicts
+                    ('vect', DictVectorizer()),  # list of dicts -> feature matrix
+                ]), 1),
+                ('surface_features', Pipeline([
+                    ('stats', SurfaceFeatures()),  # returns a list of dicts
+                    ('vect', DictVectorizer()),  # list of dicts -> feature matrix
+                ]), 1),
+                ('lexicon_features', Pipeline([
+                    ('stats', LexiconFeatures()),  # returns a list of dicts
+                    ('vect', DictVectorizer()),  # list of dicts -> feature matrix
+                ]), 1),
+                ('liwc_features', Pipeline([
+                    ('stats', LiwcFeatures()),  # returns a list of dicts
+                    ('vect', DictVectorizer()),  # list of dicts -> feature matrix
+                    ]), 1),
+                ('readability_features', Pipeline([
+                    ('stats', ReadabilityFeatures()),  # returns a list of dicts
+                    ('vect', DictVectorizer()),  # list of dicts -> feature matrix
+                    ]), 1)
+            ],
+            transformer_weights=tw
+        )),
+        ('svc', LinearSVC(penalty= "l2", dual=False, tol=1e-3)),
+    ])
+
+
+    print("Fitting the model...")
+
+    cross_val = cross_validate(pipeline, texts_train_valid, labels_train_valid, return_train_score=True, cv=3, scoring = 'f1_micro')
+    print("********************\n\n")
+    print(cross_val, "\n Mean train score: ", np.mean(cross_val['train_score']), "\n Mean test score: ", np.mean(cross_val['test_score']))
+    print("********************\n\n")
+    grid_search = pipeline.fit(texts_train_valid, labels_train_valid)
+    print("Results on training data:")
+    y = grid_search.predict(texts_train_valid)
+    print(classification_report(labels_train_valid, y))
+
+    print("Test results on data sampled only from snopes (snopes312 dataset manually checked right items -- unseen claims):")
+    texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_snopesChecked, labels_snopesChecked ,sample_size=None , discard_labels=[2,5])
+    y = grid_search.predict(texts_test)
+    print(classification_report(labels_test, y))
+    print("confusion matrix:")
+    print(confusion_matrix(labels_test, y))
+    print(pd.DataFrame({'Predicted': y, 'Expected': labels_test}))
+
+    print("Test results on data sampled only from buzzfeedTop (mixed claims):")
+    texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_buzzfeedTop, labels_buzzfeedTop ,sample_size=None , discard_labels=[])
+    y = grid_search.predict(texts_test)
+    print(classification_report(labels_test, y))
+    print("confusion matrix:")
+    print(confusion_matrix(labels_test, y))
+    print(pd.DataFrame({'Predicted': y, 'Expected': labels_test}))
+
+    print("Test results on data sampled only from perez (celebrity stories):")
+    texts_test, labels_test, texts, labels = DataLoading.balance_data(texts_perez, labels_perez ,sample_size=None , discard_labels=[])
+    y = grid_search.predict(texts_test)
+    print(classification_report(labels_test, y))
+    print("confusion matrix:")
+    print(confusion_matrix(labels_test, y))
+    print(pd.DataFrame({'Predicted': y, 'Expected': labels_test}))
