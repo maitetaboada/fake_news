@@ -271,10 +271,12 @@ def evaluate_roc(probs, y_true):
     plt.show()
 
 
-def preprocessing_for_bert(data, tokenizer, MAX_LEN=384):
+def preprocessing_for_bert(data, tokenizer=None, MAX_LEN=384):
     """
     Perform required preprocessing steps for pretrained BERT (tokenizing a set of texts)
-    @param    data (np.array): Array of texts to be processed.
+    @param data: Array of texts to be processed.
+    @param tokenizer: BERT tokenizer
+    @param MAX_LEN: input sequence length of BERT
     @return   input_ids (torch.Tensor): Tensor of token ids to be fed to a model.
     @return   attention_masks (torch.Tensor): Tensor of indices specifying which tokens should be attended to by the
     model.
@@ -538,6 +540,15 @@ def main():
 
     # ----------------------------------------------------------------------------------------------------- #
 
+    # For fine-tuning BERT, the BERT authors recommend a batch size of 16 or 32.
+    batch_size = 8
+    max_seq_length = 384
+    epochs = 6
+    drop_out = 0.25
+    lr = 1e-5
+
+    # ----------------------------------------------------------------------------------------------------- #
+
     # Load the BERT tokenizer using the transformer library of Hugging Face
     tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
 
@@ -547,20 +558,12 @@ def main():
     X_train, X_val, y_train, y_val, X_test, y_test = _train_test_split(train_data, test_data)
 
     # Run function `preprocessing_for_bert` on the train set and the validation set
-    train_inputs, train_masks = preprocessing_for_bert(X_train, tokenizer, MAX_LEN=384)
-    val_inputs, val_masks = preprocessing_for_bert(X_val, tokenizer, MAX_LEN=384)
+    train_inputs, train_masks = preprocessing_for_bert(X_train, tokenizer=tokenizer, MAX_LEN=max_seq_length)
+    val_inputs, val_masks = preprocessing_for_bert(X_val, tokenizer=tokenizer, MAX_LEN=max_seq_length)
 
     # Convert other data types to torch.Tensor
     train_labels = torch.tensor(y_train)
     val_labels = torch.tensor(y_val)
-
-    # ----------------------------------------------------------------------------------------------------- #
-
-    # For fine-tuning BERT, the BERT authors recommend a batch size of 16 or 32.
-    batch_size = 8
-    epochs = 6
-    drop_out = 0.25
-    lr = 1e-5
 
     # ----------------------------------------------------------------------------------------------------- #
 
@@ -604,7 +607,7 @@ def main():
 
     # Predictions on test data
     # Run `preprocessing_for_bert` on the test set
-    test_inputs, test_masks = preprocessing_for_bert(X_test, tokenizer, MAX_LEN=384)
+    test_inputs, test_masks = preprocessing_for_bert(X_test, tokenizer, MAX_LEN=max_seq_length)
 
     # Create the DataLoader for our test set
     test_dataset = TensorDataset(test_inputs, test_masks)
